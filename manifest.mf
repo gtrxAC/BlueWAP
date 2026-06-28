@@ -1,0 +1,7 @@
+MIDlet-1: Application, /icon.png, App
+MIDlet-Icon: /icon.png
+MIDlet-Name: Application
+MIDlet-Vendor: Your Name
+MIDlet-Version: 1.0.0
+MicroEdition-Configuration: CLDC-1.0
+MicroEdition-Profile: MIDP-2.0

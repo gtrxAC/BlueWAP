@@ -1,0 +1,8 @@
+/.vscode/
+/bin
+/build/
+/classes/
+node_modules/
+/sdk/jdk*/
+/sdk/log.txt
+/sdk/proguard.jar

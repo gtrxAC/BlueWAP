@@ -1,0 +1,14 @@
+[
+  {
+    "name": "app_debug",
+    "defines": ["DEBUG"],
+    "bootclasspath": ["sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
+    "excludes": []
+  },
+  {
+    "name": "app_release",
+    "defines": [],
+    "bootclasspath": ["sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
+    "excludes": []
+  }
+]
