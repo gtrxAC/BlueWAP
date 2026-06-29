@@ -165,6 +165,8 @@ public abstract class ListScreen extends Screen {
     }
 
     public void removeAllItems() {
+        selectedIndex = 0;
+        scroll = -itemPadding;
         items.setSize(0);
         needsResize = true;
         App.repaint();

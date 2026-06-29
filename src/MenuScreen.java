@@ -11,7 +11,7 @@ public class MenuScreen extends ListScreen implements CommandListener {
     public static final int CMD_BACK = 0;
     public static final int CMD_SELECT = 1;
 
-    TextFieldItem urlField = new TextFieldItem("Address", App.currentUrl, 2000, 0);
+    TextFieldItem urlField = new TextFieldItem("Address", App.currentUrl.toString(false), 2000, 0);
     ButtonItem goButton = new ButtonItem("Go!");
 
     public MenuScreen() {
@@ -41,9 +41,7 @@ public class MenuScreen extends ListScreen implements CommandListener {
     protected void itemSelected(Item i) {
         if (i == goButton) {
             App.popScreen();
-            App.currentUrl = urlField.getValue();
-            App.currentWml = null;
-            new Thread(App.instance).start();
+            App.visit(urlField.getValue(), false);
         }
     }
 }

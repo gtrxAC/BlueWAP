@@ -8,8 +8,9 @@ public class App extends MIDlet implements Runnable {
     
     private boolean started = false;
 
-    static String currentUrl;
+    static URL currentUrl;
     static String currentWml;
+    static String currentCard;
 
     static final String WML_BEGIN =
         "<?xml version=\"1.0\" encoding='utf-8'?>" +
@@ -45,6 +46,7 @@ public class App extends MIDlet implements Runnable {
         started = true;
 
         pushScreen(new MainScreen());
+        visit("jar://bs0dd.wml", false);
 
         disp = Display.getDisplay(this);
         disp.setCurrent(AppCanvas.instance);
@@ -94,43 +96,54 @@ public class App extends MIDlet implements Runnable {
     public void run() {
         Screen curr = App.getCurrentScreen();
         if (curr instanceof MainScreen) {
-            ((MainScreen) curr).displayWml(LOADING_WML);
+            ((MainScreen) curr).displayWml(LOADING_WML, null);
 
             try {
+                currentCard = currentUrl.card;
                 currentWml = fetch(currentUrl);
-                ((MainScreen) curr).displayWml(currentWml);
+                ((MainScreen) curr).displayWml(currentWml, currentCard);
             }
             catch (Exception e) {
                 e.printStackTrace();
-                ((MainScreen) curr).displayWml(ERROR_WML_PREFIX + e.toString() + ERROR_WML_SUFFIX);
+                ((MainScreen) curr).displayWml(ERROR_WML_PREFIX + e.toString() + ERROR_WML_SUFFIX, null);
             }
         }
     }
 
-    public String fetch(String url) throws Exception {
-        int protocolEndIndex = url.indexOf("://");
+    public String fetch(URL url) throws Exception {
+        String urlStr = url.toString(false);
 
-        if (protocolEndIndex == -1) {
-            return fetchHttp("http://" + url);
-        } else {
-            String protocol = url.substring(0, protocolEndIndex);
-
-            if ("http".equals(protocol) || "https".equals(protocol)) {
-                return fetchHttp(url);
-            }
-            else if ("jar".equals(protocol) || "file".equals(protocol)) {
-                url = url.substring("jar://".length());
-                if (!url.startsWith("/")) url = "/" + url;
-                return Util.readFile(url);
-            }
-            else {
-                throw new Exception("Unsupported protocol '" + protocol + "'");
-            }
+        if (url.protocol.equals("http") || url.protocol.equals("https")) {
+            return fetchHttp(urlStr);
+        }
+        else if (url.protocol.equals("jar") || url.protocol.equals("file")) {
+            return Util.readFile("/" + url.getPath());
+        }
+        else {
+            throw new Exception("Unsupported protocol '" + url.protocol + "'");
         }
     }
 
     public String fetchHttp(String url) throws Exception {
         byte[] bytes = HTTP.request("GET", url, null, null, false);
         return Util.bytesToString(bytes);
+    }
+
+    public static void visit(String url, boolean relative) {
+        try {
+            if (relative) {
+                currentUrl = new URL(url, currentUrl);
+            } else {
+                currentUrl = new URL(url);
+            }
+        }
+        catch (Exception e) {
+            Screen curr = App.getCurrentScreen();
+            if (curr instanceof MainScreen) {
+                ((MainScreen) curr).displayWml(ERROR_WML_PREFIX + e.toString() + ERROR_WML_SUFFIX, null);
+            }
+        }
+        currentWml = null;
+        new Thread(instance).start();
     }
 }

@@ -36,6 +36,44 @@ public class Util {
 		return sb.toString();
 	}
 
+	public static String[] split(String str, String delimiter) {
+		if (str == null || str.length() == 0) {
+			return new String[0];
+		}
+		Vector parts = _split(str, delimiter);
+		String[] result = new String[parts.size()];
+		parts.copyInto(result);
+		return result;
+	}
+
+	public static Vector splitVec(String str, String delimiter) {
+		if (str == null || str.length() == 0) {
+			return new Vector();
+		}
+		return _split(str, delimiter);
+	}
+
+	private static Vector _split(String str, String delimiter) {
+		Vector parts = new Vector();
+		int start = 0;
+		int index;
+		
+		while ((index = str.indexOf(delimiter, start)) != -1) {
+			parts.addElement(str.substring(start, index));
+			start = index + delimiter.length();
+		}
+		
+		// Add the last part
+		parts.addElement(str.substring(start));
+
+		System.out.println("split:");
+		for (int i = 0;i < parts.size(); i++) {
+			System.out.println("["  + ((String) parts.elementAt(i)) + "] ");
+		}
+
+		return parts;
+	}
+
 	/**
 	 * Get array of text lines to draw (word wrap)
 	 * https://github.com/shinovon/JTube/blob/2.6.1/src/jtube/Util.java

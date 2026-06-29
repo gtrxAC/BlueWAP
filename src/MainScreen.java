@@ -8,8 +8,6 @@ import org.kxml2.io.*;
 import org.xmlpull.v1.*;
 
 public class MainScreen extends ListScreen implements CommandListener {
-    private static final String WAP_BS0DD = "<?xml version=\"1.0\" encoding='utf-8'?>\n<!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\">\n<wml>\n<head>\n</head>\n<card id=\"card1\" title=\"Bs0Dd`s WAP\">\n<p align=\"center\"><img src=\"logo.wbmp\" alt=\"Logo)\"/><br/></p>\n<p align=\"center\">\n<a href=\"rus.wml\">Русский</a><br/>\n<a href=\"eng.wml\">English</a><br/>\n-*-*-*-*-*-*-*-*-<br/>\n2022 &#169; Compys S&#38;N Systems\n</p>\n<do type=\"rus\" label=\"Русский\">\n  <go href=\"rus.wml\"/>\n</do>\n<do type=\"eng\" label=\"English\">\n  <go href=\"eng.wml\"/>\n</do>\n</card>\n</wml>";
-
     public static final int CMD_BACK = 0;
     public static final int CMD_MENU = 1;
 
@@ -18,14 +16,12 @@ public class MainScreen extends ListScreen implements CommandListener {
         setCommandListener(this);
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
         addCommand(new Command("Menu", Command.SCREEN, CMD_MENU));
-
-        displayWml(WAP_BS0DD);
     }
 
-    public void displayWml(String wml) {
+    public void displayWml(String wml, String cardId) {
         removeAllItems();
         try {
-            parseWml(wml);
+            parseWml(wml, cardId);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -34,11 +30,13 @@ public class MainScreen extends ListScreen implements CommandListener {
         }
     }
 
-    public void parseWml(String wml) throws Exception {
+    public void parseWml(String wml, String cardId) throws Exception {
         wml = wml.trim();
         ByteArrayInputStream is = new ByteArrayInputStream(Util.stringToBytes(wml));
 
         WmlParser p = new WmlParser();
+
+        boolean haveShownCard = false;
 
         p.setInput(is, null);
         p.nextTag();
@@ -61,6 +59,18 @@ public class MainScreen extends ListScreen implements CommandListener {
         while (p.getEventType() != XmlPullParser.END_DOCUMENT) {
             try {
                 require(p, XmlPullParser.START_TAG, "card");
+
+                // determine if this card is to be shown (specified card id or first card)
+                String thisCardId = p.getAttributeValue(null, "id");
+
+                if ((cardId == null && haveShownCard) || (cardId != null && !cardId.equals(thisCardId))) {
+                    // skip this card
+                    p.skipSubTree();
+                    p.next();
+                    ignoreWhitespace(p);
+                    continue;
+                }
+                haveShownCard = true;
             }
             catch (XmlPullParserException e) {
                 try {
@@ -119,6 +129,10 @@ public class MainScreen extends ListScreen implements CommandListener {
         }
         catch (XmlPullParserException e) {
             p.addWarning("expected </wml>");
+        }
+
+        if (!haveShownCard) {
+            p.addWarning((cardId == null) ? "no cards found" : "card '" + cardId + "' not found");
         }
 
         for (int i = 0; i < p.warnings.size(); i++) {
@@ -249,6 +263,12 @@ public class MainScreen extends ListScreen implements CommandListener {
                 App.pushScreen(new MenuScreen());
                 break;
             }
+        }
+    }
+
+    protected void itemSelected(Item i) {
+        if (i instanceof WmlAnchorItem) {
+            App.visit(((WmlAnchorItem) i).target, true);
         }
     }
 }
