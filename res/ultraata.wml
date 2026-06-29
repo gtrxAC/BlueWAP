@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding='utf-8'?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+<head>
+</head>
+
+<card id="card1" title="UltraATA WAP">
+
+	<p align="center"><big><b>ATA Database</b></big></p>
+	<p>
+	Go to URL:<br/>
+      <input name="url" title="URL" value="http://" emptyok="true"/>
+      <anchor>
+        Go
+        <go href="$(url:noesc)"/>
+      </anchor>
+      <br/><br/>
+	Download J2ME apps:<br/>
+	<a href="apps.wml"><b>J2ME Apps</b></a><br/>
+	MIDIs and other ringtones:
+	<br/>
+	<a href="tones.wml"><b>Ringtones</b></a><br/>
+	Other useful sites:
+	<br/>
+	<a href="links.wml"><b>Links</b></a>	
+	</p>
+	<br/>
+	<p>
+	
+	<anchor> 
+	About
+	<go href="#card2"/>
+	</anchor>
+	</p>
+	
+	<do type="accept" label="J2ME">
+	<go href="apps.wml"/>
+	</do>
+	
+	<do type="accept" label="Links">
+	<go href="links.wml"/>
+	</do>
+</card>
+<card id="card2" title="Info">
+	<p>
+	ATA Database is an archive for various media and programs, now serving WAP for compatibility with vintage phones!
+	This is a personal project designed to make vintage phones easier to use by providing media and links to other sites.
+	<br/>
+	~-~-~-~-~-~-~<br/>
+	
+	ATA Database is intended for the general downloading and consumption of media for personal use. Please be mindful of my limited resources.
+	</p>
+	
+	<do type="prev" label="Back">
+	<prev/>
+	</do>
+</card>
+</wml>

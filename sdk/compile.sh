@@ -15,7 +15,9 @@ node sdk/preprocess.js `find src -name '*'.java` manifest.mf midlets.pro ${DEFIN
 
 echo "Copying assets"
 mkdir -p build/res
-[[ -e res/* ]] && cp res/* build/res
+
+# [[ -e res/* ]] && \
+cp res/* build/res
 cd build/res
 rm -rf ${EXCLUDES}
 cd ../..

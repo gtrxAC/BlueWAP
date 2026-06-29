@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN"
+  "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+  <card id="main" title="wap.15pmm01.com">
+    <p>
+      Web Search:<br/>
+      <input name="search" title="Search" emptyok="true"/>
+      <br/>
+      <anchor>
+        Search
+        <go href="http://wap.15pmm01.com/cgi-bin/wap-search.py?q=$(search)"/>
+      </anchor>
+      <br/><br/>
+
+      Weather:<br/>
+      <input name="city" title="City" emptyok="true"/>
+      <br/>
+      <anchor>
+        Weather
+        <go href="http://wap.15pmm01.com/cgi-bin/wap-weather.py?city=$(city)"/>
+      </anchor>
+      <br/><br/>
+
+      Dictionary:<br/>
+      Word:<br/>
+      <input name="dictword" title="Word" emptyok="true"/>
+      <br/>
+      Language:<br/>
+      <input name="dictlang" title="Lang" value="en" emptyok="true"/>
+      <br/>
+      <anchor>
+        Look up
+        <go href="http://wap.15pmm01.com/cgi-bin/wap-dict.py?word=$(dictword)&amp;lang=$(dictlang)"/>
+      </anchor>
+      <br/><br/>
+
+      Wikipedia:<br/>
+      <input name="wiki" title="Wikipedia" emptyok="true"/>
+      <br/>
+      Language:<br/>
+      <input name="wikilang" title="Lang" value="en" maxlength="2" emptyok="true"/>
+      <br/>
+      <anchor>
+        Search
+        <go href="http://wap.15pmm01.com/cgi-bin/wap-wiki.py?q=$(wiki)&amp;lang=$(wikilang)"/>
+      </anchor>
+      <br/><br/>
+
+      Reddit: (Enter subreddit)<br/>
+      <input name="reddit" title="Subreddit" emptyok="true"/>
+      <br/>
+      <anchor>
+        Open
+        <go href="http://wap.15pmm01.com/cgi-bin/wap-reddit.py?sub=$(reddit)"/>
+      </anchor>
+      <br/><br/>
+
+      <a href="http://wap.15pmm01.com/cgi-bin/wap-news.py">NPR News</a><br/><br/>
+
+      <a href="http://wap.15pmm01.com/cgi-bin/wap-translate.py">Translate</a><br/><br/>
+
+      Petar Marinov<br/>
+      15pmm01@15pmm01.com<br/>
+      <a href="http://waparchive.15pmm01.com">WAP Archive</a><br/>
+      <a href="http://archive.15pmm01.com">Full Archive</a><br/>
+      <a href="http://wapmail.15pmm01.com">WAPmail</a><br/><br/>
+
+      Siehe auch:<br/>
+      <a href="http://gtrxac.fi/wap">WAP Discord by gtrxAC</a><br/>
+      <a href="http://www.frogfind.com/">FrogFind</a><br/>
+      <a href="http://wap.bs0dd.net">Bs(/)Dd</a><br/>
+      <a href="http://ultraata.net">UltraATA</a><br/>
+      <a href="http://wap.hutch3g.eu">Hutch3G</a><br/>
+      <a href="http://wap.danielthefox.com">DanielFox</a><br/>
+      <a href="http://wap.localize-friends.de/">LocalizeFriends</a><br/>
+      <a href="http://www.webelements.com/wapelements">WapElements</a><br/>
+      <a href="http://www.dg599.com/wap.wml">DG599</a><br/><br/>
+
+      Rechtliches:<br/>
+      <a href="http://wap.15pmm01.com/cgi-bin/wap-legal.py?doc=impressum">Impressum/Datenschutz</a><br/>
+      <a href="http://wap.15pmm01.com/cgi-bin/wap-legal.py?doc=nutzung">Nutzungsbedingungen</a><br/><br/>
+      Fuer Anfragen kontaktieren Sie: wapmaster@15pmm01.com
+    </p>
+  </card>
+</wml>

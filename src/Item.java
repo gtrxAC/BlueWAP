@@ -1,0 +1,59 @@
+import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.Graphics;
+
+public abstract class Item {
+    // int width;
+    int height;
+    int y;
+    // boolean selectable;
+
+    public static final Font smallFont =
+        Font.getFont(Font.FACE_PROPORTIONAL, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+    public static final Font smallBoldFont =
+        Font.getFont(Font.FACE_PROPORTIONAL, Font.STYLE_BOLD, Font.SIZE_SMALL);
+    public static final Font smallUnderlinedFont =
+        Font.getFont(Font.FACE_PROPORTIONAL, Font.STYLE_UNDERLINED, Font.SIZE_SMALL);
+
+    public static final int SMALL_FONT_HEIGHT = smallFont.getHeight();
+    public static final int SMALL_BOLD_FONT_HEIGHT = smallBoldFont.getHeight();
+    public static final int SMALL_UNDERLINED_FONT_HEIGHT = smallUnderlinedFont.getHeight();
+
+     /**
+     * Draw this item at the current y position. The width of the screen is provided as a parameter.
+     * Screen coordinates are automatically translated so (0, 0) is the top left of the item.
+     * Do not use g.translate(), or if you do, undo your translations.
+     * @param g Graphics context to draw on
+     * @param width Screen width in pixels
+     * @param selected Whether this item is currently selected
+     */
+    public abstract void draw(Graphics g, int width, boolean selected);
+
+    /**
+     * Called before this item is first drawn, and when the width of the screen changes.
+     * This method should calculate the height of the item and assign a value to the 'height' field.
+     * @param width Screen width in pixels
+     */
+    public abstract void sizeChanged(int width);
+
+    public void itemSelected() {}
+
+    /**
+     * Light blue highlight which can be drawn by items to indicate that they are selected.
+     * Note: Graphics current color is overwritten and not restored
+     */
+    public void drawHighlight(Graphics g, int x, int y, int width, int height) {
+        // int lastColor = g.getColor();
+        g.setColor(0x5599FF);
+        g.drawRoundRect(x - 1, y - 1, width + 1, height + 1, 2, 2);
+        g.drawRect(x, y, width - 1, height - 1);
+        // g.setColor(lastColor);
+    }
+
+    /**
+     * Draw highlight around entire item
+     * Note: Graphics current color is overwritten and not restored
+     */
+    public void drawHighlight(Graphics g, int width) {
+        drawHighlight(g, 0, 0, width, height);
+    }
+}
