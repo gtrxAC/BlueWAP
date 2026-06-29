@@ -26,6 +26,7 @@ public class ButtonItem extends Item {
     }
 
     public ButtonItem(String text, int bgColor, int selectedBgColor, int textColor, int selectedTextColor) {
+        super(true);
         this.text = text;
         this.bgColor = bgColor;
         this.darkerBgColor = Util.blend(bgColor, 0x000000, 7);

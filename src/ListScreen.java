@@ -62,7 +62,8 @@ public abstract class ListScreen extends Screen {
                     // Item is taller than screen -> scroll down by two lines
                     scroll += Item.smallFont.getHeight()*2;
                 } else {
-                    selectedIndex = Math.min(selectedIndex + 1, items.size() - 1);
+                    int newSel = getNextSelectableItem();
+                    if (newSel != -1) selectedIndex = newSel;
                 }
                 break;
             }
@@ -73,7 +74,8 @@ public abstract class ListScreen extends Screen {
                     // Item is taller than screen -> scroll up by two lines
                     scroll -= Item.smallFont.getHeight()*2;
                 } else {
-                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                    int newSel = getPreviousSelectableItem();
+                    if (newSel != -1) selectedIndex = newSel;
                 }
                 break;
             }
@@ -93,6 +95,39 @@ public abstract class ListScreen extends Screen {
         if (oldSelectedIndex != selectedIndex) {
             makeSelectedItemVisible();
         }
+    }
+
+    private boolean itemIsSelectable(int index) {
+        Item item = (Item) items.elementAt(index);
+        Item selected = (Item) items.elementAt(selectedIndex);
+
+        // if gap between items is more than the screen height, don't allow jumping to
+        // this item because then the contents of some in-between items might never be seen
+        if (Math.abs(item.y - selected.y) > height) return false;
+
+        return (item.isSelectable() || item.height >= height);
+    }
+
+    private int getPreviousSelectableItem() {
+        for (int i = selectedIndex - 1; i >= 0; i--) {
+            if (itemIsSelectable(i)) return i;
+        }
+        // no suitable selectable item found - scroll to the previous item
+        return Math.max(0, selectedIndex - 1);
+    }
+
+    private int getNextSelectableItem() {
+        for (int i = selectedIndex + 1; i < items.size(); i++) {
+            if (itemIsSelectable(i)) return i;
+        }
+        // no suitable selectable item found - scroll to the next item or bottom-most visible item even if unselectable
+        int bottommostVisible = selectedIndex + 1;
+        
+        for (int i = bottommostVisible; i < items.size(); i++) {
+            Item item = (Item) items.elementAt(i);
+            if (item.y + item.height - scroll <= height) bottommostVisible = i; 
+        }
+        return Math.min(items.size() - 1, bottommostVisible);
     }
 
     // from discord j2me, modified

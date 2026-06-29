@@ -11,6 +11,7 @@ public class TextFieldItem extends Item implements CommandListener {
     private int constraints;
 
     public TextFieldItem(String title, String value, int maxSize, int constraints) {
+        super(true);
         this.title = title;
         this.value = (value != null) ? value : "";
         this.maxSize = maxSize;

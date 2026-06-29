@@ -6,6 +6,7 @@ public class LinkItem extends Item {
     private int stringWidth;
 
     public LinkItem(String text) {
+        super(true);
         this.text = text;
     }
 

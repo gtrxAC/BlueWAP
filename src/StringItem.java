@@ -4,12 +4,14 @@ import javax.microedition.lcdui.Graphics;
 public class StringItem extends Item {
     String text;
     Font font;
+    String[] textLines;
 
     public StringItem(String text) {
         this(text, smallFont);
     }
 
     public StringItem(String text, Font font) {
+        super(false);
         this.text = text;
         this.font = font;
     }
@@ -17,10 +19,15 @@ public class StringItem extends Item {
     public void draw(Graphics g, int width, boolean selected) {
         g.setFont(font);
         g.setColor(0x111111);
-        g.drawString(text, 0, 0, 0);
+        int y = 0;
+        for (int i = 0; i < textLines.length; i++) {
+            g.drawString(textLines[i], 0, y, 0);
+            y += font.getHeight();
+        }
     }
 
     public void sizeChanged(int width) {
-        height = font.getHeight();
+        textLines = Util.wordWrap(text, width, font);
+        height = font.getHeight()*textLines.length;
     }
 }

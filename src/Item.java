@@ -5,7 +5,11 @@ public abstract class Item {
     // int width;
     int height;
     int y;
-    // boolean selectable;
+    private boolean selectable;
+
+    protected Item(boolean selectable) {
+        this.selectable = selectable;
+    }
 
     public static final Font smallFont =
         Font.getFont(Font.FACE_PROPORTIONAL, Font.STYLE_PLAIN, Font.SIZE_SMALL);
@@ -36,6 +40,10 @@ public abstract class Item {
     public abstract void sizeChanged(int width);
 
     public void itemSelected() {}
+
+    public boolean isSelectable() {
+        return selectable;
+    }
 
     /**
      * Light blue highlight which can be drawn by items to indicate that they are selected.
