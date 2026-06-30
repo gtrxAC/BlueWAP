@@ -43,6 +43,7 @@ public class MainScreen extends ListScreen implements CommandListener {
         boolean haveShownCard = false;
 
         p.setInput(is, null);
+        p.defineEntityReplacementText("nbsp", " ");
         p.nextTag();
 
         try {
