@@ -10,7 +10,7 @@ import tech.alicesworld.ModernConnector.*;
 public class HTTP {
 	public static final Exception requestMethodException = new Exception();
 
-	private static byte[] requestWrapped(String method, String url, Object data, String contentType, boolean authorize) throws Exception {
+	private static byte[] requestWrapped2(String method, String url, Object data, String contentType, boolean authorize) throws Exception {
 		HttpConnection hc = null;
 		OutputStream os = null;
 		// url = App.getPlatformSpecificUrl(url);
@@ -56,6 +56,30 @@ public class HTTP {
 		}
 	}
 
+	private static byte[] requestWrapped(String method, String url, Object data, String contentType, boolean authorize) throws Exception {
+//#ifndef NO_HTTP_REDIRECT_SUPPORT
+		int redirects = 0;
+
+		while (redirects < 5) {
+			try {
+				return requestWrapped2(method, url, data, contentType, authorize);
+			}
+			catch (Exception e) {
+				if (e instanceof HTTPRedirectException) {
+					redirects++;
+					String redirUrl = ((HTTPRedirectException) e).getUrl();
+					url = new URL(redirUrl, new URL(url)).toString(false);
+					continue;
+				}
+				throw e;
+			}
+		}
+		throw new Exception("Too many redirects while fetching '" + url + "'");
+//#else
+		return requestWrapped2(method, url, data, contentType, authorize);
+//#endif
+	}
+
 	public static byte[] sendRequest(HttpConnection hc) throws Exception {
 		InputStream is = null;
 		try {
@@ -63,6 +87,12 @@ public class HTTP {
 			is = hc.openInputStream();
 			byte[] result = Util.readBytes(is, (int) hc.getLength(), 1024, 2048);
 
+//#ifndef NO_HTTP_REDIRECT_SUPPORT
+			if (respCode >= 300 && respCode < 400) {
+				String loc = hc.getHeaderField("Location");
+				if (loc != null) throw new HTTPRedirectException(loc);
+			}
+//#endif
 			if (respCode == HttpConnection.HTTP_OK) {
 				return result;
 			}
