@@ -10,12 +10,16 @@ import org.xmlpull.v1.*;
 public class MainScreen extends ListScreen implements CommandListener {
     public static final int CMD_BACK = 0;
     public static final int CMD_MENU = 1;
+    public static final int CMD_FORWARD = 2;
+
+    public static final MainScreen instance = new MainScreen();
 
     public MainScreen() {
         super(2, 2);
         setCommandListener(this);
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
-        addCommand(new Command("Menu", Command.SCREEN, CMD_MENU));
+        addCommand(new Command("Address", Command.SCREEN, CMD_MENU));
+        addCommand(new Command("Forward", Command.SCREEN, CMD_FORWARD));
     }
 
     public void displayWml(String wml, String cardId) {
@@ -193,14 +197,17 @@ public class MainScreen extends ListScreen implements CommandListener {
                     target = "#";
                 }
                 p.skipSubTree();
+                continue;
             }
             else if (p.getEventType() == XmlPullParser.START_TAG && "prev".equals(p.getName())) {
                 action = WmlAnchorItem.ACTION_PREV;
                 p.skipSubTree();
+                continue;
             }
             else if (p.getEventType() == XmlPullParser.START_TAG && "refresh".equals(p.getName())) {
                 action = WmlAnchorItem.ACTION_REFRESH;
                 p.skipSubTree();
+                continue;
             }
             
             String addText = parseTextElement(p);
@@ -210,7 +217,7 @@ public class MainScreen extends ListScreen implements CommandListener {
                 p.addWarning("expected text, <img>, <br>, <go>, <prev>, <refresh>, or </anchor>");
             }
         }
-        addItem(new WmlAnchorItem(text, WmlAnchorItem.ACTION_GO, target));
+        addItem(new WmlAnchorItem(text, action, target));
     }
 
     public String parseTextElement(WmlParser p) throws Exception {
@@ -257,6 +264,11 @@ public class MainScreen extends ListScreen implements CommandListener {
     public void commandAction(Command c, Displayable d) {
         switch (c.getPriority()) {
             case CMD_BACK: {
+                History.back();
+                break;
+            }
+            case CMD_FORWARD: {
+                History.forward();
                 break;
             }
             case CMD_MENU: {
@@ -268,7 +280,21 @@ public class MainScreen extends ListScreen implements CommandListener {
 
     protected void itemSelected(Item i) {
         if (i instanceof WmlAnchorItem) {
-            App.visit(((WmlAnchorItem) i).target, true);
+            WmlAnchorItem anchor = (WmlAnchorItem) i;
+            switch (anchor.action) {
+                case WmlAnchorItem.ACTION_GO: {
+                    History.visit(anchor.target, true);
+                    break;
+                }
+                case WmlAnchorItem.ACTION_PREV: {
+                    History.back();
+                    break;
+                }
+                case WmlAnchorItem.ACTION_REFRESH: {
+                    History.getCurrent().refresh();
+                    break;
+                }
+            }
         }
     }
 }

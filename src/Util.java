@@ -66,11 +66,6 @@ public class Util {
 		// Add the last part
 		parts.addElement(str.substring(start));
 
-		System.out.println("split:");
-		for (int i = 0;i < parts.size(); i++) {
-			System.out.println("["  + ((String) parts.elementAt(i)) + "] ");
-		}
-
 		return parts;
 	}
 

@@ -135,4 +135,10 @@ public class URL {
 
         return result.toString();
     }
+
+    public boolean isSamePage(URL other) {
+        return other.domain.equals(domain) &&
+            other.protocol.equals(protocol) &&
+            other.getPath().equals(getPath());
+    }
 }
