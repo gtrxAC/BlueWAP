@@ -56,7 +56,7 @@ public class HTTP {
 		}
 	}
 
-	private static byte[] requestWrapped(String method, String url, Object data, String contentType, boolean authorize) throws Exception {
+	private static byte[] requestWrapped(String method, String url, Object data, String contentType, boolean authorize, History hist) throws Exception {
 //#ifndef NO_HTTP_REDIRECT_SUPPORT
 		int redirects = 0;
 
@@ -68,7 +68,9 @@ public class HTTP {
 				if (e instanceof HTTPRedirectException) {
 					redirects++;
 					String redirUrl = ((HTTPRedirectException) e).getUrl();
-					url = new URL(redirUrl, new URL(url)).toString(false);
+					URL urlObj = new URL(redirUrl, new URL(url));
+					if (hist != null) hist.url = urlObj;
+					url = urlObj.toString(false);
 					continue;
 				}
 				throw e;
@@ -104,7 +106,7 @@ public class HTTP {
 		}
 	}
 
-	public static byte[] request(String method, String url, Object data, String contentType, boolean authorize) throws Exception {
+	public static byte[] request(String method, String url, Object data, String contentType, boolean authorize, History hist) throws Exception {
 //#ifdef MODERNCONNECTOR
 //#ifndef J2ME_LOADER
 		try {
@@ -116,7 +118,7 @@ public class HTTP {
 
 			while (true) {
 				try {
-					return requestWrapped(method, url, data, contentType, authorize);
+					return requestWrapped(method, url, data, contentType, authorize, hist);
 				}
 				catch (IOException e) {
 					// Automatic retry if we get IOException -36 which randomly occurs on Symbian
@@ -132,18 +134,18 @@ public class HTTP {
 			// J2ME Loader: if proxyless enabled, and HTTPS request (using system TLS) fails, start using java-based TLS instead
 			// Android below 5 does not have TLS 1.2 by default
 			try {
-				return requestWrapped(method, url, data, contentType, authorize);
+				return requestWrapped(method, url, data, contentType, authorize, hist);
 			}
 			catch (IOException e) {
 				if (e.toString().indexOf("Failure in SSL library") != -1 || e.toString().indexOf("unsupported protocol") != -1) {
 					Settings.useModcon = true;
 					Settings.save();
-					return requestWrapped(method, url, data, contentType, authorize);
+					return requestWrapped(method, url, data, contentType, authorize, hist);
 				}
 				else throw e;
 			}
 //#else
-			return requestWrapped(method, url, data, contentType, authorize);
+			return requestWrapped(method, url, data, contentType, authorize, hist);
 //#endif
 //#endif
 
@@ -162,23 +164,23 @@ public class HTTP {
 //#endif
 	}
 
-	public static String apiRequest(String method, String url, Object data, boolean useProxy) throws Exception {
-		// String fullUrl = getFullUrl(url, useProxy);
-		return Util.bytesToString(request(method, url, data, null, true));
-	}
+	// public static String apiRequest(String method, String url, Object data, boolean useProxy) throws Exception {
+	// 	// String fullUrl = getFullUrl(url, useProxy);
+	// 	return Util.bytesToString(request(method, url, data, null, true));
+	// }
 
 	public static byte[] getBytes(String url) throws Exception {
-		return request("GET", url, null, null, false);
+		return request("GET", url, null, null, false, null);
 	}
-	public static String get(String url, boolean useProxy) throws Exception {
-		return apiRequest("GET", url, null, useProxy);
-	}
-	public static String post(String url, String data, boolean useProxy) throws Exception {
-		return apiRequest("POST", url, data, useProxy);
-	}
-	public static String post(String url, JSONObject data, boolean useProxy) throws Exception {
-		return post(url, data.build(), useProxy);
-	}
+	// public static String get(String url, boolean useProxy) throws Exception {
+	// 	return apiRequest("GET", url, null, useProxy);
+	// }
+	// public static String post(String url, String data, boolean useProxy) throws Exception {
+	// 	return apiRequest("POST", url, data, useProxy);
+	// }
+	// public static String post(String url, JSONObject data, boolean useProxy) throws Exception {
+	// 	return post(url, data.build(), useProxy);
+	// }
 	
 	public static Image getImage(String url) throws Exception {
 		byte[] b = getBytes(url);
