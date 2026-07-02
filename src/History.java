@@ -105,7 +105,7 @@ public class History implements Runnable {
     }
 
     private String fetchHttp(String url) throws Exception {
-        byte[] bytes = HTTP.request("GET", url, null, null, false, this);
+        byte[] bytes = HTTP.request("GET", url, null, null, this);
         return Util.bytesToString(bytes);
     }
 }
