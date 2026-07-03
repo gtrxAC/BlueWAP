@@ -4,6 +4,7 @@
 # Add libraries used by your app here
 -libraryjars ../sdk/lib/midp20.jar
 -libraryjars ../sdk/lib/cldc10.jar
+-libraryjars ../sdk/lib/jsr82.jar
 
 # Not recommended to edit these
 -injars ../bin/in.jar
