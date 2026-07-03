@@ -11,25 +11,16 @@ public class BluetoothHTTP extends HTTP {
 	}
 
 	protected InputStream makeRequest() throws Exception {
-		BluetoothResponse response = execute(method, url, headers, data);
-		responseCode = response.getResponseCode();
-		responseBytes = response.getBody();
+		execute(method, url, headers, data);
 		if (responseBytes == null) responseBytes = new byte[0];
 
-		if (responseCode >= 300 && responseCode < 400) {
-			String redir = (String) response.getHeaders().get("Location");
-			if (redir == null) throw new Exception("received redirect with no location");
-
-			url = new URL(redir, new URL(url)).toString(false);
-			throw redirectException;
-		}
 		return new ByteArrayInputStream(responseBytes);
 	}
 
 	protected void closeTransport() {
 	}
 
-	private BluetoothResponse execute(String method, String url, Hashtable headers, byte[] data) throws Exception {
+	private void execute(String method, String url, Hashtable headers, byte[] data) throws Exception {
 		String connectionUrl = buildConnectionUrl(url);
 		StreamConnection connection = (StreamConnection) Connector.open(connectionUrl);
 		OutputStream output = null;
@@ -42,7 +33,7 @@ public class BluetoothHTTP extends HTTP {
 
 			input = connection.openInputStream();
 			DataInputStream dis = new DataInputStream(input);
-			return readResponse(dis);
+			readResponse(dis);
 		}
 		finally {
 			closeQuietly(input);
@@ -53,13 +44,6 @@ public class BluetoothHTTP extends HTTP {
 
 	private String buildConnectionUrl(String url) {
 		String endpoint = url;
-		if (endpoint.startsWith("bthttp://")) {
-			endpoint = endpoint.substring("bthttp://".length());
-		}
-		else if (endpoint.startsWith("bt://")) {
-			endpoint = endpoint.substring("bt://".length());
-		}
-
 		int slash = endpoint.indexOf('/');
 		if (slash >= 0) {
 			endpoint = endpoint.substring(0, slash);
@@ -98,7 +82,7 @@ public class BluetoothHTTP extends HTTP {
 		}
 	}
 
-	private BluetoothResponse readResponse(DataInputStream dis) throws IOException {
+	private void readResponse(DataInputStream dis) throws IOException {
 		int version = dis.readByte();
 		if (version != PROTOCOL_VERSION) {
 			throw new IOException("Unsupported Bluetooth protocol version: " + version);
@@ -116,7 +100,9 @@ public class BluetoothHTTP extends HTTP {
 		int bodyLength = dis.readInt();
 		byte[] body = new byte[bodyLength];
 		dis.readFully(body);
-		return new BluetoothResponse(responseCode, responseHeaders, body);
+		this.responseCode = responseCode;
+		this.responseBytes = body;
+		this.headers = responseHeaders;
 	}
 
 	private void writeString(DataOutputStream dos, String value) throws IOException {
@@ -154,29 +140,5 @@ public class BluetoothHTTP extends HTTP {
 			connection.close();
 		}
 		catch (Exception e) {}
-	}
-
-	private static class BluetoothResponse {
-		private int responseCode;
-		private Hashtable headers;
-		private byte[] body;
-
-		public BluetoothResponse(int responseCode, Hashtable headers, byte[] body) {
-			this.responseCode = responseCode;
-			this.headers = headers;
-			this.body = body;
-		}
-
-		public int getResponseCode() {
-			return responseCode;
-		}
-
-		public Hashtable getHeaders() {
-			return headers;
-		}
-
-		public byte[] getBody() {
-			return body;
-		}
 	}
 }
