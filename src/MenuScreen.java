@@ -14,12 +14,18 @@ public class MenuScreen extends ListScreen implements CommandListener {
     String url = History.getCurrent().url.toString(false);
     TextFieldItem urlField = new TextFieldItem("Address", url, 2000, 0);
     ButtonItem goButton = new ButtonItem("Go!");
+    ButtonItem standardButton = new ButtonItem("Standard");
+    ButtonItem bluetoothButton = new ButtonItem("Bluetooth");
+    private int connectionMode = HTTP.CONNECTION_TYPE;
 
     public MenuScreen() {
         super(2, 2);
 
         addItem(urlField);
+        addItem(standardButton);
+        addItem(bluetoothButton);
         addItem(goButton);
+        updateConnectionButtons();
 
         setCommandListener(this);
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
@@ -40,9 +46,35 @@ public class MenuScreen extends ListScreen implements CommandListener {
     }
 
     protected void itemSelected(Item i) {
-        if (i == goButton) {
+        if (i == standardButton) {
+            setConnectionMode(HTTP.CONNECTION_TYPE_STANDARD);
+        }
+        else if (i == bluetoothButton) {
+            setConnectionMode(HTTP.CONNECTION_TYPE_BLUETOOTH);
+            App.pushScreen(new BluetoothDeviceScreen());
+        }
+        else if (i == goButton) {
+            if (connectionMode == HTTP.CONNECTION_TYPE_BLUETOOTH && BluetoothHTTP.selectedConnectionUrl == null) {
+                App.pushScreen(new BluetoothDeviceScreen());
+                return;
+            }
             App.popScreen();
             History.visit(urlField.getValue(), false);
         }
+    }
+
+    private void setConnectionMode(int mode) {
+        connectionMode = mode;
+        HTTP.setConnectionType(mode);
+        if (mode == HTTP.CONNECTION_TYPE_BLUETOOTH) {
+            BluetoothHTTP.selectedConnectionUrl = null;
+        }
+        updateConnectionButtons();
+    }
+
+    private void updateConnectionButtons() {
+        standardButton.text = connectionMode == HTTP.CONNECTION_TYPE_STANDARD ? "Standard (active)" : "Standard";
+        bluetoothButton.text = connectionMode == HTTP.CONNECTION_TYPE_BLUETOOTH ? "Bluetooth (active)" : "Bluetooth";
+        App.repaint();
     }
 }

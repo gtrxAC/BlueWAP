@@ -8,7 +8,7 @@ public abstract class HTTP {
 
 	public static final int CONNECTION_TYPE_STANDARD = 0;
 	public static final int CONNECTION_TYPE_BLUETOOTH = 1;
-	public static final int CONNECTION_TYPE = CONNECTION_TYPE_STANDARD;
+	public static int CONNECTION_TYPE = CONNECTION_TYPE_STANDARD;
 
 	protected String method;
 	protected String url;
@@ -35,6 +35,12 @@ public abstract class HTTP {
 
 	public static HTTP createRequest(String url) {
 		return createRequest("GET", url);
+	}
+
+	public static void setConnectionType(int connectionType) {
+		if (connectionType == CONNECTION_TYPE_STANDARD || connectionType == CONNECTION_TYPE_BLUETOOTH) {
+			CONNECTION_TYPE = connectionType;
+		}
 	}
 
 	protected abstract InputStream makeRequest() throws Exception;

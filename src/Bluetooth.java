@@ -1,5 +1,3 @@
-package com.gtrxac.discord;
-
 import javax.bluetooth.*;
 import java.util.*;
 import javax.microedition.io.*;

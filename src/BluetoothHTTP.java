@@ -5,6 +5,7 @@ import javax.microedition.io.*;
 public class BluetoothHTTP extends HTTP {
 	private static final byte PROTOCOL_VERSION = 1;
 	private static final String BLUETOOTH_SCHEME_PREFIX = "btspp://";
+	public static String selectedConnectionUrl;
 
 	public BluetoothHTTP(String method, String url) {
 		super(method, url);
@@ -21,8 +22,7 @@ public class BluetoothHTTP extends HTTP {
 	}
 
 	private void execute(String method, String url, Hashtable headers, byte[] data) throws Exception {
-		String connectionUrl = buildConnectionUrl(url);
-		StreamConnection connection = (StreamConnection) Connector.open(connectionUrl);
+		StreamConnection connection = (StreamConnection) Connector.open(selectedConnectionUrl);
 		OutputStream output = null;
 		InputStream input = null;
 		try {
@@ -40,18 +40,6 @@ public class BluetoothHTTP extends HTTP {
 			closeQuietly(output);
 			closeQuietly(connection);
 		}
-	}
-
-	private String buildConnectionUrl(String url) {
-		String endpoint = url;
-		int slash = endpoint.indexOf('/');
-		if (slash >= 0) {
-			endpoint = endpoint.substring(0, slash);
-		}
-		if (endpoint.length() == 0) {
-			endpoint = "localhost";
-		}
-		return BLUETOOTH_SCHEME_PREFIX + endpoint + ";name=BlueWAP;authenticate=false;encrypt=false";
 	}
 
 	private void writeRequest(DataOutputStream dos, String method, String url, Hashtable headers, byte[] data) throws IOException {
