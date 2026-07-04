@@ -10,7 +10,7 @@ import javax.microedition.lcdui.Displayable;
 
 public class BluetoothDeviceScreen extends ListScreen implements BluetoothListener, CommandListener {
     private static final int CMD_BACK = 0;
-    private static final int CMD_SEARCH = 1;
+    private static final int CMD_SELECT = 1;
 
     private ButtonItem searchButton = new ButtonItem("Search devices");
     private Vector deviceNames = new Vector();
@@ -22,7 +22,7 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothListen
         super(2, 2);
         addItem(searchButton);
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
-        addCommand(new Command("Search", Command.SCREEN, CMD_SEARCH));
+        addCommand(new Command("Select", Command.SCREEN, CMD_SELECT));
         setCommandListener(this);
     }
 
@@ -30,8 +30,8 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothListen
         if (c.getPriority() == CMD_BACK) {
             App.popScreen();
         }
-        else if (c.getPriority() == CMD_SEARCH) {
-            searchDevices();
+        else if (c.getPriority() == CMD_SELECT) {
+            selectItem();
         }
     }
 
