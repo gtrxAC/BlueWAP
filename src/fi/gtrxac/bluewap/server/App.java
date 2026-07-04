@@ -11,6 +11,7 @@ import java.util.*;
 
 public class App extends AppBase implements BluetoothListener {
     private Bluetooth bluetooth;
+    public static Vector connections = new Vector();
 
     public void init() {
         pushScreen(LogScreen.instance);
@@ -32,6 +33,8 @@ public class App extends AppBase implements BluetoothListener {
      * @param conn
      */
     public void btConnected(StreamConnection conn) {
+        connections.addElement(conn);
+
         LogScreen.log("Device connected");
         DataInputStream input = null;
         DataOutputStream output = null;
@@ -67,6 +70,7 @@ public class App extends AppBase implements BluetoothListener {
             closeQuietly(input);
             closeQuietly(output);
             closeQuietly(conn);
+            connections.removeElement(conn);
         }
     }
 

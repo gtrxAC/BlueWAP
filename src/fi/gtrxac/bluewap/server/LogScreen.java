@@ -5,6 +5,7 @@ import fi.gtrxac.bluewap.*;
 import fi.gtrxac.bluewap.ui.*;
 import java.io.*;
 import java.util.Vector;
+import javax.microedition.io.*;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
@@ -12,8 +13,8 @@ import org.kxml2.io.*;
 import org.xmlpull.v1.*;
 
 public class LogScreen extends ListScreen implements CommandListener {
-    public static final int CMD_BACK = 0;
-    public static final int CMD_SELECT = 1;
+    public static final int CMD_QUIT = 0;
+    public static final int CMD_DISCONNECT = 1;
 
     public static final LogScreen instance = new LogScreen();
 
@@ -22,11 +23,9 @@ public class LogScreen extends ListScreen implements CommandListener {
     public LogScreen() {
         super(2, 2);
 
-        addItem(new StringItem("Test"));
-
         setCommandListener(this);
-        addCommand(new Command("Back", Command.BACK, CMD_BACK));
-        addCommand(new Command("Select", Command.OK, CMD_SELECT));
+        addCommand(new Command("Quit", Command.EXIT, CMD_QUIT));
+        addCommand(new Command("Disconnect", Command.BACK, CMD_DISCONNECT));
     }
 
     public static void log(String item) {
@@ -61,13 +60,19 @@ public class LogScreen extends ListScreen implements CommandListener {
 
     public void commandAction(Command c, Displayable d) {
         switch (c.getPriority()) {
-            case CMD_BACK: {
-                App.popScreen();
+            case CMD_QUIT: {
+                App.instance.notifyDestroyed();
                 break;
             }
-            case CMD_SELECT: {
-                lines.addElement("New Item test dhfjdfhjhjd skfjkjkfh dskhjf jhfsjhfkds " + lines.size());
-                refresh();
+            case CMD_DISCONNECT: {
+                // TODO: disconnect also http streams
+                for (int i = 0; i < App.connections.size(); i++) {
+                    StreamConnection sc = (StreamConnection) App.connections.elementAt(i);
+                    try { sc.close(); } catch (Exception e) {}
+                    log("Closed connection");
+                }
+                App.connections.setSize(0);
+                log("Closed all connections");
                 break;
             }
         }
