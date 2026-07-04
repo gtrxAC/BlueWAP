@@ -50,46 +50,45 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothListen
         }
     }
 
-    private void searchDevices() {
+    private void clearAndRefresh() {
         deviceNames.removeAllElements();
         deviceUrls.removeAllElements();
         deviceItems.removeAllElements();
         removeAllItems();
         addItem(searchButton);
+    }
+
+    private void searchDevices() {
+        clearAndRefresh();
+        addItem(new StringItem("Searching..."));
+
         bluetooth = new Bluetooth(Config.BLUETOOTH_UUID, Config.BLUETOOTH_SERVICE, this);
         bluetooth.search();
     }
 
     public void btSearchCompleted(String[] names, String[] urls) {
-        deviceNames.removeAllElements();
-        deviceUrls.removeAllElements();
-        deviceItems.removeAllElements();
-        removeAllItems();
-        addItem(searchButton);
+        clearAndRefresh();
 
-        if (names != null) {
-            for (int i = 0; i < names.length; i++) {
-                if (names[i] != null && names[i].length() > 0) {
-                    deviceNames.addElement(names[i]);
-                    deviceUrls.addElement(urls[i]);
-                    ButtonItem deviceItem = new ButtonItem(names[i]);
-                    deviceItems.addElement(deviceItem);
-                    addItem(deviceItem);
-                }
-            }
+        if (names.length == 0) {
+            addItem(new StringItem("No devices found. Make sure the server device is set to visible, then try again."));
+            return;
         }
-        if (deviceNames.size() == 0) {
-            addItem(new ButtonItem("none"));
+        for (int i = 0; i < names.length; i++) {
+            if (names[i] != null && names[i].length() > 0) {
+                deviceNames.addElement(names[i]);
+                deviceUrls.addElement(urls[i]);
+                ButtonItem deviceItem = new ButtonItem(names[i]);
+                deviceItems.addElement(deviceItem);
+                addItem(deviceItem);
+            }
         }
     }
 
     public void btError(Exception e) {
-        deviceNames.removeAllElements();
-        deviceUrls.removeAllElements();
-        deviceItems.removeAllElements();
-        removeAllItems();
-        addItem(searchButton);
-        addItem(new ButtonItem("error"));
+        e.printStackTrace();
+        clearAndRefresh();
+        addItem(new StringItem("An error occurred:"));
+        addItem(new StringItem(e.toString()));
     }
 }
 //#endif

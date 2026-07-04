@@ -12,7 +12,7 @@ public class Bluetooth implements DiscoveryListener, Runnable {
 	private UUID[] uuids;
 	private DiscoveryAgent discAgent;
 	private LocalDevice local;
-	private String localName;
+	// private String localName;
     private String serviceName;
 
 	private Vector discovered;
@@ -114,7 +114,12 @@ public class Bluetooth implements DiscoveryListener, Runnable {
     private void init() throws Exception {
         if (local != null) return;
         local = LocalDevice.getLocalDevice();
-        localName = local.getFriendlyName();
+
+        if (local == null) {
+            throw new Exception("Cannot get local device. Make sure Bluetooth is supported and enabled.");
+        }
+
+        // localName = local.getFriendlyName();
         discAgent = local.getDiscoveryAgent();
         local.setDiscoverable(DiscoveryAgent.GIAC);
     }
@@ -140,7 +145,7 @@ public class Bluetooth implements DiscoveryListener, Runnable {
     public void inquiryCompleted(int discType) {
         if (discovered.size() == 0) {
             // No devices found - call app's callback with empty arrays
-            listener.btSearchCompleted(new String[]{"none2"}, new String[]{"none2"});
+            listener.btSearchCompleted(new String[]{}, new String[]{});
 			searching = false;
             return;
         }
@@ -188,8 +193,6 @@ public class Bluetooth implements DiscoveryListener, Runnable {
                 // Search the next device
                 RemoteDevice device = (RemoteDevice) discovered.elementAt(searchedDevices);
                 discAgent.searchServices(null, uuids, device, this);
-                // } else {
-                // }
             }
         }
         catch (Exception e) {

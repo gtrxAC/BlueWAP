@@ -26,6 +26,9 @@ public class StringItem extends Item {
         g.setFont(font);
         g.setColor(0x111111);
         int y = 0;
+
+        if (textLines == null) sizeChanged(width);
+
         for (int i = 0; i < textLines.length; i++) {
             g.drawString(textLines[i], 0, y, 0);
             y += font.getHeight();
