@@ -1,5 +1,11 @@
-MIDlet-1: BlueWAP, , App
+//#ifdef BLUEWAP_CLIENT
+MIDlet-1: BlueWAP, , fi.gtrxac.bluewap.client.App
 MIDlet-Name: BlueWAP
+//#endif
+//#ifdef BLUEWAP_SERVER
+MIDlet-1: BlueWAP Server, , fi.gtrxac.bluewap.server.App
+MIDlet-Name: BlueWAP Server
+//#endif
 MIDlet-Vendor: gtrxAC
 MIDlet-Version: 1.0.0
 MicroEdition-Configuration: CLDC-1.0

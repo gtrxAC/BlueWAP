@@ -44,11 +44,13 @@ public abstract class HTTP {
 		return createRequest("GET", url);
 	}
 
+//#ifdef BLUEWAP_CLIENT
 	public static void setConnectionType(int connectionType) {
 		if (connectionType == CONNECTION_TYPE_STANDARD || connectionType == CONNECTION_TYPE_BLUETOOTH) {
 			CONNECTION_TYPE = connectionType;
 		}
 	}
+//#endif
 
 	protected abstract InputStream makeRequest() throws Exception;
 

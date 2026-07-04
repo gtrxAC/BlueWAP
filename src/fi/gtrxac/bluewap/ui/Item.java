@@ -8,8 +8,8 @@ import javax.microedition.lcdui.Graphics;
  */
 public abstract class Item {
     // int width;
-    int height;
-    int y;
+    public int height;
+    public int y;
     private boolean selectable;
 
     protected Item(boolean selectable) {
