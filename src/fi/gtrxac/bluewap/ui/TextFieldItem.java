@@ -36,17 +36,16 @@ public class TextFieldItem extends Item implements CommandListener {
             g.setColor(0x222222);
         }
 
+        int x = Math.max(3, smallFont.getHeight()/6);
+        int y = (height - smallFont.getHeight())/2;
+
         g.setFont(smallFont);
-        g.drawString(
-            value,
-            smallFont.getHeight()/6,
-            (height - smallFont.getHeight())/2,
-            0
-        );
+        g.drawString(value, x, y, 0);
     }
 
     public void sizeChanged(int width) {
-        height = smallFont.getHeight()*4/3;
+        int fontHeight = smallFont.getHeight();
+        height = Math.max(fontHeight*4/3, fontHeight + 6);
     }
 
     public void itemSelected() {
