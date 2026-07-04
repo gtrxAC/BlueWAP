@@ -52,7 +52,7 @@ public class History implements Runnable {
         menuUrls.addElement(url);
     }
 
-    public static void visit(String url, boolean relative) {
+    public static synchronized void visit(String url, boolean relative) {
         // if we've gone back in the history, remove all entries after the current one
         if (currentIndex < list.size() - 1) {
             list.setSize(currentIndex + 1);
@@ -81,15 +81,7 @@ public class History implements Runnable {
         new Thread(this).start();
     }
 
-    public static int getLength() {
-        return list.size();
-    }
-
-    public static History getItem(int index) {
-        return (History) list.elementAt(index);
-    }
-
-    public static History getCurrent() {
+    public static synchronized History getCurrent() {
         if (list.size() == 0) return null;
         return (History) list.elementAt(currentIndex);
     }

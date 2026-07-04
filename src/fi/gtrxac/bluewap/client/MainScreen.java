@@ -27,14 +27,16 @@ public class MainScreen extends ListScreen implements CommandListener {
     }
 
     public void displayWml(String wml, String cardId) {
-        removeAllItems();
-        try {
-            parseWml(wml, cardId);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            addItem(new StringItem("Failed to load page:"));
-            addItem(new StringItem(e.toString()));
+        synchronized (History.getCurrent()) {
+            removeAllItems();
+            try {
+                parseWml(wml, cardId);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                addItem(new StringItem("Failed to load page:"));
+                addItem(new StringItem(e.toString()));
+            }
         }
     }
 
