@@ -15,7 +15,6 @@ public class AppCanvas extends Canvas {
     }
 
     protected void paint(Graphics g) {
-        updateCommands();
         Screen curr = AppBase.getCurrentScreen();
         if (curr != null) curr.prepareAndDraw(g);
     }
