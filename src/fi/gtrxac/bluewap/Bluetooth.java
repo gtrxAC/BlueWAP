@@ -39,35 +39,39 @@ public class Bluetooth implements DiscoveryListener, Runnable {
         uuids = new UUID[] {this.uuid};
 	}
 
+//#ifdef BLUETOOTH_SERVER
     /**
      * Start listening for connections from other devices.
      * When a connection is established, the app's btConnected callback is called.
      */
-    // public void listen() {
-    //     try {
-    //         init();
-    //         String url = "btspp://localhost:" + uuid + ";name=" + serviceName + ";authenticate=false;encrypt=false";
-    //         server = (StreamConnectionNotifier) Connector.open(url);
-    //         serverRunning = true;
-    //         new Thread(this).start();
-    //     }
-    //     catch (Exception e) {
-    //         listener.btError(e);
-    //     }
-    // }
+    public void listen() {
+        try {
+            init();
+            String url = "btspp://localhost:" + uuid + ";name=" + serviceName + ";authenticate=false;encrypt=false";
+            server = (StreamConnectionNotifier) Connector.open(url);
+            serverRunning = true;
+            new Thread(this).start();
+        }
+        catch (Exception e) {
+            listener.btError(e);
+        }
+    }
+//#endif
 
+//#ifdef BLUETOOTH_SERVER
     /**
      * Stop listening for connections from other devices.
      * After this is called, the app is no longer notified by the btConnected callback.
      */
-    // public void stopListening() {
-    //     try {
-    //         server.close();
-    //     }
-    //     catch (Exception e) {}
+    public void stopListening() {
+        try {
+            server.close();
+        }
+        catch (Exception e) {}
         
-    //     serverRunning = false;
-    // }
+        serverRunning = false;
+    }
+//#endif
 
     /**
      * Start searching for other devices that are running this application and are listening for connections.
@@ -116,15 +120,17 @@ public class Bluetooth implements DiscoveryListener, Runnable {
     }
 
     public void run() {
-        // while (serverRunning) {
-        //     try {
-        //         StreamConnection conn = server.acceptAndOpen();
-        //         listener.btConnected(conn);
-        //     }
-        //     catch (Exception e) {
-        //         listener.btError(e);
-        //     }
-        // }
+//#ifdef BLUETOOTH_SERVER
+        while (serverRunning) {
+            try {
+                StreamConnection conn = server.acceptAndOpen();
+                listener.btConnected(conn);
+            }
+            catch (Exception e) {
+                listener.btError(e);
+            }
+        }
+//#endif
     }
 
 	public void deviceDiscovered(RemoteDevice device, DeviceClass cod) {
