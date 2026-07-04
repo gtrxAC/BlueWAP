@@ -13,8 +13,9 @@ import org.xmlpull.v1.*;
 
 public class MainScreen extends ListScreen implements CommandListener {
     public static final int CMD_BACK = 0;
-    public static final int CMD_MENU = 1;
-    public static final int CMD_FORWARD = 2;
+    public static final int CMD_SELECT = 1;
+    public static final int CMD_MENU = 2;
+    public static final int CMD_FORWARD = 3;
 
     public static final MainScreen instance = new MainScreen();
 
@@ -22,6 +23,7 @@ public class MainScreen extends ListScreen implements CommandListener {
         super(2, 2);
         setCommandListener(this);
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
+        addCommand(new Command("Select", Command.OK, CMD_SELECT));
         addCommand(new Command("Address", Command.SCREEN, CMD_MENU));
         addCommand(new Command("Forward", Command.SCREEN, CMD_FORWARD));
     }
@@ -272,6 +274,10 @@ public class MainScreen extends ListScreen implements CommandListener {
         switch (c.getPriority()) {
             case CMD_BACK: {
                 History.back();
+                break;
+            }
+            case CMD_SELECT: {
+                selectItem();
                 break;
             }
             case CMD_FORWARD: {
