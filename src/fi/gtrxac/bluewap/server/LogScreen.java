@@ -15,6 +15,8 @@ public class LogScreen extends ListScreen implements CommandListener {
     public static final int CMD_BACK = 0;
     public static final int CMD_SELECT = 1;
 
+    public static final LogScreen instance = new LogScreen();
+
     Vector lines = new Vector();
 
     public LogScreen() {
@@ -27,7 +29,11 @@ public class LogScreen extends ListScreen implements CommandListener {
         addCommand(new Command("Select", Command.OK, CMD_SELECT));
     }
 
-    public void addLogItem(String item) {
+    public static void log(String item) {
+        instance.addLogItem(item);
+    }
+
+    private void addLogItem(String item) {
         lines.addElement(item);
         while (lines.size() > 50) {
             lines.removeElementAt(0);
