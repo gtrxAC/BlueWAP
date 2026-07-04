@@ -15,7 +15,7 @@ public class App extends AppBase implements BluetoothListener {
     private Bluetooth bluetooth;
 
     public void init() {
-        pushScreen(new LogScreen());
+        pushScreen(LogScreen.instance);
         bluetooth = new Bluetooth(BLUETOOTH_UUID, BLUETOOTH_SERVICE, this);
         bluetooth.listen();
         LogScreen.log("Bluetooth server started");
