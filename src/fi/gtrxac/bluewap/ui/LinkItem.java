@@ -1,6 +1,11 @@
+package fi.gtrxac.bluewap.ui;
+
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 
+/**
+ * A ListScreen item that visually resembles a hyperlink.
+ */
 public class LinkItem extends Item {
     String text;
     private int stringWidth;

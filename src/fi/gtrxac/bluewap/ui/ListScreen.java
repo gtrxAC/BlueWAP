@@ -1,7 +1,12 @@
+package fi.gtrxac.bluewap.ui;
+
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Canvas;
 import java.util.*;
 
+/**
+ * A list that can display a vertical scrollable list of Items.
+ */
 public abstract class ListScreen extends Screen {
     public int scroll;
     public int selectedIndex;
@@ -161,7 +166,7 @@ public abstract class ListScreen extends Screen {
     public void addItem(Item i) {
         items.addElement(i);
         needsResize = true;
-        App.repaint();
+        AppBase.repaint();
     }
 
     public void removeAllItems() {
@@ -169,7 +174,7 @@ public abstract class ListScreen extends Screen {
         scroll = -itemPadding;
         items.setSize(0);
         needsResize = true;
-        App.repaint();
+        AppBase.repaint();
     }
 
     protected void itemSelected(Item i) {}

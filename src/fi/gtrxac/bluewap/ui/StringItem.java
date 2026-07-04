@@ -1,6 +1,12 @@
+package fi.gtrxac.bluewap.ui;
+
+import fi.gtrxac.bluewap.*;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 
+/**
+ * A ListScreen item that shows a basic string of text.
+ */
 public class StringItem extends Item {
     String text;
     Font font;

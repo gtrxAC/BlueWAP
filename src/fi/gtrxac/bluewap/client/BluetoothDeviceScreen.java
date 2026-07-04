@@ -1,3 +1,8 @@
+//#ifdef BLUEWAP_CLIENT
+package fi.gtrxac.bluewap.client;
+
+import fi.gtrxac.bluewap.*;
+import fi.gtrxac.bluewap.ui.*;
 import java.util.Vector;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
@@ -87,3 +92,4 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothListen
         addItem(new ButtonItem("error"));
     }
 }
+//#endif

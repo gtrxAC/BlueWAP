@@ -1,3 +1,5 @@
+package fi.gtrxac.bluewap;
+
 import java.io.*;
 import java.util.*;
 import javax.microedition.io.*;

@@ -1,3 +1,7 @@
+//#ifdef BLUEWAP_CLIENT
+package fi.gtrxac.bluewap.client;
+
+import fi.gtrxac.bluewap.*;
 import java.io.*;
 import java.util.*;
 import javax.microedition.io.*;
@@ -130,3 +134,4 @@ public class BluetoothHTTP extends HTTP {
 		catch (Exception e) {}
 	}
 }
+//#endif

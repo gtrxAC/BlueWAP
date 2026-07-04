@@ -1,3 +1,5 @@
+package fi.gtrxac.bluewap;
+
 import java.util.*;
 
 public class URL {

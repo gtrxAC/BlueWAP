@@ -1,6 +1,11 @@
+package fi.gtrxac.bluewap.ui;
+
 import java.util.Vector;
 import javax.microedition.lcdui.*;
 
+/**
+ * Represents any kind of screen that is handled by the UI framework and displayed by AppCanvas.
+ */
 public abstract class Screen implements CommandListener {
     public int width;
     public int height;

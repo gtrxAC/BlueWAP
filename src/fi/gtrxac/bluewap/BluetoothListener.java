@@ -1,3 +1,5 @@
+package fi.gtrxac.bluewap;
+
 import javax.microedition.io.*;
 
 public interface BluetoothListener {

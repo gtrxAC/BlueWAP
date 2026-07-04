@@ -1,9 +1,15 @@
+package fi.gtrxac.bluewap.ui;
+
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.TextBox;
 
+/**
+ * A ListScreen item that contains and handles text input from the user.
+ * When the item is selected, text can be entered via LCDUI TextBox.
+ */
 public class TextFieldItem extends Item implements CommandListener {
     private String title;
     private String value;
@@ -48,7 +54,7 @@ public class TextFieldItem extends Item implements CommandListener {
         t.addCommand(new Command("OK", Command.OK, 0));
         t.addCommand(new Command("Cancel", Command.BACK, 1));
         t.setCommandListener(this);
-        App.disp.setCurrent(t);
+        AppBase.disp.setCurrent(t);
     }
 
     public void commandAction(Command c, Displayable d) {
@@ -56,9 +62,12 @@ public class TextFieldItem extends Item implements CommandListener {
             TextBox t = (TextBox) d;
             value = t.getString();
         }
-        App.disp.setCurrent(AppCanvas.instance);
+        AppBase.disp.setCurrent(AppCanvas.instance);
     }
 
+    /**
+     * Get the text currently contained in this item.
+     */
     public String getValue() {
         return value;
     }

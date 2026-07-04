@@ -1,3 +1,5 @@
+package fi.gtrxac.bluewap.client;
+
 //#ifndef NO_HTTP_REDIRECT_SUPPORT
 public class HTTPRedirectException extends Exception {
 	public HTTPRedirectException(String url) {

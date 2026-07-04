@@ -1,6 +1,11 @@
+package fi.gtrxac.bluewap.ui;
+
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 
+/**
+ * Represents any item that can be shown in a ListScreen.
+ */
 public abstract class Item {
     // int width;
     int height;

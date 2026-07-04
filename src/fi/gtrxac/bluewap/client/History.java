@@ -1,3 +1,7 @@
+//#ifdef BLUEWAP_CLIENT
+package fi.gtrxac.bluewap.client;
+
+import fi.gtrxac.bluewap.*;
 import java.util.*;
 
 public class History implements Runnable {
@@ -108,3 +112,4 @@ public class History implements Runnable {
         return HTTP.createRequest(url).getResponseString();
     }
 }
+//#endif

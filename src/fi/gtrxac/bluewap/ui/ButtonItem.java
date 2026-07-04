@@ -1,8 +1,11 @@
+package fi.gtrxac.bluewap.ui;
+
+import fi.gtrxac.bluewap.*;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 
 public class ButtonItem extends Item {
-    String text;
+    public String text;
     int bgColor;
     int darkerBgColor;
     int selectedBgColor;

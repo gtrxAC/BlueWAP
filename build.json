@@ -1,13 +1,25 @@
 [
   {
-    "name": "app_debug",
-    "defines": ["DEBUG"],
+    "name": "bluewap_client_debug",
+    "defines": ["BLUEWAP_CLIENT", "DEBUG"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
     "excludes": []
   },
   {
-    "name": "app_release",
-    "defines": [],
+    "name": "bluewap_server_debug",
+    "defines": ["BLUEWAP_SERVER", "DEBUG"],
+    "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
+    "excludes": []
+  },
+  {
+    "name": "bluewap_client_release",
+    "defines": ["BLUEWAP_CLIENT"],
+    "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
+    "excludes": []
+  },
+  {
+    "name": "bluewap_server_release",
+    "defines": ["BLUEWAP_SERVER"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
     "excludes": []
   }

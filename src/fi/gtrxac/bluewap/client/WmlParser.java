@@ -1,5 +1,7 @@
-import java.util.Vector;
+//#ifdef BLUEWAP_CLIENT
+package fi.gtrxac.bluewap.client;
 
+import java.util.Vector;
 import org.kxml2.io.KXmlParser;
 
 public class WmlParser extends KXmlParser {
@@ -11,3 +13,4 @@ public class WmlParser extends KXmlParser {
         warningLocations.addElement(getPositionDescription());
     }
 }
+//#endif

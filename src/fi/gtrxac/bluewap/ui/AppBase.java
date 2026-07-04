@@ -1,50 +1,31 @@
+package fi.gtrxac.bluewap.ui;
+
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.*;
 import java.util.*;
 
-public class App extends MIDlet {
+public abstract class AppBase extends MIDlet {
+    // _________________________________________________________________________
+    //
+    //  MIDlet lifecycle
+    // _________________________________________________________________________
+    //
 	public static Display disp;
-    public static App instance;
+    public static AppBase instance;
     
     private boolean started = false;
 
-    static final String WML_BEGIN =
-        "<?xml version=\"1.0\" encoding='utf-8'?>" +
-        "<!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\">" +
-        "<wml>" +
-        "<head>" +
-        "</head>";
-
-    static final String LOADING_WML =
-        WML_BEGIN +
-        "<card title=\"Loading\">" +
-        "<p>Loading...</p>" +
-        "</card>" +
-        "</wml>";
-
-    static final String ERROR_WML_PREFIX =
-        WML_BEGIN +
-        "<card title=\"Error\">" +
-        "<p>An error occurred:</p>" +
-        "<p>";
-
-    static final String ERROR_WML_SUFFIX =
-        "</p>" +
-        "</card>" +
-        "</wml>";
-
-    public App() {
+    public AppBase() {
         instance = this;
     }
 
     public void startApp() {
         if (started) return;
         started = true;
-
-        pushScreen(MainScreen.instance);
-        History.visit("jar://bs0dd.wml", false);
-
         disp = Display.getDisplay(this);
+
+        init();
+
         disp.setCurrent(AppCanvas.instance);
     }
 
@@ -52,26 +33,53 @@ public class App extends MIDlet {
 
     public void destroyApp(boolean unconditional) {}
 
-
+    // _________________________________________________________________________
+    //
+    //  Screen management
+    // _________________________________________________________________________
+    //
     private static Stack screens = new Stack();
 
+    // _________________________________________________________________________
+    //
+    //  Public API
+    // _________________________________________________________________________
+    //
+
+    /**
+     * Implemented by the app to show the first screen of the app.
+     */
+    public abstract void init();
+
+    /**
+     * Add a new screen to the top of the screen stack and show it.
+     */
     public static void pushScreen(Screen s) {
         screens.push(s);
         AppCanvas.instance.updateCommands();
         repaint();
     }
 
+    /**
+     * Close the screen from the top of the screen stack and go back to the previous screen. 
+     */
     public static void popScreen() {
         screens.pop();
         AppCanvas.instance.updateCommands();
         repaint();
     }
 
+    /**
+     * Replace the currently shown screen with another screen.
+     */
     public static void replaceScreen(Screen s) {
         screens.pop();
         pushScreen(s);
     }
 
+    /**
+     * Get the currently shown screen.
+     */
     public static Screen getCurrentScreen() {
         if (screens.empty()) return null;
         return (Screen) screens.peek();

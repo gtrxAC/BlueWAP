@@ -1,3 +1,8 @@
+//#ifdef BLUEWAP_CLIENT
+package fi.gtrxac.bluewap.client;
+
+import fi.gtrxac.bluewap.ui.*;
+
 public class WmlAnchorItem extends LinkItem {
     public static final int ACTION_NONE = 0;
     public static final int ACTION_GO = 1;
@@ -13,3 +18,4 @@ public class WmlAnchorItem extends LinkItem {
         this.target = target;
     }
 }
+//#endif

@@ -1,9 +1,13 @@
+//#ifdef BLUEWAP_CLIENT
+package fi.gtrxac.bluewap.client;
+
+import fi.gtrxac.bluewap.*;
+import fi.gtrxac.bluewap.ui.*;
 import java.io.*;
 import java.util.Vector;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
-
 import org.kxml2.io.*;
 import org.xmlpull.v1.*;
 
@@ -299,3 +303,4 @@ public class MainScreen extends ListScreen implements CommandListener {
         }
     }
 }
+//#endif

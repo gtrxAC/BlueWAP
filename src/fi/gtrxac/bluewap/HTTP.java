@@ -1,3 +1,6 @@
+package fi.gtrxac.bluewap;
+
+import fi.gtrxac.bluewap.client.*;
 import java.io.*;
 import java.util.*;
 import javax.microedition.lcdui.Image;
@@ -6,9 +9,11 @@ public abstract class HTTP {
 	private static final String DEFAULT_ACCEPT = "text/vnd.wap.wml, image/vnd.wap.wbmp";
 	private static final String DEFAULT_CONTENT_TYPE = "application/json";
 
+//#ifdef BLUEWAP_CLIENT
 	public static final int CONNECTION_TYPE_STANDARD = 0;
 	public static final int CONNECTION_TYPE_BLUETOOTH = 1;
 	public static int CONNECTION_TYPE = CONNECTION_TYPE_STANDARD;
+//#endif
 
 	protected String method;
 	protected String url;
@@ -27,9 +32,11 @@ public abstract class HTTP {
 	}
 
 	public static HTTP createRequest(String method, String url) {
+//#ifdef BLUEWAP_CLIENT
 		if (CONNECTION_TYPE == CONNECTION_TYPE_BLUETOOTH) {
 			return new BluetoothHTTP(method, url);
 		}
+//#endif
 		return new StandardHTTP(method, url);
 	}
 
