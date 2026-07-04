@@ -1,9 +1,9 @@
 //#ifdef BLUEWAP_CLIENT
-MIDlet-1: BlueWAP, , fi.gtrxac.bluewap.client.App
+MIDlet-1: BlueWAP, /i.png, fi.gtrxac.bluewap.client.App
 MIDlet-Name: BlueWAP
 //#endif
 //#ifdef BLUEWAP_SERVER
-MIDlet-1: BlueWAP Server, , fi.gtrxac.bluewap.server.App
+MIDlet-1: BlueWAP Server, /j.png, fi.gtrxac.bluewap.server.App
 MIDlet-Name: BlueWAP Server
 //#endif
 MIDlet-Vendor: gtrxAC
