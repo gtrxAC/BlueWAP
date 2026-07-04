@@ -11,6 +11,7 @@ public class History implements Runnable {
     boolean loaded;
 
     private static Vector list = new Vector();
+    public static Vector menuUrls = new Vector();
     private static int currentIndex = -1;
     
     private History(String url, boolean relative) {
@@ -43,12 +44,22 @@ public class History implements Runnable {
         }
     }
 
+    private static void addMenuUrlsItem(String url) {
+        while (menuUrls.size() > 8) {
+            menuUrls.removeElementAt(0);
+        }
+        if (menuUrls.indexOf(url) != -1) return;
+        menuUrls.addElement(url);
+    }
+
     public static void visit(String url, boolean relative) {
         // if we've gone back in the history, remove all entries after the current one
         if (currentIndex < list.size() - 1) {
             list.setSize(currentIndex + 1);
         }
-        list.addElement(new History(url, relative));
+        History hist = new History(url, relative);
+        list.addElement(hist);
+        addMenuUrlsItem(hist.url.toString(false));
         forward();
     }
 
@@ -68,6 +79,14 @@ public class History implements Runnable {
         this.wml = App.LOADING_WML;
         this.loaded = false;
         new Thread(this).start();
+    }
+
+    public static int getLength() {
+        return list.size();
+    }
+
+    public static History getItem(int index) {
+        return (History) list.elementAt(index);
     }
 
     public static History getCurrent() {

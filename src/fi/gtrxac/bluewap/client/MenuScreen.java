@@ -25,11 +25,21 @@ public class MenuScreen extends ListScreen implements CommandListener {
     public MenuScreen() {
         super(2, 2);
 
+        addItem(new StringItem("Address"));
         addItem(urlField);
+        addItem(goButton);
+
+        addItem(new StringItem("Connection mode"));
         addItem(standardButton);
         addItem(bluetoothButton);
-        addItem(goButton);
         updateConnectionButtons();
+
+        addItem(new StringItem("History"));
+
+        for (int i = History.menuUrls.size() - 1; i >= 0; i--) {
+            String url = (String) History.menuUrls.elementAt(i);
+            addItem(new LinkItem(url));
+        }
 
         setCommandListener(this);
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
@@ -50,6 +60,9 @@ public class MenuScreen extends ListScreen implements CommandListener {
     }
 
     protected void itemSelected(Item i) {
+        if (i instanceof LinkItem) {
+            visit(((LinkItem) i).text);
+        }
         if (i == standardButton) {
             setConnectionMode(HTTP.CONNECTION_TYPE_STANDARD);
         }
@@ -58,13 +71,17 @@ public class MenuScreen extends ListScreen implements CommandListener {
             App.pushScreen(new BluetoothDeviceScreen());
         }
         else if (i == goButton) {
-            if (connectionMode == HTTP.CONNECTION_TYPE_BLUETOOTH && BluetoothHTTP.selectedConnectionUrl == null) {
-                App.pushScreen(new BluetoothDeviceScreen());
-                return;
-            }
-            App.popScreen();
-            History.visit(urlField.getValue(), false);
+            visit(urlField.getValue());
         }
+    }
+
+    private void visit(String url) {
+        if (connectionMode == HTTP.CONNECTION_TYPE_BLUETOOTH && BluetoothHTTP.selectedConnectionUrl == null) {
+            App.pushScreen(new BluetoothDeviceScreen());
+            return;
+        }
+        App.popScreen();
+        History.visit(url, false);
     }
 
     private void setConnectionMode(int mode) {
