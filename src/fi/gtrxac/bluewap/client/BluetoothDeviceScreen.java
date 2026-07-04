@@ -56,7 +56,7 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothListen
         deviceItems.removeAllElements();
         removeAllItems();
         addItem(searchButton);
-        bluetooth = new Bluetooth("0000110100001000800000805F9B34FB", "BlueWAP", this);
+        bluetooth = new Bluetooth(Config.BLUETOOTH_UUID, Config.BLUETOOTH_SERVICE, this);
         bluetooth.search();
     }
 

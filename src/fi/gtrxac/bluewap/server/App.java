@@ -10,13 +10,11 @@ import java.io.*;
 import java.util.*;
 
 public class App extends AppBase implements BluetoothListener {
-    private static final String BLUETOOTH_UUID = "0000110100001000800000805F9B34FB";
-    private static final String BLUETOOTH_SERVICE = "BlueWAP";
     private Bluetooth bluetooth;
 
     public void init() {
         pushScreen(LogScreen.instance);
-        bluetooth = new Bluetooth(BLUETOOTH_UUID, BLUETOOTH_SERVICE, this);
+        bluetooth = new Bluetooth(Config.BLUETOOTH_UUID, Config.BLUETOOTH_SERVICE, this);
         bluetooth.listen();
         LogScreen.log("Bluetooth server started");
     }
