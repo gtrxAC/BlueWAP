@@ -25,16 +25,16 @@ public class MenuScreen extends ListScreen implements CommandListener {
     public MenuScreen() {
         super(2, 2);
 
-        addItem(new StringItem("Address"));
+        addItem(new StringItem("Address:"));
         addItem(urlField);
         addItem(goButton);
 
-        addItem(new StringItem("Connection mode"));
+        addItem(new StringItem("Connection mode:"));
         addItem(standardButton);
         addItem(bluetoothButton);
         updateConnectionButtons();
 
-        addItem(new StringItem("History"));
+        addItem(new StringItem("History:"));
 
         for (int i = History.menuUrls.size() - 1; i >= 0; i--) {
             String url = (String) History.menuUrls.elementAt(i);

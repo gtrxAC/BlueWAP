@@ -16,6 +16,7 @@ public class MainScreen extends ListScreen implements CommandListener {
     public static final int CMD_SELECT = 1;
     public static final int CMD_MENU = 2;
     public static final int CMD_FORWARD = 3;
+    public static final int CMD_REFRESH = 4;
 
     public static final MainScreen instance = new MainScreen();
 
@@ -24,8 +25,9 @@ public class MainScreen extends ListScreen implements CommandListener {
         setCommandListener(this);
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
         addCommand(new Command("Select", Command.OK, CMD_SELECT));
-        addCommand(new Command("Address", Command.SCREEN, CMD_MENU));
+        addCommand(new Command("Menu", Command.SCREEN, CMD_MENU));
         addCommand(new Command("Forward", Command.SCREEN, CMD_FORWARD));
+        addCommand(new Command("Refresh", Command.SCREEN, CMD_REFRESH));
     }
 
     public void displayWml(String wml, String cardId) {
@@ -286,6 +288,10 @@ public class MainScreen extends ListScreen implements CommandListener {
             }
             case CMD_MENU: {
                 App.pushScreen(new MenuScreen());
+                break;
+            }
+            case CMD_REFRESH: {
+                History.getCurrent().refresh();
                 break;
             }
         }
