@@ -172,7 +172,7 @@ public class MainScreen extends ListScreen implements CommandListener {
         text = Util.replace(text, "'", "&apos;");
         text = Util.replace(text, "\"", "&quot;");
         text = Util.replace(text, "<", "&lt;");
-        return Util.replace(text, ">", "&rt;");
+        return Util.replace(text, ">", "&gt;");
     }
 
     private void createWarningsWml(WmlParser p) {
