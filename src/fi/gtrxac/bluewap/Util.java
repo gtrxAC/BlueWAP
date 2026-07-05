@@ -71,6 +71,14 @@ public class Util {
 		return parts;
 	}
 
+    public static String sanitizeWml(String text) {
+        text = Util.replace(text, "&", "&amp;");
+        text = Util.replace(text, "'", "&apos;");
+        text = Util.replace(text, "\"", "&quot;");
+        text = Util.replace(text, "<", "&lt;");
+        return Util.replace(text, ">", "&gt;");
+    }
+
 	/**
 	 * Get array of text lines to draw (word wrap)
 	 * https://github.com/shinovon/JTube/blob/2.6.1/src/jtube/Util.java

@@ -167,20 +167,12 @@ public class MainScreen extends ListScreen implements CommandListener {
         }
     }
 
-    private String sanitizeWml(String text) {
-        text = Util.replace(text, "&", "&amp;");
-        text = Util.replace(text, "'", "&apos;");
-        text = Util.replace(text, "\"", "&quot;");
-        text = Util.replace(text, "<", "&lt;");
-        return Util.replace(text, ">", "&gt;");
-    }
-
     private void createWarningsWml(WmlParser p) {
         StringBuffer warningsBuf = new StringBuffer();
         warningsBuf.append(WmlTemplates.BEGIN)
             .append("<card title=\"Page warnings\">")
             .append("<p>Problems with &quot;")
-            .append(sanitizeWml(History.getCurrent().url.toString(false)))
+            .append(Util.sanitizeWml(History.getCurrent().url.toString(false)))
             .append("&quot;:</p>");
 
         if (p.warnings.size() == 0) {
@@ -191,10 +183,10 @@ public class MainScreen extends ListScreen implements CommandListener {
             String warnLoc = (String) p.warningLocations.elementAt(i);
 
             warningsBuf.append("<p>Warning: ")
-                .append(sanitizeWml(warn))
+                .append(Util.sanitizeWml(warn))
                 .append("</p>")
                 .append("<p>at ")
-                .append(sanitizeWml(warnLoc))
+                .append(Util.sanitizeWml(warnLoc))
                 .append("</p>");
         }
 

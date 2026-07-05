@@ -86,7 +86,12 @@ public class App extends AppBase implements BluetoothListener {
                 // Error with HTTP request - send error over BT
                 LogScreen.log("Proxy error: " + e.toString());
                 try {
-                    writeResponse(output, 500, new Hashtable(), Util.stringToBytes(e.toString()));
+                    String errorWml = WmlTemplates.ERROR_BEGIN +
+                        "Proxy error: " +
+                        Util.sanitizeWml(e.toString()) +
+                        WmlTemplates.ERROR_END;
+
+                    writeResponse(output, 500, new Hashtable(), Util.stringToBytes(errorWml));
                 }
                 catch (Exception ex) {
                     // Error with BT connection while sending error response - close connection
