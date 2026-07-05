@@ -36,7 +36,7 @@ public class App extends AppBase {
 
     public void init() {
         pushScreen(MainScreen.instance);
-        History.visit("jar://bs0dd.wml", false);
+        History.visit("jar://home.wml", false);
     }
 }
 //#endif

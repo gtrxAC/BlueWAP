@@ -210,8 +210,6 @@ public class MainScreen extends ListScreen implements CommandListener {
             p.next();
             ignoreWhitespace(p);
 
-            System.out.println("  " + p.getPositionDescription());
-
             if (p.getEventType() == XmlPullParser.END_DOCUMENT) {
                 p.addWarning("unexpected end of file");
                 break;

@@ -47,7 +47,7 @@ public class History implements Runnable {
         catch (Exception e) {
             e.printStackTrace();
             try {
-                this.url = new URL("jar://bs0dd.wml");
+                this.url = new URL("jar://home.wml");
             }
             catch (Exception ee) {}
 

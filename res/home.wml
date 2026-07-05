@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding='utf-8'?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+<head>
+</head>
+<card title="Welcome">
+    <p>Welcome to BlueWAP by gtrxAC</p>
+    <p>Select 'Menu' to choose your connection mode and enter an address.</p>
+    <p>You can also try the following offline demo pages:</p>
+    <a href="jar://15pmm01.wml">15pmm01.wml</a>
+    <a href="jar://bs0dd.wml">bs0dd.wml</a>
+    <a href="jar://ultraata.wml">ultraata.wml</a>
+</card>
+</wml>
