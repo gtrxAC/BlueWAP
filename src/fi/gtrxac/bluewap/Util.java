@@ -160,7 +160,7 @@ public class Util {
 	 */
 	public static String readFile(String name) throws Exception {
 		InputStream is = new Object().getClass().getResourceAsStream(name);
-		if (is == null) throw new Exception("File not found");
+		if (is == null) throw new Exception("File not found: '" + name + "'");
 
 		DataInputStream dis = new DataInputStream(is);
 		StringBuffer buf = new StringBuffer();
