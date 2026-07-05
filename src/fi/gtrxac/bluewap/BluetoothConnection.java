@@ -1,13 +1,12 @@
-//#ifdef BLUEWAP_SERVER
-package fi.gtrxac.bluewap.server;
+package fi.gtrxac.bluewap;
 
 import javax.microedition.io.*;
 import java.io.*;
 
 public class BluetoothConnection {
-    StreamConnection conn;
-    DataInputStream input;
-    DataOutputStream output;
+    public StreamConnection conn;
+    public DataInputStream input;
+    public DataOutputStream output;
     
     public BluetoothConnection(StreamConnection c) {
         conn = c;
@@ -24,4 +23,3 @@ public class BluetoothConnection {
         try { conn.close(); } catch (Exception e) {}
     }
 }
-//#endif

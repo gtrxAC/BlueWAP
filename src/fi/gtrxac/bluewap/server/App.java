@@ -173,21 +173,6 @@ public class App extends AppBase implements BluetoothListener {
         return input.readUTF();
     }
 
-    private void closeQuietly(InputStream input) {
-        if (input == null) return;
-        try { input.close(); } catch (Exception e) {}
-    }
-
-    private void closeQuietly(OutputStream output) {
-        if (output == null) return;
-        try { output.close(); } catch (Exception e) {}
-    }
-
-    private void closeQuietly(StreamConnection conn) {
-        if (conn == null) return;
-        try { conn.close(); } catch (Exception e) {}
-    }
-
     private static class RequestData {
         public String method;
         public String url;

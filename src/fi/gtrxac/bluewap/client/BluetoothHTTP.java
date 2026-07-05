@@ -9,6 +9,12 @@ import javax.microedition.io.*;
 public class BluetoothHTTP extends HTTP {
 	private static final byte PROTOCOL_VERSION = 1;
 	private static final String BLUETOOTH_SCHEME_PREFIX = "btspp://";
+
+	private StreamConnection sc;
+	private BluetoothConnection bc;
+	private DataInputStream dis;
+	private DataOutputStream dos;
+
 	public static String selectedConnectionUrl;
 
 	public BluetoothHTTP(String method, String url) {
@@ -25,24 +31,51 @@ public class BluetoothHTTP extends HTTP {
 	protected void closeTransport() {
 	}
 
+	private void clearConnections() {
+		if (bc != null) bc.close();
+		sc = null;
+		bc = null;
+		dis = null;
+		dos = null;
+	}
+
 	private void execute(String method, String url, Hashtable headers, byte[] data) throws Exception {
-		StreamConnection connection = (StreamConnection) Connector.open(selectedConnectionUrl);
-		OutputStream output = null;
-		InputStream input = null;
+		// No existing connection -> open new connection
+		if (bc == null) {
+			try {
+				sc = (StreamConnection) Connector.open(selectedConnectionUrl);
+				bc = new BluetoothConnection(sc);
+				dis = null;
+				dos = null;
+			}
+			catch (Exception e) {
+				clearConnections();
+				throw new Exception("Failed to open Bluetooth connection: " + e.toString());
+			}
+		}
+
+		// Connection does not have I/O open -> open them
+		if (is == null) {
+			try {
+				bc.open();
+				dis = bc.input;
+				dos = bc.output;
+			}
+			catch (Exception e) {
+				clearConnections();
+				throw new Exception("Failed to open Bluetooth stream: " + e.toString());
+			}
+		}
+
 		try {
-			output = connection.openOutputStream();
-			DataOutputStream dos = new DataOutputStream(output);
 			writeRequest(dos, method, url, headers, data);
 			dos.flush();
-
-			input = connection.openInputStream();
-			DataInputStream dis = new DataInputStream(input);
 			readResponse(dis);
 		}
-		finally {
-			closeQuietly(input);
-			closeQuietly(output);
-			closeQuietly(connection);
+		catch (Exception e) {
+			// Error with BT connection -> close everything
+			clearConnections();
+			throw new Exception("Bluetooth communication error: " + e.toString());
 		}
 	}
 
@@ -108,30 +141,6 @@ public class BluetoothHTTP extends HTTP {
 
 	private String readString(DataInputStream dis) throws IOException {
 		return dis.readUTF();
-	}
-
-	private void closeQuietly(InputStream input) {
-		if (input == null) return;
-		try {
-			input.close();
-		}
-		catch (Exception e) {}
-	}
-
-	private void closeQuietly(OutputStream output) {
-		if (output == null) return;
-		try {
-			output.close();
-		}
-		catch (Exception e) {}
-	}
-
-	private void closeQuietly(StreamConnection connection) {
-		if (connection == null) return;
-		try {
-			connection.close();
-		}
-		catch (Exception e) {}
 	}
 }
 //#endif
