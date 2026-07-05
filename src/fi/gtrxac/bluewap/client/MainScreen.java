@@ -124,6 +124,12 @@ public class MainScreen extends ListScreen implements CommandListener {
                     if (p.getEventType() == XmlPullParser.START_TAG && "img".equals(p.getName())) {
                         parseImgTag(p);
                     }
+                    if (p.getEventType() == XmlPullParser.START_TAG && "input".equals(p.getName())) {
+                        // not usable yet
+                        addItem(new TextFieldItem("Input text", "", 2000, 0));
+                        p.skipSubTree();
+                        p.next();
+                    }
                 }
             }
             catch (XmlPullParserException e) {
@@ -223,7 +229,7 @@ public class MainScreen extends ListScreen implements CommandListener {
             
             String addText = parseTextElement(p);
             if (addText != null) {
-                text += addText;
+                text += addText.trim();
             } else {
                 p.addWarning("expected text, <img>, <br>, <go>, <prev>, <refresh>, or </anchor>");
             }
