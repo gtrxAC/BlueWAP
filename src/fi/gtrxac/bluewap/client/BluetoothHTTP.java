@@ -10,10 +10,10 @@ public class BluetoothHTTP extends HTTP {
 	private static final byte PROTOCOL_VERSION = 1;
 	private static final String BLUETOOTH_SCHEME_PREFIX = "btspp://";
 
-	private StreamConnection sc;
-	private BluetoothConnection bc;
-	private DataInputStream dis;
-	private DataOutputStream dos;
+	private static StreamConnection sc;
+	private static BluetoothConnection bc;
+	private static DataInputStream dis;
+	private static DataOutputStream dos;
 
 	public static String selectedConnectionUrl;
 

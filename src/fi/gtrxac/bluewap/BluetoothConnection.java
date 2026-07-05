@@ -13,8 +13,8 @@ public class BluetoothConnection {
     }
 
     public void open() throws Exception {
-        input = conn.openDataInputStream();
-        output = conn.openDataOutputStream();
+        if (input == null) input = conn.openDataInputStream();
+        if (output == null) output = conn.openDataOutputStream();
     }
 
     public void close() {
