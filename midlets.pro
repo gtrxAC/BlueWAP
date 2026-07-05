@@ -23,9 +23,10 @@
 //#endif
 
 # Not recommended to edit these
--keep public class * extends javax.microedition.midlet.MIDlet
+-keep,allowobfuscation public class * extends javax.microedition.midlet.MIDlet
 -dontnote
 -dontusemixedcaseclassnames
 -repackageclasses ''
 -overloadaggressively
 -allowaccessmodification
+-adaptresourcefilecontents META-INF/MANIFEST.MF
