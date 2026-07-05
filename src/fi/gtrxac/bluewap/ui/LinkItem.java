@@ -1,5 +1,6 @@
 package fi.gtrxac.bluewap.ui;
 
+import fi.gtrxac.bluewap.*;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 
@@ -8,7 +9,9 @@ import javax.microedition.lcdui.Graphics;
  */
 public class LinkItem extends Item {
     public String text;
-    private int stringWidth;
+
+    private String[] textLines;
+    private int maxStringWidth;
 
     public LinkItem(String text) {
         super(true);
@@ -18,22 +21,38 @@ public class LinkItem extends Item {
     public void draw(Graphics g, int width, boolean selected) {
         if (selected) {
             g.setColor(0xEEF8FF);
-            g.fillRect(0, 0, stringWidth, height);
+            g.fillRect(0, 0, maxStringWidth, height);
             g.setColor(0x2244AA);
         } else {
             g.setColor(0x3355CC);
         }
+
+        if (textLines == null) sizeChanged(width);
         
         g.setFont(smallUnderlinedFont);
-        g.drawString(text, 0, 0, 0);
+        int y = 0;
+        for (int i = 0; i < textLines.length; i++) {
+            g.drawString(textLines[i], 0, y, 0);
+            y += SMALL_UNDERLINED_FONT_HEIGHT;
+        }
 
         if (selected) {
-            drawHighlight(g, 0, 0, stringWidth, height);
+            drawHighlight(g, 0, 0, maxStringWidth, height);
         }
     }
 
     public void sizeChanged(int width) {
-        height = SMALL_UNDERLINED_FONT_HEIGHT;
-        stringWidth = smallUnderlinedFont.stringWidth(text);
+        textLines = Util.wordWrap(text, width, smallUnderlinedFont);
+        height = SMALL_UNDERLINED_FONT_HEIGHT*textLines.length;
+
+        maxStringWidth = 0;
+
+        for (int i = 0; i < textLines.length; i++) {
+            int stringWidth = smallUnderlinedFont.stringWidth(textLines[i]);
+
+            if (stringWidth > maxStringWidth) {
+                maxStringWidth = stringWidth;
+            }
+        }
     }
 }

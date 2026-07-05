@@ -8,9 +8,10 @@ import javax.microedition.lcdui.Graphics;
  * A ListScreen item that shows a basic string of text.
  */
 public class StringItem extends Item {
-    String text;
-    Font font;
-    String[] textLines;
+    public String text;
+
+    private Font font;
+    private String[] textLines;
 
     public StringItem(String text) {
         this(text, smallFont);
