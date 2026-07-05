@@ -65,10 +65,9 @@ public class LogScreen extends ListScreen implements CommandListener {
                 break;
             }
             case CMD_DISCONNECT: {
-                // TODO: disconnect also http streams
                 for (int i = 0; i < App.connections.size(); i++) {
-                    StreamConnection sc = (StreamConnection) App.connections.elementAt(i);
-                    try { sc.close(); } catch (Exception e) {}
+                    BluetoothConnection bc = (BluetoothConnection) App.connections.elementAt(i);
+                    bc.close();
                     log("Closed connection");
                 }
                 App.connections.setSize(0);

@@ -30,47 +30,84 @@ public class App extends AppBase implements BluetoothListener {
 
     /**
      * Called from a separate thread
-     * @param conn
      */
     public void btConnected(StreamConnection conn) {
-        connections.addElement(conn);
-
         LogScreen.log("Device connected");
+
+        BluetoothConnection bc = new BluetoothConnection(conn);
+        connections.addElement(bc);
         DataInputStream input = null;
         DataOutputStream output = null;
+
         try {
-            input = conn.openDataInputStream();
-            output = conn.openDataOutputStream();
-
-            RequestData request = readRequest(input);
-            LogScreen.log("Proxying " + request.method + " " + request.url);
-
-            StandardHTTP http = new StandardHTTP(request.method, request.url);
-            for (Enumeration e = request.headers.keys(); e.hasMoreElements(); ) {
-                String key = (String) e.nextElement();
-                String value = (String) request.headers.get(key);
-                http.setHeader(key, value);
-            }
-            if (request.data != null) {
-                http.setData(request.data);
-            }
-
-            byte[] body = http.getResponseBytes();
-            writeResponse(output, http.getResponseCode(), new Hashtable(), body);
-            LogScreen.log("Response sent");
+            bc.open();
+            input = bc.input;
+            output = bc.output;
         }
         catch (Exception e) {
-            LogScreen.log("Proxy error: " + e.toString());
-            try {
-                writeResponse(output, 500, new Hashtable(), Util.stringToBytes(e.toString()));
-            }
-            catch (Exception ex) {}
+            // Error with BT connection - close connection
+            bc.close();
+            return;
         }
-        finally {
-            closeQuietly(input);
-            closeQuietly(output);
-            closeQuietly(conn);
-            connections.removeElement(conn);
+        
+        while (true) {
+            RequestData request = null;
+
+            try {
+                request = readRequest(input);
+                LogScreen.log(request.method + " " + request.url);
+            }
+            catch (Exception e) {
+                // Error with BT connection - close connection
+                bc.close();
+                return;
+            }
+
+            StandardHTTP http = null;
+            byte[] body = null;
+            int respCode;
+
+            try {
+                http = new StandardHTTP(request.method, request.url);
+                for (Enumeration e = request.headers.keys(); e.hasMoreElements(); ) {
+                    String key = (String) e.nextElement();
+                    String value = (String) request.headers.get(key);
+                    http.setHeader(key, value);
+                }
+                if (request.data != null) {
+                    http.setData(request.data);
+                }
+
+                body = http.getResponseBytes();
+                respCode = http.getResponseCode();
+                LogScreen.log("Response received");
+            }
+            catch (Exception e) {
+                // Error with HTTP request - send error over BT
+                LogScreen.log("Proxy error: " + e.toString());
+                try {
+                    writeResponse(output, 500, new Hashtable(), Util.stringToBytes(e.toString()));
+                }
+                catch (Exception ex) {
+                    // Error with BT connection while sending error response - close connection
+                    bc.close();
+                    return;
+                }
+                continue;
+            }
+            finally {
+                try { http.close(); } catch (Exception e) {}
+            }
+
+            try {
+                writeResponse(output, respCode, new Hashtable(), body);
+                LogScreen.log("Response sent");
+            }
+            catch (Exception e) {
+                // Error with BT connection - close connection
+                bc.close();
+                return;
+            }
         }
     }
 

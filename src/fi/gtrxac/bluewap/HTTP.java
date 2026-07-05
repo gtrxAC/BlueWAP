@@ -1,5 +1,6 @@
 package fi.gtrxac.bluewap;
 
+import fi.gtrxac.bluewap.ui.*;
 import fi.gtrxac.bluewap.client.*;
 import java.io.*;
 import java.util.*;
@@ -8,6 +9,15 @@ import javax.microedition.lcdui.Image;
 public abstract class HTTP {
 	private static final String DEFAULT_ACCEPT = "text/vnd.wap.wml, image/vnd.wap.wbmp";
 	private static final String DEFAULT_CONTENT_TYPE = "application/json";
+
+	private static final String DEFAULT_USER_AGENT =
+//#ifdef BLUEWAP_CLIENT
+		"BlueWAP/" +
+//#endif
+//#ifdef BLUEWAP_SERVER
+		"BlueWAPServer/" +
+//#endif
+		AppBase.instance.getAppProperty("MIDlet-Version");
 
 //#ifdef BLUEWAP_CLIENT
 	public static final int CONNECTION_TYPE_STANDARD = 0;
@@ -29,6 +39,7 @@ public abstract class HTTP {
 		this.url = url;
 		this.headers = new Hashtable();
 		headers.put("Accept", DEFAULT_ACCEPT);
+		headers.put("User-Agent", DEFAULT_USER_AGENT);
 	}
 
 	public static HTTP createRequest(String method, String url) {
