@@ -177,7 +177,7 @@ public class MainScreen extends ListScreen implements CommandListener {
 
     private void createWarningsWml(WmlParser p) {
         StringBuffer warningsBuf = new StringBuffer();
-        warningsBuf.append(App.WML_BEGIN)
+        warningsBuf.append(WmlTemplates.BEGIN)
             .append("<card title=\"Page warnings\">")
             .append("<p>Problems with &quot;")
             .append(sanitizeWml(History.getCurrent().url.toString(false)))
@@ -198,7 +198,7 @@ public class MainScreen extends ListScreen implements CommandListener {
                 .append("</p>");
         }
 
-        warningsBuf.append(App.WML_END);
+        warningsBuf.append(WmlTemplates.END);
 
         warningsWml = warningsBuf.toString();
     }

@@ -51,7 +51,7 @@ public class History implements Runnable {
             }
             catch (Exception ee) {}
 
-            this.wml = App.ERROR_WML_PREFIX + e.toString() + App.ERROR_WML_SUFFIX;
+            this.wml = WmlTemplates.ERROR_BEGIN + e.toString() + WmlTemplates.ERROR_END;
             this.card = null;
             this.loaded = false;
         }
@@ -89,7 +89,7 @@ public class History implements Runnable {
     }
 
     public void refresh() {
-        this.wml = App.LOADING_WML;
+        this.wml = WmlTemplates.LOADING;
         this.loaded = false;
         new Thread(this).start();
     }
@@ -112,7 +112,7 @@ public class History implements Runnable {
         }
         catch (Exception e) {
             e.printStackTrace();
-            this.wml = App.ERROR_WML_PREFIX + e.toString() + App.ERROR_WML_SUFFIX;
+            this.wml = WmlTemplates.ERROR_BEGIN + e.toString() + WmlTemplates.ERROR_END;
             this.loaded = false;
         }
         screenChanged();
