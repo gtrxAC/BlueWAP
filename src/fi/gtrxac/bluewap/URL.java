@@ -87,6 +87,14 @@ public class URL {
                 path.removeElementAt(0);
             }
         } else {
+            if (path.size() == 0) {
+                if (protocol.equals("warnings")) {
+                    domain = "";
+                    return;
+                } else {
+                    throw new Exception("URL does not have a domain");
+                }
+            }
             domain = (String) path.elementAt(0);
             path.removeElementAt(0);
         }

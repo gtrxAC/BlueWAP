@@ -5,16 +5,29 @@ import fi.gtrxac.bluewap.*;
 import java.util.*;
 
 public class History implements Runnable {
-    URL url;
-    String wml;
-    String card;
-    boolean loaded;
+    public URL url;
+    public String wml;
+    public String card;
+    public boolean loaded;
 
     private static Vector list = new Vector();
     public static Vector menuUrls = new Vector();
     private static int currentIndex = -1;
     
     private History(String url, boolean relative) {
+        if (url.equals("warnings://")) {
+            try {
+                this.url = new URL(url);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+            this.wml = MainScreen.warningsWml;
+            this.card = null;
+            this.loaded = true;
+            return;
+        }
+
         try {
             History curr = getCurrent();
             if (relative) {

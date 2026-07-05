@@ -14,12 +14,15 @@ public class App extends AppBase {
         "<head>" +
         "</head>";
 
+    static final String WML_END = 
+        "</card>" +
+        "</wml>";
+
     static final String LOADING_WML =
         WML_BEGIN +
         "<card title=\"Loading\">" +
         "<p>Loading...</p>" +
-        "</card>" +
-        "</wml>";
+        WML_END;
 
     static final String ERROR_WML_PREFIX =
         WML_BEGIN +
@@ -29,8 +32,7 @@ public class App extends AppBase {
 
     static final String ERROR_WML_SUFFIX =
         "</p>" +
-        "</card>" +
-        "</wml>";
+        WML_END;
 
     public void init() {
         pushScreen(MainScreen.instance);

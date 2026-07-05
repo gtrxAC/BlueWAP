@@ -17,7 +17,9 @@ public class MainScreen extends ListScreen implements CommandListener {
     public static final int CMD_MENU = 2;
     public static final int CMD_FORWARD = 3;
     public static final int CMD_REFRESH = 4;
+    public static final int CMD_WARNINGS = 5;
 
+    public static String warningsWml;
     public static final MainScreen instance = new MainScreen();
 
     public MainScreen() {
@@ -28,6 +30,7 @@ public class MainScreen extends ListScreen implements CommandListener {
         addCommand(new Command("Menu", Command.SCREEN, CMD_MENU));
         addCommand(new Command("Forward", Command.SCREEN, CMD_FORWARD));
         addCommand(new Command("Refresh", Command.SCREEN, CMD_REFRESH));
+        addCommand(new Command("Warnings", Command.SCREEN, CMD_WARNINGS));
     }
 
     public void displayWml(String wml, String cardId) {
@@ -112,6 +115,9 @@ public class MainScreen extends ListScreen implements CommandListener {
                         p.nextTag();
                         break;
                     }
+                    if (p.getEventType() == XmlPullParser.START_TAG && "p".equals(p.getName())) {
+                        parsePTag(p);
+                    }
                     if (p.getEventType() == XmlPullParser.START_TAG && "a".equals(p.getName())) {
                         parseATag(p);
                     }
@@ -156,11 +162,82 @@ public class MainScreen extends ListScreen implements CommandListener {
             p.addWarning((cardId == null) ? "no cards found" : "card '" + cardId + "' not found");
         }
 
+        if (!History.getCurrent().url.protocol.equals("warnings")) {
+            createWarningsWml(p);
+        }
+    }
+
+    private String sanitizeWml(String text) {
+        text = Util.replace(text, "&", "&amp;");
+        text = Util.replace(text, "'", "&apos;");
+        text = Util.replace(text, "\"", "&quot;");
+        text = Util.replace(text, "<", "&lt;");
+        return Util.replace(text, ">", "&rt;");
+    }
+
+    private void createWarningsWml(WmlParser p) {
+        StringBuffer warningsBuf = new StringBuffer();
+        warningsBuf.append(App.WML_BEGIN)
+            .append("<card title=\"Page warnings\">")
+            .append("<p>Problems with &quot;")
+            .append(sanitizeWml(History.getCurrent().url.toString(false)))
+            .append("&quot;:</p>");
+
+        if (p.warnings.size() == 0) {
+            warningsBuf.append("<p>No problems found with this page.</p>");
+        }
         for (int i = 0; i < p.warnings.size(); i++) {
             String warn = (String) p.warnings.elementAt(i);
             String warnLoc = (String) p.warningLocations.elementAt(i);
-            addItem(new StringItem("Warning: " + warn));
-            addItem(new StringItem("  at " + warnLoc));
+
+            warningsBuf.append("<p>Warning: ")
+                .append(sanitizeWml(warn))
+                .append("</p>")
+                .append("<p>at ")
+                .append(sanitizeWml(warnLoc))
+                .append("</p>");
+        }
+
+        warningsBuf.append(App.WML_END);
+
+        warningsWml = warningsBuf.toString();
+    }
+
+    public void parsePTag(WmlParser p) throws Exception {
+        String text = "";
+
+        while (true) {
+            p.next();
+            ignoreWhitespace(p);
+
+            System.out.println("  " + p.getPositionDescription());
+
+            if (p.getEventType() == XmlPullParser.END_DOCUMENT) {
+                p.addWarning("unexpected end of file");
+                break;
+            }
+            else if (p.getEventType() == XmlPullParser.END_TAG && "p".equals(p.getName())) {
+                break;
+            }
+            if (p.getEventType() == XmlPullParser.START_TAG && "a".equals(p.getName())) {
+                break;
+            }
+            if (p.getEventType() == XmlPullParser.START_TAG && "anchor".equals(p.getName())) {
+                break;
+            }
+            if (p.getEventType() == XmlPullParser.START_TAG && "input".equals(p.getName())) {
+                break;
+            }
+            
+            String addText = parseTextElement(p);
+            if (addText != null) {
+                text += addText;
+            } else {
+                p.addWarning("expected text, <img>, <br>, or </a>");
+            }
+        }
+        if (text.length() != 0) {
+            addItem(new StringItem(text));
         }
     }
 
@@ -298,6 +375,10 @@ public class MainScreen extends ListScreen implements CommandListener {
             }
             case CMD_REFRESH: {
                 History.getCurrent().refresh();
+                break;
+            }
+            case CMD_WARNINGS: {
+                History.visit("warnings://", false);
                 break;
             }
         }
