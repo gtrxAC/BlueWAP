@@ -132,7 +132,7 @@ public class MainScreen extends ListScreen implements CommandListener {
                     }
                     if (p.getEventType() == XmlPullParser.START_TAG && "input".equals(p.getName())) {
                         // not usable yet
-                        addItem(new TextFieldItem("Input text", "", 2000, 0));
+                        addItem(new TextFieldItem("Input text", "not implemented", 2000, 0));
                         p.skipSubTree();
                         p.next();
                     }
