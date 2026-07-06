@@ -65,6 +65,7 @@ public class App extends AppBase implements BluetoothListener {
             }
 
             StandardHTTP http = null;
+            String resultUrl = request.url;
             byte[] body = null;
             int respCode;
 
@@ -81,6 +82,7 @@ public class App extends AppBase implements BluetoothListener {
 
                 body = http.getResponseBytes();
                 respCode = http.getResponseCode();
+                resultUrl = http.getUrl();
                 LogScreen.log("Response received");
             }
             catch (Exception e) {
@@ -92,7 +94,9 @@ public class App extends AppBase implements BluetoothListener {
                         Util.sanitizeWml(e.toString()) +
                         WmlTemplates.ERROR_END;
 
-                    writeResponse(output, 500, new Hashtable(), Util.stringToBytes(errorWml));
+                    writeResponse(
+                        output, 500, new Hashtable(), resultUrl,
+                        Util.stringToBytes(errorWml), request.version);
                 }
                 catch (Exception ex) {
                     // Error with BT connection while sending error response - close connection
@@ -106,7 +110,10 @@ public class App extends AppBase implements BluetoothListener {
             }
 
             try {
-                writeResponse(output, respCode, new Hashtable(), body);
+                writeResponse(
+                    output, respCode, new Hashtable(), resultUrl,
+                    body, request.version);
+                    
                 LogScreen.log("Response sent");
             }
             catch (Exception e) {
@@ -118,8 +125,11 @@ public class App extends AppBase implements BluetoothListener {
     }
 
     private RequestData readRequest(DataInputStream input) throws IOException {
-        int version = input.readByte();
-        if (version != 1) {
+        byte version = input.readByte();
+        if (
+            version < BluetoothConnection.PROTOCOL_BASE ||
+            version > BluetoothConnection.PROTOCOL_CURRENT
+        ) {
             throw new IOException("Unsupported Bluetooth protocol version: " + version);
         }
 
@@ -135,11 +145,11 @@ public class App extends AppBase implements BluetoothListener {
         int bodyLength = input.readInt();
         byte[] body = new byte[bodyLength];
         input.readFully(body);
-        return new RequestData(method, url, headers, body);
+        return new RequestData(method, url, headers, body, version);
     }
 
-    private void writeResponse(DataOutputStream output, int responseCode, Hashtable headers, byte[] body) throws IOException {
-        output.writeByte(1);
+    private void writeResponse(DataOutputStream output, int responseCode, Hashtable headers, String resultUrl, byte[] body, byte version) throws IOException {
+        output.writeByte(version);
         output.writeInt(responseCode);
 
         int headerCount = 0;
@@ -154,6 +164,10 @@ public class App extends AppBase implements BluetoothListener {
                 writeString(output, key);
                 writeString(output, value);
             }
+        }
+
+        if (version >= BluetoothConnection.PROTOCOL_ADDED_RESULT_URL) {
+            writeString(output, resultUrl);
         }
 
         if (body == null) {
@@ -184,12 +198,14 @@ public class App extends AppBase implements BluetoothListener {
         public String url;
         public Hashtable headers;
         public byte[] data;
+        public byte version;
 
-        public RequestData(String method, String url, Hashtable headers, byte[] data) {
+        public RequestData(String method, String url, Hashtable headers, byte[] data, byte version) {
             this.method = method;
             this.url = url;
             this.headers = headers;
             this.data = data;
+            this.version = version;
         }
     }
 }

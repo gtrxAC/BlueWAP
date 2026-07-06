@@ -133,7 +133,10 @@ public class History implements Runnable {
     }
 
     private String fetchHttp(String url) throws Exception {
-        return HTTP.createRequest(url).getResponseString();
+        HTTP http = HTTP.createRequest(url);
+        String result = http.getResponseString();
+        this.url = new URL(http.getUrl());
+        return result;
     }
 }
 //#endif
