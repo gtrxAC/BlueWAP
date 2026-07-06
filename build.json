@@ -9,7 +9,7 @@
     "name": "bluewap_server_debug",
     "defines": ["BLUETOOTH_SERVER", "BLUEWAP_SERVER", "DEBUG"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
-    "excludes": ["i.png"]
+    "excludes": ["i.png", "15pmm01.wml", "bs0dd.wml", "home.wml", "ultraata.wml"]
   },
   {
     "name": "bluewap_client_release",
@@ -21,6 +21,6 @@
     "name": "bluewap_server_release",
     "defines": ["BLUETOOTH_SERVER", "BLUEWAP_SERVER"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
-    "excludes": ["i.png"]
+    "excludes": ["i.png", "15pmm01.wml", "bs0dd.wml", "home.wml", "ultraata.wml"]
   }
 ]
