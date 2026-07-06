@@ -3,8 +3,8 @@ MIDlet-1: BlueWAP, /i.png, fi.gtrxac.bluewap.client.App
 MIDlet-Name: BlueWAP
 //#endif
 //#ifdef BLUEWAP_SERVER
-MIDlet-1: BlueWAP Server, /j.png, fi.gtrxac.bluewap.server.App
-MIDlet-Name: BlueWAP Server
+MIDlet-1: BW Server, /j.png, fi.gtrxac.bluewap.server.App
+MIDlet-Name: BW Server
 //#endif
 MIDlet-Vendor: gtrxAC
 MIDlet-Version: 1.0.0

@@ -17,7 +17,8 @@ public class App extends AppBase implements BluetoothListener {
         pushScreen(LogScreen.instance);
         bluetooth = new Bluetooth(Config.BLUETOOTH_UUID, Config.BLUETOOTH_SERVICE, this);
         bluetooth.listen();
-        LogScreen.log("Bluetooth server started");
+        LogScreen.log("BlueWAP server started");
+        LogScreen.log("Device name: " + bluetooth.localName);
     }
 
     public void btSearchCompleted(String[] deviceNames, String[] deviceURLs) {

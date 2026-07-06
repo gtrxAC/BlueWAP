@@ -12,7 +12,7 @@ public class Bluetooth implements DiscoveryListener, Runnable {
 	private UUID[] uuids;
 	private DiscoveryAgent discAgent;
 	private LocalDevice local;
-	// private String localName;
+	public String localName;
     private String serviceName;
 
 	private Vector discovered;
@@ -119,9 +119,16 @@ public class Bluetooth implements DiscoveryListener, Runnable {
             throw new Exception("Cannot get local device. Make sure Bluetooth is supported and enabled.");
         }
 
-        // localName = local.getFriendlyName();
+//#ifdef BLUETOOTH_SERVER
+        localName = local.getFriendlyName();
+        if (localName == null) localName = "(unknown)";
+//#endif
+
         discAgent = local.getDiscoveryAgent();
+
+//#ifdef BLUETOOTH_SERVER
         local.setDiscoverable(DiscoveryAgent.GIAC);
+//#endif
     }
 
     public void run() {
