@@ -1,5 +1,6 @@
 package fi.gtrxac.bluewap;
 
+import fi.gtrxac.bluewap.ui.*;
 import java.io.*;
 import java.util.*;
 import javax.microedition.io.*;
@@ -104,6 +105,17 @@ public class StandardHTTP extends HTTP {
 	}
 
 	protected InputStream makeRequest() throws Exception {
+//#ifdef BLUEWAP_SERVER
+		String clientUa = (String) headers.get("User-Agent");
+		if (clientUa == null) {
+			clientUa = "";
+		}
+		else if (clientUa.length() != 0 && !clientUa.endsWith(" ")) {
+			clientUa += " ";
+		}
+		clientUa += "BlueWAPServer/" + AppBase.instance.getAppProperty("MIDlet-Version");
+//#endif
+
 		for (int redirs = 0; redirs < 5; redirs++) {
 			try {
 				return makeRequestWithSymbianErrorHandler();
