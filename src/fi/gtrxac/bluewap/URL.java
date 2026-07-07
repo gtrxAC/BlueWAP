@@ -54,6 +54,21 @@ public class URL {
         for (int i = 0; i < baseUrl.path.size() - 1; i++) {
             path.insertElementAt(baseUrl.path.elementAt(i), i);
         }
+
+        // remove "." part to point to the same dir
+        // remove ".." and preceding part to go back a dir
+        for (int i = 0; i < path.size(); ) {
+            String part = (String) path.elementAt(i);
+
+            if (part.equals(".")) {
+                path.removeElementAt(i);
+            }
+            else if (part.equals("..") && i != 0) {
+                path.removeElementAt(i);
+                path.removeElementAt(i - 1);
+            }
+            else i++;
+        }
     }
 
     private void parseAbsoluteUrl(String url) throws Exception {
