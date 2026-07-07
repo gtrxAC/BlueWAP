@@ -15,6 +15,8 @@ public class MenuScreen extends ListScreen implements CommandListener {
     public static final int CMD_BACK = 0;
     public static final int CMD_SELECT = 1;
 
+    public static final boolean supportsBluetooth = Util.checkClass("javax.bluetooth.UUID");
+
     String url = History.getCurrent().url.toString(false);
     TextFieldItem urlField = new TextFieldItem("Address", url, 2000, 0);
     ButtonItem goButton = new ButtonItem("Go!");
@@ -29,10 +31,14 @@ public class MenuScreen extends ListScreen implements CommandListener {
         addItem(urlField);
         addItem(goButton);
 
-        addItem(new StringItem("Connection mode:"));
-        addItem(standardButton);
-        addItem(bluetoothButton);
-        updateConnectionButtons();
+        if (supportsBluetooth) {
+            addItem(new StringItem("Connection mode:"));
+            addItem(standardButton);
+            addItem(bluetoothButton);
+            updateConnectionButtons();
+        } else {
+            addItem(new StringItem("Connecting via cellular/Wi-Fi. This device does not support Java Bluetooth API."));
+        }
 
         addItem(new StringItem("History:"));
 

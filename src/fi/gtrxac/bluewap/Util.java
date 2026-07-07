@@ -280,4 +280,14 @@ public class Util {
 			|| c == '.'
 			|| c == '~';
 	}
+	
+	public static boolean checkClass(String s) {
+		try {
+			Class.forName(s);
+			return true;
+		}
+		catch (Throwable e) {}
+
+		return false;
+	}
 }

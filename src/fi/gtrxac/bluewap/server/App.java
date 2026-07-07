@@ -13,8 +13,15 @@ public class App extends AppBase implements BluetoothListener {
     private Bluetooth bluetooth;
     public static Vector connections = new Vector();
 
+    public static final boolean supportsBluetooth = Util.checkClass("javax.bluetooth.UUID");
+
     public void init() {
         pushScreen(LogScreen.instance);
+
+        if (!supportsBluetooth) {
+            LogScreen.log("This device does not support Java Bluetooth API (JSR-82). BlueWAP Server cannot run.");
+            return;
+        }
         bluetooth = new Bluetooth(Config.BLUETOOTH_UUID, Config.BLUETOOTH_SERVICE, this);
         bluetooth.listen();
         LogScreen.log("BlueWAP server started");
