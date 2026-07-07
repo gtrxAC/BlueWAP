@@ -99,51 +99,7 @@ public class WmlParser extends KXmlParser {
             String currentLinkTarget = null;
 
             try {
-                while (true) {
-                    next();
-                    ignoreWhitespace();
-
-                    if (getEventType() == XmlPullParser.END_DOCUMENT) {
-                        addWarning("unexpected end of file");
-                        break;
-                    }
-                    else if (getEventType() == XmlPullParser.END_TAG && "card".equals(getName())) {
-                        nextTag();
-                        break;
-                    }
-                    else if (getEventType() == XmlPullParser.START_TAG && "p".equals(getName())) {
-                        parsePTag();
-                    }
-                    else if (getEventType() == XmlPullParser.START_TAG && "a".equals(getName())) {
-                        parseATag();
-                    }
-                    else if (getEventType() == XmlPullParser.START_TAG && "anchor".equals(getName())) {
-                        parseAnchorTag();
-                    }
-                    else if (getEventType() == XmlPullParser.TEXT) {
-                        output.addItem(new StringItem(getText().trim()));
-                    }
-                    else if (getEventType() == XmlPullParser.START_TAG && "img".equals(getName())) {
-                        parseImgTag();
-                    }
-                    else if (getEventType() == XmlPullParser.START_TAG && "input".equals(getName())) {
-                        // not usable yet
-                        output.addItem(new TextFieldItem("Input text", "not implemented", 2000, 0));
-                        skipSubTree();
-                        next();
-                    }
-                    // ignore script and style so they are not shown as text
-                    else if (getEventType() == XmlPullParser.START_TAG && "script".equals(getName())) {
-                        addWarning("<script> is not supported, you are likely viewing an HTML page");
-                        skipSubTree();
-                        next();
-                    }
-                    else if (getEventType() == XmlPullParser.START_TAG && "style".equals(getName())) {
-                        addWarning("<style> is not supported, you are likely viewing an HTML page");
-                        skipSubTree();
-                        next();
-                    }
-                }
+                parseCard();
             }
             catch (XmlPullParserException e) {
                 addWarning(e.toString());
@@ -170,36 +126,52 @@ public class WmlParser extends KXmlParser {
         }
     }
 
-    private void createWarningsWml() {
-        if (History.getCurrent().url.protocol.equals("warnings")) {
-            return;
+    private void parseCard() throws Exception {
+        while (true) {
+            next();
+            ignoreWhitespace();
+
+            if (getEventType() == XmlPullParser.END_DOCUMENT) {
+                addWarning("unexpected end of file");
+                break;
+            }
+            else if (getEventType() == XmlPullParser.END_TAG && "card".equals(getName())) {
+                nextTag();
+                break;
+            }
+            else if (getEventType() == XmlPullParser.START_TAG && "p".equals(getName())) {
+                parsePTag();
+            }
+            else if (getEventType() == XmlPullParser.START_TAG && "a".equals(getName())) {
+                parseATag();
+            }
+            else if (getEventType() == XmlPullParser.START_TAG && "anchor".equals(getName())) {
+                parseAnchorTag();
+            }
+            else if (getEventType() == XmlPullParser.TEXT) {
+                output.addItem(new StringItem(getText().trim()));
+            }
+            else if (getEventType() == XmlPullParser.START_TAG && "img".equals(getName())) {
+                parseImgTag();
+            }
+            else if (getEventType() == XmlPullParser.START_TAG && "input".equals(getName())) {
+                // not usable yet
+                output.addItem(new TextFieldItem("Input text", "not implemented", 2000, 0));
+                skipSubTree();
+                next();
+            }
+            // ignore script and style so they are not shown as text
+            else if (getEventType() == XmlPullParser.START_TAG && "script".equals(getName())) {
+                addWarning("<script> is not supported, you are likely viewing an HTML page");
+                skipSubTree();
+                next();
+            }
+            else if (getEventType() == XmlPullParser.START_TAG && "style".equals(getName())) {
+                addWarning("<style> is not supported, you are likely viewing an HTML page");
+                skipSubTree();
+                next();
+            }
         }
-
-        StringBuffer warningsBuf = new StringBuffer();
-        warningsBuf.append(WmlTemplates.BEGIN)
-            .append("<card title=\"Page warnings\">")
-            .append("<p>Problems with &quot;")
-            .append(Util.sanitizeWml(History.getCurrent().url.toString(false)))
-            .append("&quot;:</p>");
-
-        if (warnings.size() == 0) {
-            warningsBuf.append("<p>No problems found with this page.</p>");
-        }
-        for (int i = 0; i < warnings.size(); i++) {
-            String warn = (String) warnings.elementAt(i);
-            String warnLoc = (String) warningLocations.elementAt(i);
-
-            warningsBuf.append("<p>Warning: ")
-                .append(Util.sanitizeWml(warn))
-                .append("</p>")
-                .append("<p>at ")
-                .append(Util.sanitizeWml(warnLoc))
-                .append("</p>");
-        }
-
-        warningsBuf.append(WmlTemplates.END);
-
-        MainScreen.warningsWml = warningsBuf.toString();
     }
 
     public void parsePTag() throws Exception {
@@ -338,6 +310,12 @@ public class WmlParser extends KXmlParser {
         return "Image";
     }
 
+    // _________________________________________________________________________
+    //
+    //  Parsing utilities
+    // _________________________________________________________________________
+    //
+
     private void ignoreWhitespace() throws IOException {
         try {
             while (getEventType() == KXmlParser.TEXT && isWhitespace()) {
@@ -352,9 +330,47 @@ public class WmlParser extends KXmlParser {
         require(type, null, text);
     }
 
+    // _________________________________________________________________________
+    //
+    //  Warning reporting
+    // _________________________________________________________________________
+    //
+
     public void addWarning(String text) {
         warnings.addElement(text);
         warningLocations.addElement(getPositionDescription());
+    }
+
+    private void createWarningsWml() {
+        if (History.getCurrent().url.protocol.equals("warnings")) {
+            return;
+        }
+
+        StringBuffer warningsBuf = new StringBuffer();
+        warningsBuf.append(WmlTemplates.BEGIN)
+            .append("<card title=\"Page warnings\">")
+            .append("<p>Problems with &quot;")
+            .append(Util.sanitizeWml(History.getCurrent().url.toString(false)))
+            .append("&quot;:</p>");
+
+        if (warnings.size() == 0) {
+            warningsBuf.append("<p>No problems found with this page.</p>");
+        }
+        for (int i = 0; i < warnings.size(); i++) {
+            String warn = (String) warnings.elementAt(i);
+            String warnLoc = (String) warningLocations.elementAt(i);
+
+            warningsBuf.append("<p>Warning: ")
+                .append(Util.sanitizeWml(warn))
+                .append("</p>")
+                .append("<p>at ")
+                .append(Util.sanitizeWml(warnLoc))
+                .append("</p>");
+        }
+
+        warningsBuf.append(WmlTemplates.END);
+
+        MainScreen.warningsWml = warningsBuf.toString();
     }
 }
 //#endif
