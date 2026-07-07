@@ -124,38 +124,38 @@ public class MainScreen extends ListScreen implements CommandListener {
                         p.addWarning("unexpected end of file");
                         break;
                     }
-                    if (p.getEventType() == XmlPullParser.END_TAG && "card".equals(p.getName())) {
+                    else if (p.getEventType() == XmlPullParser.END_TAG && "card".equals(p.getName())) {
                         p.nextTag();
                         break;
                     }
-                    if (p.getEventType() == XmlPullParser.START_TAG && "p".equals(p.getName())) {
+                    else if (p.getEventType() == XmlPullParser.START_TAG && "p".equals(p.getName())) {
                         parsePTag(p);
                     }
-                    if (p.getEventType() == XmlPullParser.START_TAG && "a".equals(p.getName())) {
+                    else if (p.getEventType() == XmlPullParser.START_TAG && "a".equals(p.getName())) {
                         parseATag(p);
                     }
-                    if (p.getEventType() == XmlPullParser.START_TAG && "anchor".equals(p.getName())) {
+                    else if (p.getEventType() == XmlPullParser.START_TAG && "anchor".equals(p.getName())) {
                         parseAnchorTag(p);
                     }
-                    if (p.getEventType() == XmlPullParser.TEXT) {
+                    else if (p.getEventType() == XmlPullParser.TEXT) {
                         addItem(new StringItem(p.getText().trim()));
                     }
-                    if (p.getEventType() == XmlPullParser.START_TAG && "img".equals(p.getName())) {
+                    else if (p.getEventType() == XmlPullParser.START_TAG && "img".equals(p.getName())) {
                         parseImgTag(p);
                     }
-                    if (p.getEventType() == XmlPullParser.START_TAG && "input".equals(p.getName())) {
+                    else if (p.getEventType() == XmlPullParser.START_TAG && "input".equals(p.getName())) {
                         // not usable yet
                         addItem(new TextFieldItem("Input text", "not implemented", 2000, 0));
                         p.skipSubTree();
                         p.next();
                     }
                     // ignore script and style so they are not shown as text
-                    if (p.getEventType() == XmlPullParser.START_TAG && "script".equals(p.getName())) {
+                    else if (p.getEventType() == XmlPullParser.START_TAG && "script".equals(p.getName())) {
                         p.addWarning("<script> is not supported, you are likely viewing an HTML page");
                         p.skipSubTree();
                         p.next();
                     }
-                    if (p.getEventType() == XmlPullParser.START_TAG && "style".equals(p.getName())) {
+                    else if (p.getEventType() == XmlPullParser.START_TAG && "style".equals(p.getName())) {
                         p.addWarning("<style> is not supported, you are likely viewing an HTML page");
                         p.skipSubTree();
                         p.next();
