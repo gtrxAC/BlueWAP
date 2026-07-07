@@ -22,6 +22,9 @@ public class MainScreen extends ListScreen implements CommandListener {
     public static String warningsWml;
     public static final MainScreen instance = new MainScreen();
 
+    private static final ButtonItem systemBrowserButton =
+        new ButtonItem("Open in browser");
+
     public MainScreen() {
         super(2, 2);
         setCommandListener(this);
@@ -57,7 +60,17 @@ public class MainScreen extends ListScreen implements CommandListener {
 
         p.setInput(is, null);
         p.defineEntityReplacementText("nbsp", " ");
-        p.nextTag();
+
+        try {
+            p.nextTag();
+        }
+        catch (XmlPullParserException e) {
+            p.addWarning("page does not start with a WML tag, treating the page as raw text");
+            addItem(systemBrowserButton);
+            addItem(new StringItem(wml));
+            createWarningsWml(p);
+            return;
+        }
 
         try {
             require(p, XmlPullParser.START_TAG, "wml");
@@ -136,6 +149,17 @@ public class MainScreen extends ListScreen implements CommandListener {
                         p.skipSubTree();
                         p.next();
                     }
+                    // ignore script and style so they are not shown as text
+                    if (p.getEventType() == XmlPullParser.START_TAG && "script".equals(p.getName())) {
+                        p.addWarning("<script> is not supported, you are likely viewing an HTML page");
+                        p.skipSubTree();
+                        p.next();
+                    }
+                    if (p.getEventType() == XmlPullParser.START_TAG && "style".equals(p.getName())) {
+                        p.addWarning("<style> is not supported, you are likely viewing an HTML page");
+                        p.skipSubTree();
+                        p.next();
+                    }
                 }
             }
             catch (XmlPullParserException e) {
@@ -162,12 +186,14 @@ public class MainScreen extends ListScreen implements CommandListener {
             p.addWarning((cardId == null) ? "no cards found" : "card '" + cardId + "' not found");
         }
 
-        if (!History.getCurrent().url.protocol.equals("warnings")) {
-            createWarningsWml(p);
-        }
+        createWarningsWml(p);
     }
 
     private void createWarningsWml(WmlParser p) {
+        if (History.getCurrent().url.protocol.equals("warnings")) {
+            return;
+        }
+
         StringBuffer warningsBuf = new StringBuffer();
         warningsBuf.append(WmlTemplates.BEGIN)
             .append("<card title=\"Page warnings\">")
@@ -375,6 +401,16 @@ public class MainScreen extends ListScreen implements CommandListener {
     }
 
     protected void itemSelected(Item i) {
+        if (i == systemBrowserButton) {
+            try {
+                if (App.instance.platformRequest(History.getCurrent().url.toString(false))) {
+                    App.instance.notifyDestroyed();
+                }
+            }
+            catch (Exception e) {
+                addItem(new StringItem(e.toString()));
+            }
+        }
         if (i instanceof WmlAnchorItem) {
             WmlAnchorItem anchor = (WmlAnchorItem) i;
             switch (anchor.action) {
