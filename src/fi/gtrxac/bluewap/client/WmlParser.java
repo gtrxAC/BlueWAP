@@ -14,6 +14,7 @@ public class WmlParser extends KXmlParser {
     private String cardId;
     private boolean haveShownCard;
     private boolean lastItemTerminated;
+    private boolean isHtml;
 
     private Vector warnings;
     private Vector warningLocations;
@@ -26,6 +27,7 @@ public class WmlParser extends KXmlParser {
         this.cardId = cardId;
         this.haveShownCard = false;
         this.lastItemTerminated = false;
+        this.isHtml = false;
 
         this.warnings = new Vector(5);
         this.warningLocations = new Vector(5);
@@ -41,16 +43,23 @@ public class WmlParser extends KXmlParser {
     public static void displayWml(ListScreen output, String wml, String cardId) {
         synchronized (History.getCurrent()) {
             output.removeAllItems();
+            WmlParser p = null;
+
             try {
-                WmlParser p = new WmlParser(output, wml, cardId);
+                p = new WmlParser(output, wml, cardId);
+                p.setFeature("http://xmlpull.org/v1/doc/relaxedrelaxedrelaxed", true);
                 p.parseWml();
-                p.createWarningsWml();
             }
             catch (Exception e) {
                 e.printStackTrace();
                 output.addItem(new StringItem("Failed to load page:"));
                 output.addItem(new StringItem(e.toString()));
             }
+
+            try {
+                p.createWarningsWml();
+            }
+            catch (Exception e) {}
         }
     }
 
@@ -70,11 +79,18 @@ public class WmlParser extends KXmlParser {
 
         // first tag (ignoring xml header and doctype) is <wml>
         try {
-            require(XmlPullParser.START_TAG, "wml");
+            require(START_TAG, "wml");
             nextTag();
         }
         catch (XmlPullParserException e) {
-            addWarning("expected <wml>");
+            try {
+                require(START_TAG, "html");
+                isHtml = true;
+                nextTag();
+            }
+            catch (XmlPullParserException ee) {
+                addWarning("expected <wml> or <html>");
+            }
         }
 
         // <wml> nested tags: card (any amount), head (up to 1), template (up to 1)
@@ -99,13 +115,16 @@ public class WmlParser extends KXmlParser {
                     haveTemplate = true;
                     skipSubTree();  // not supported
                 }
+                else if (isHtml && "body".equals(getName())) {
+                    parseP("body");
+                }
                 else {
                     addWarning(WML_NESTED_TAGS);
                     skipSubTree();
                 }
             }
             else if (getEventType() == END_TAG) {
-                if ("wml".equals(getName())) {
+                if ((isHtml ? "html" : "wml").equals(getName())) {
                     break;
                 } else {
                     addWarning(WML_NESTED_TAGS);
@@ -144,7 +163,7 @@ public class WmlParser extends KXmlParser {
             }
             if (getEventType() == START_TAG) {
                 if ("p".equals(getName())) {
-                    parseP();
+                    parseP("p");
                 }
                 else if ("do".equals(getName())) {
                     parseDo();
@@ -188,11 +207,8 @@ public class WmlParser extends KXmlParser {
         return ",b,big,em,i,small,strong,u,".indexOf("," + getName() + ",") != -1;
     }
 
-    private void parseP() throws Exception {
+    private void parseP(String tagName) throws Exception {
         final String P_NESTED_TAGS = "expected text, <a>, <anchor>, <b>, <big>, <br>, <do>, <em>, <fieldset>, <i>, <input>, <img>, <select>, <small>, <strong>, <table>, <u>, or </p>";
-
-        // em, b, u, strong, small, i, big
-        // a, anchor, b, big, br, em, i, img, small, strong, table, u 
 
         nextItem();
 
@@ -233,12 +249,15 @@ public class WmlParser extends KXmlParser {
                 else if (isFormattingTag()) {
                     parseFormattingTag();
                 }
+                else if (isHtml && "p".equals(getName()) && !"p".equals(tagName)) {
+                    parseP("p");
+                }
                 else {
                     addWarning(P_NESTED_TAGS);
                 }
             }
             else if (getEventType() == END_TAG) {
-                if ("p".equals(getName())) {
+                if (tagName.equals(getName())) {
                     break;
                 }
                 else if (isFormattingTag()) {
