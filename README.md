@@ -8,7 +8,7 @@ The browser consists of two apps, a client and a server. The client is run on th
 The client can also be used as a standalone WAP browser if your device has an internet connection.
 
 ## Status
-BlueWAP currently supports a basic subset of WML (Wireless Markup Language).
+BlueWAP currently supports a basic subset of WML (Wireless Markup Language). As some WML and HTML elements are the same, this also allows for crude viewing of some HTML pages.
 
 ### Working
 * Basic text paragraphs
