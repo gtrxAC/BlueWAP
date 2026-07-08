@@ -375,7 +375,7 @@ public class WmlParser extends KXmlParser {
             }
             nextItem();
         }
-        output.addItem(new WmlAnchorItem(text.trim(), WmlAnchorItem.ACTION_GO, target));
+        addAnchorItem(text, WmlAnchorItem.ACTION_GO, target);
     }
 
     public void parseAnchor() throws Exception {
@@ -432,6 +432,13 @@ public class WmlParser extends KXmlParser {
                 break;
             }
             nextItem();
+        }
+        addAnchorItem(text, action, target);
+    }
+
+    public void addAnchorItem(String text, int action, String target) {
+        if (text == null || text.trim().length() == 0) {
+            text = "Link";
         }
         output.addItem(new WmlAnchorItem(text.trim(), action, target));
     }
