@@ -9,14 +9,22 @@ import org.kxml2.io.*;
 import org.xmlpull.v1.*;
 
 public class WmlParser extends KXmlParser {
-    private String wml;
     private ListScreen output;
+    private String wml;
+    private String cardId;
+    private boolean haveShownCard;
+    private boolean lastItemTerminated;
+
     private Vector warnings;
     private Vector warningLocations;
 
-    private WmlParser(ListScreen output, String wml) throws Exception {
+    private WmlParser(ListScreen output, String wml, String cardId) throws Exception {
         this.output = output;
         this.wml = wml.trim();
+        this.cardId = cardId;
+        this.haveShownCard = false;
+        this.lastItemTerminated = false;
+
         this.warnings = new Vector(5);
         this.warningLocations = new Vector(5);
 
@@ -30,8 +38,8 @@ public class WmlParser extends KXmlParser {
         synchronized (History.getCurrent()) {
             output.removeAllItems();
             try {
-                WmlParser p = new WmlParser(output, wml);
-                p.parseWml(cardId);
+                WmlParser p = new WmlParser(output, wml, cardId);
+                p.parseWml();
                 p.createWarningsWml();
             }
             catch (Exception e) {
@@ -42,19 +50,21 @@ public class WmlParser extends KXmlParser {
         }
     }
 
-    private void parseWml(String cardId) throws Exception {
-        boolean haveShownCard = false;
+    private void parseWml() throws Exception {
+        final String WML_NESTED_TAGS = "expected <card>, <head>, <template>, or </wml>";
 
+        // go to the first tag, if fails then the page is not xml
         try {
             nextTag();
         }
         catch (XmlPullParserException e) {
-            addWarning("page does not begin with a WML tag, treating it as raw text");
+            addWarning("page does not begin with a tag, treating it as raw text");
             output.addItem(MainScreen.systemBrowserButton);
             output.addItem(new StringItem(wml));
             return;
         }
 
+        // first tag (ignoring xml header and doctype) is <wml>
         try {
             require(XmlPullParser.START_TAG, "wml");
             nextTag();
@@ -63,62 +73,45 @@ public class WmlParser extends KXmlParser {
             addWarning("expected <wml>");
         }
 
-        try {
-            require(XmlPullParser.START_TAG, "head");
-            skipSubTree();
-            nextTag();
-        }
-        catch (XmlPullParserException e) {}
+        // <wml> nested tags: card (any amount), head (up to 1), template (up to 1)
+        boolean haveHead = false;
+        boolean haveTemplate = false;
 
-        while (getEventType() != XmlPullParser.END_DOCUMENT) {
-            try {
-                require(XmlPullParser.START_TAG, "card");
-
-                // determine if this card is to be shown (specified card id or first card)
-                String thisCardId = getAttributeValue(null, "id");
-
-                if ((cardId == null && haveShownCard) || (cardId != null && !cardId.equals(thisCardId))) {
-                    // skip this card
+        while (true) {
+            if (getEventType() == TEXT) {
+                addWarning(WML_NESTED_TAGS);
+            }
+            else if (getEventType() == START_TAG) {
+                if ("card".equals(getName())) {
+                    parseCard();
+                }
+                else if ("head".equals(getName())) {
+                    if (haveHead) addWarning("more than one <head>");
+                    haveHead = true;
+                    skipSubTree();  // not supported
+                }
+                else if ("template".equals(getName())) {
+                    if (haveTemplate) addWarning("more than one <template>");
+                    haveTemplate = true;
+                    skipSubTree();  // not supported
+                }
+                else {
+                    addWarning(WML_NESTED_TAGS);
                     skipSubTree();
-                    next();
-                    ignoreWhitespace();
-                    continue;
                 }
-                haveShownCard = true;
             }
-            catch (XmlPullParserException e) {
-                try {
-                    require(XmlPullParser.END_TAG, "wml");
+            else if (getEventType() == END_TAG) {
+                if ("wml".equals(getName())) {
                     break;
+                } else {
+                    addWarning(WML_NESTED_TAGS);
                 }
-                catch (XmlPullParserException ee) {
-                    addWarning("expected <card> or </wml>");
-                }
             }
-            
-            String currentLinkTarget = null;
-
-            try {
-                parseCard();
+            else if (getEventType() == END_DOCUMENT) {
+                addWarning("unexpected end of file");
+                break;
             }
-            catch (XmlPullParserException e) {
-                addWarning(e.toString());
-            }
-
-            // try {
-            //     require(XmlPullParser.END_TAG, "card");
-            //     nextTag();
-            // }
-            // catch (XmlPullParserException e) {
-            //     addWarning(e, warnings, "expected </card>");
-            // }
-        }
-
-        try {
-            require(XmlPullParser.END_TAG, "wml");
-        }
-        catch (XmlPullParserException e) {
-            addWarning("expected </wml>");
+            nextItem();
         }
 
         if (!haveShownCard) {
@@ -127,177 +120,302 @@ public class WmlParser extends KXmlParser {
     }
 
     private void parseCard() throws Exception {
-        while (true) {
-            next();
-            ignoreWhitespace();
+        final String CARD_NESTED_TAGS = "expected <do>, <onevent>, <p>, <timer>, or </card>";
 
-            if (getEventType() == XmlPullParser.END_DOCUMENT) {
+        // determine if this card is to be shown (specified card id or first card)
+        String thisCardId = getAttributeValue(null, "id");
+
+        if ((cardId == null && haveShownCard) || (cardId != null && !cardId.equals(thisCardId))) {
+            // skip this card
+            skipSubTree();
+            return;
+        }
+
+        nextItem();
+
+        while (true) {
+            if (getEventType() == TEXT) {
+                addWarning(CARD_NESTED_TAGS);
+                appendToLastItem(getText().trim());
+            }
+            if (getEventType() == START_TAG) {
+                if ("p".equals(getName())) {
+                    parseP();
+                }
+                else if ("do".equals(getName())) {
+                    notSupported();
+                }
+                else if ("onevent".equals(getName())) {
+                    notSupported();
+                }
+                else if ("timer".equals(getName())) {
+                    notSupported();
+                }
+                else {
+                    addWarning(CARD_NESTED_TAGS);
+                    skipSubTree();
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if ("card".equals(getName())) {
+                    break;
+                } else {
+                    addWarning(CARD_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_DOCUMENT) {
+                addWarning("unexpected end of file");
+                haveShownCard = true;
+                return;
+            }
+            nextItem();
+        }
+
+        try {
+            require(XmlPullParser.END_TAG, "card");
+        }
+        catch (XmlPullParserException e) {
+            addWarning("expected <do>, <onevent>, <p>, <timer>, or </card>");
+        }
+        haveShownCard = true;
+    }
+
+    private boolean isFormattingTag() {
+        return ",b,big,em,i,small,strong,u,".indexOf("," + getName() + ",") != -1;
+    }
+
+    private void parseP() throws Exception {
+        final String P_NESTED_TAGS = "expected text, <a>, <anchor>, <b>, <big>, <br>, <do>, <em>, <fieldset>, <i>, <input>, <img>, <select>, <small>, <strong>, <table>, <u>, or </p>";
+
+        // em, b, u, strong, small, i, big
+        // a, anchor, b, big, br, em, i, img, small, strong, table, u 
+
+        nextItem();
+
+        while (true) {
+            if (getEventType() == TEXT) {
+                appendToLastItem(getText().trim());
+            }
+            if (getEventType() == START_TAG) {
+                if ("a".equals(getName())) {
+                    parseA();
+                }
+                else if ("anchor".equals(getName())) {
+                    parseAnchor();
+                }
+                else if ("br".equals(getName())) {
+                    lastItemTerminated = true;
+                }
+                else if ("do".equals(getName())) {
+                    notSupported();
+                }
+                else if ("fieldset".equals(getName())) {
+                    lastItemTerminated = true;
+                }
+                else if ("input".equals(getName())) {
+                    // not usable yet
+                    output.addItem(new TextFieldItem("Input text", "not implemented", 2000, 0));
+                    skipSubTree();
+                }
+                else if ("img".equals(getName())) {
+                    parseImg();
+                }
+                else if ("select".equals(getName())) {
+                    notSupported();
+                }
+                else if ("table".equals(getName())) {
+                    notSupported();
+                }
+                else if (isFormattingTag()) {
+                    parseFormattingTag();
+                }
+                else {
+                    addWarning(P_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if ("p".equals(getName())) {
+                    break;
+                }
+                else if (isFormattingTag()) {
+                    // ignore
+                }
+                else {
+                    addWarning(P_NESTED_TAGS);
+                }
+            }
+            nextItem();
+        }
+        lastItemTerminated = true;
+    }
+
+    private void parseFormattingTag() throws Exception {
+        final String FORMATTING_TAG_NESTED_TAGS =
+            "expected text, formatting tag, <a>, <anchor>, <br>, <img>, or <table>";
+
+        int depth = 1;
+        nextItem();
+
+        while (true) {
+            if (getEventType() == TEXT) {
+                appendToLastItem(getText().trim());
+            }
+            else if (getEventType() == START_TAG) {
+                if (isFormattingTag()) {
+                    depth++;
+                }
+                else if ("a".equals(getName())) {
+                    parseA();
+                }
+                else if ("anchor".equals(getName())) {
+                    parseAnchor();
+                }
+                else if ("br".equals(getName())) {
+                    lastItemTerminated = true;
+                }
+                else if ("img".equals(getName())) {
+                    parseImg();
+                }
+                else if ("table".equals(getName())) {
+                    notSupported();
+                }
+                else {
+                    addWarning(FORMATTING_TAG_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if (isFormattingTag()) {
+                    depth--;
+                    if (depth == 0) break;
+                } else {
+                    addWarning(FORMATTING_TAG_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_DOCUMENT) {
                 addWarning("unexpected end of file");
                 break;
             }
-            else if (getEventType() == XmlPullParser.END_TAG && "card".equals(getName())) {
-                nextTag();
-                break;
-            }
-            else if (getEventType() == XmlPullParser.START_TAG && "p".equals(getName())) {
-                parsePTag();
-            }
-            else if (getEventType() == XmlPullParser.START_TAG && "a".equals(getName())) {
-                parseATag();
-            }
-            else if (getEventType() == XmlPullParser.START_TAG && "anchor".equals(getName())) {
-                parseAnchorTag();
-            }
-            else if (getEventType() == XmlPullParser.TEXT) {
-                output.addItem(new StringItem(getText().trim()));
-            }
-            else if (getEventType() == XmlPullParser.START_TAG && "img".equals(getName())) {
-                parseImgTag();
-            }
-            else if (getEventType() == XmlPullParser.START_TAG && "input".equals(getName())) {
-                // not usable yet
-                output.addItem(new TextFieldItem("Input text", "not implemented", 2000, 0));
-                skipSubTree();
-                next();
-            }
-            // ignore script and style so they are not shown as text
-            else if (getEventType() == XmlPullParser.START_TAG && "script".equals(getName())) {
-                addWarning("<script> is not supported, you are likely viewing an HTML page");
-                skipSubTree();
-                next();
-            }
-            else if (getEventType() == XmlPullParser.START_TAG && "style".equals(getName())) {
-                addWarning("<style> is not supported, you are likely viewing an HTML page");
-                skipSubTree();
-                next();
-            }
+            nextItem();
         }
     }
+         
+            // // ignore script and style so they are not shown as text
+            // else if (getEventType() == XmlPullParser.START_TAG && "script".equals(getName())) {
+            //     addWarning("<script> is not supported, you are likely viewing an HTML page");
+            //     skipSubTree();
+            //     next();
+            // }
+            // else if (getEventType() == XmlPullParser.START_TAG && "style".equals(getName())) {
+            //     addWarning("<style> is not supported, you are likely viewing an HTML page");
+            //     skipSubTree();
+            //     next();
+            // }
 
-    public void parsePTag() throws Exception {
-        String text = "";
+    public void parseA() throws Exception {
+        final String A_NESTED_TAGS = "expected text, <img>, <br>, or </a>";
 
-        while (true) {
-            next();
-            ignoreWhitespace();
-
-            if (getEventType() == XmlPullParser.END_DOCUMENT) {
-                addWarning("unexpected end of file");
-                break;
-            }
-            else if (getEventType() == XmlPullParser.END_TAG && "p".equals(getName())) {
-                break;
-            }
-            if (getEventType() == XmlPullParser.START_TAG && "a".equals(getName())) {
-                break;
-            }
-            if (getEventType() == XmlPullParser.START_TAG && "anchor".equals(getName())) {
-                break;
-            }
-            if (getEventType() == XmlPullParser.START_TAG && "input".equals(getName())) {
-                break;
-            }
-            
-            String addText = parseTextElement();
-            if (addText != null) {
-                text += addText;
-            } else {
-                addWarning("expected text, <img>, <br>, or </a>");
-            }
-        }
-        if (text.length() != 0) {
-            output.addItem(new StringItem(text));
-        }
-    }
-
-    public void parseATag() throws Exception {
         String text = "";
         String target = getAttributeValue(null, "href");
 
-        while (true) {
-            next();
-            ignoreWhitespace();
+        if (target == null) {
+            addWarning("<a> does not have 'href' attribute");
+            target = "#";
+        }
 
-            if (getEventType() == XmlPullParser.END_DOCUMENT) {
+        nextItem();
+
+        while (true) {
+            if (getEventType() == TEXT) {
+                text += getText().trim();
+            }
+            else if (getEventType() == START_TAG) {
+                if ("br".equals(getName())) {
+                    text += "\n";
+                }
+                else if ("img".equals(getName())) {
+                    parseImg();
+                }
+                else {
+                    addWarning(A_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if ("a".equals(getName())) {
+                    break;
+                } else {
+                    addWarning(A_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_DOCUMENT) {
                 addWarning("unexpected end of file");
                 break;
             }
-            else if (getEventType() == XmlPullParser.END_TAG && "a".equals(getName())) {
-                break;
-            }
-            
-            String addText = parseTextElement();
-            if (addText != null) {
-                text += addText;
-            } else {
-                addWarning("expected text, <img>, <br>, or </a>");
-            }
+            nextItem();
         }
-        output.addItem(new WmlAnchorItem(text, WmlAnchorItem.ACTION_GO, target));
+        output.addItem(new WmlAnchorItem(text.trim(), WmlAnchorItem.ACTION_GO, target));
     }
 
-    public void parseAnchorTag() throws Exception {
+    public void parseAnchor() throws Exception {
+        final String ANCHOR_NESTED_TAGS =
+            "expected text, <br>, <go>, <img>, <prev>, <refresh>, or </anchor>";
+
         String text = "";
         int action = WmlAnchorItem.ACTION_NONE;
         String target = null;
 
-        while (true) {
-            next();
-            ignoreWhitespace();
+        nextItem();
 
-            if (getEventType() == XmlPullParser.END_DOCUMENT) {
+        while (true) {
+            if (getEventType() == TEXT) {
+                text += getText().trim();
+            }
+            else if (getEventType() == START_TAG) {
+                if ("br".equals(getName())) {
+                    text += "\n";
+                }
+                else if ("go".equals(getName())) {
+                    action = WmlAnchorItem.ACTION_GO;
+                    target = getAttributeValue(null, "href");
+                    if (target == null) {
+                        addWarning("<go> does not have 'href' attribute");
+                        target = "#";
+                    }
+                    skipSubTree();  // variables and postfield not supported
+                }
+                else if ("img".equals(getName())) {
+                    parseImg();
+                }
+                else if ("prev".equals(getName())) {
+                    action = WmlAnchorItem.ACTION_PREV;
+                    skipSubTree();  // variables and postfield not supported
+                }
+                else if ("refresh".equals(getName())) {
+                    action = WmlAnchorItem.ACTION_REFRESH;
+                    skipSubTree();  // variables and postfield not supported
+                }
+                else {
+                    addWarning(ANCHOR_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if ("anchor".equals(getName())) {
+                    break;
+                } else {
+                    addWarning(ANCHOR_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_DOCUMENT) {
                 addWarning("unexpected end of file");
                 break;
             }
-            else if (getEventType() == XmlPullParser.END_TAG && "anchor".equals(getName())) {
-                break;
-            }
-            else if (getEventType() == XmlPullParser.START_TAG && "go".equals(getName())) {
-                action = WmlAnchorItem.ACTION_GO;
-                target = getAttributeValue(null, "href");
-                if (target == null) {
-                    addWarning("<go> does not have 'href' attribute");
-                    target = "#";
-                }
-                skipSubTree();
-                continue;
-            }
-            else if (getEventType() == XmlPullParser.START_TAG && "prev".equals(getName())) {
-                action = WmlAnchorItem.ACTION_PREV;
-                skipSubTree();
-                continue;
-            }
-            else if (getEventType() == XmlPullParser.START_TAG && "refresh".equals(getName())) {
-                action = WmlAnchorItem.ACTION_REFRESH;
-                skipSubTree();
-                continue;
-            }
-            
-            String addText = parseTextElement();
-            if (addText != null) {
-                text += addText.trim();
-            } else {
-                addWarning("expected text, <img>, <br>, <go>, <prev>, <refresh>, or </anchor>");
-            }
+            nextItem();
         }
-        output.addItem(new WmlAnchorItem(text, action, target));
+        output.addItem(new WmlAnchorItem(text.trim(), action, target));
     }
 
-    public String parseTextElement() throws Exception {
-        if (getEventType() == XmlPullParser.TEXT) {
-            return getText();
-        }
-        else if (getEventType() == XmlPullParser.START_TAG && "img".equals(getName())) {
-            return getImgAltText();
-        }
-        else if (getEventType() == XmlPullParser.START_TAG && "br".equals(getName())) {
-            return "\n";
-        }
-        return null;
-    }
-
-    public void parseImgTag() {
+    public void parseImg() throws Exception {
         output.addItem(new StringItem(getImgAltText()));
+        skipSubTree();
     }
 
     public String getImgAltText() {
@@ -328,6 +446,38 @@ public class WmlParser extends KXmlParser {
     private void require(int type, String text) throws Exception {
         ignoreWhitespace();
         require(type, null, text);
+    }
+
+    private Item getLastItem() {
+        return (Item) output.items.lastElement();
+    }
+
+    private void appendToLastItem(String text) {
+        if (
+            lastItemTerminated || output.items.size() == 0 ||
+            !(getLastItem() instanceof StringItem) || getLastItem() instanceof WmlAnchorItem
+        ) {
+            output.addItem(new StringItem(text));
+            lastItemTerminated = false;
+        } else {
+            ((StringItem) getLastItem()).text += text;
+        }
+    }
+
+    private void appendLine(String text) {
+        output.addItem(new StringItem(text));
+        lastItemTerminated = true;
+    }
+
+    private void notSupported() throws Exception {
+        appendLine("[" + getName().toUpperCase() + "]");
+        skipSubTree();
+    }
+
+    private void nextItem() throws Exception {
+        System.out.println(getPositionDescription());
+        next();
+        ignoreWhitespace();
     }
 
     // _________________________________________________________________________

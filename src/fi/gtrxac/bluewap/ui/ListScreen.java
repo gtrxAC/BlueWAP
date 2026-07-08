@@ -13,7 +13,7 @@ public abstract class ListScreen extends Screen {
 
     public int itemPadding;
 
-    private Vector items;
+    public Vector items;
 
     // private static final int MARGIN = Item.smallFont.getHeight()/7;  // left and right margin of the screen
     // private static final int PADDING = Item.smallFont.getHeight()/8;  // space between items
