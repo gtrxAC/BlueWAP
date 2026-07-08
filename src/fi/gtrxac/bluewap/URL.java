@@ -24,8 +24,15 @@ public class URL {
     private void parseRelativeUrl(String url, URL baseUrl) throws Exception {
         url = url.trim();
 
-        // protocol/domain will always be the same
+        // protocol will always be the same
         protocol = baseUrl.protocol;
+
+        if (url.startsWith("//")) {
+            // absolute url only sharing the protocol
+            parseAbsoluteUrl(protocol + ":" + url);
+            return;
+        }
+
         domain = baseUrl.domain;
 
         // separate card reference
