@@ -249,8 +249,11 @@ public class WmlParser extends KXmlParser {
                 else if (isFormattingTag()) {
                     parseFormattingTag();
                 }
-                else if (isHtml && "p".equals(getName()) && !"p".equals(tagName)) {
-                    parseP("p");
+                else if (isHtml && ("script".equals(getName()) || "style".equals(getName()))) {
+                    skipSubTree();
+                }
+                else if (isHtml && ",p,div,h1,h2,h3,h4,h5,h6,".indexOf("," + getName() + ",") != -1) {
+                    parseP(getName());
                 }
                 else {
                     addWarning(P_NESTED_TAGS);
