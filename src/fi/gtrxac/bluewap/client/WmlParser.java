@@ -18,6 +18,8 @@ public class WmlParser extends KXmlParser {
     private Vector warnings;
     private Vector warningLocations;
 
+    public static Vector commands = new Vector(5);
+
     private WmlParser(ListScreen output, String wml, String cardId) throws Exception {
         this.output = output;
         this.wml = wml.trim();
@@ -27,6 +29,8 @@ public class WmlParser extends KXmlParser {
 
         this.warnings = new Vector(5);
         this.warningLocations = new Vector(5);
+
+        commands.setSize(0);
 
         byte[] wmlBytes = Util.stringToBytes(this.wml);
         ByteArrayInputStream is = new ByteArrayInputStream(wmlBytes);
@@ -494,8 +498,11 @@ public class WmlParser extends KXmlParser {
         if (text.length() == 0) {
             text = type.substring(0, 1).toUpperCase() + type.substring(1);
         }
-
-        output.addItem(new WmlAnchorItem(text.trim(), action, target));
+        
+        int prio = commands.size() + 100;
+        WmlCommand cmd = new WmlCommand(text, prio, action, target);
+        commands.addElement(cmd);
+        output.addCommand(cmd);
     }
 
     public void parseOnevent() throws Exception {

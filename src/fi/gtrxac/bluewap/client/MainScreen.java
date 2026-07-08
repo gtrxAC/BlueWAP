@@ -37,10 +37,19 @@ public class MainScreen extends ListScreen implements CommandListener {
     }
 
     public void displayWml(String wml, String card) {
+        for (int i = 0; i < WmlParser.commands.size(); i++) {
+            WmlCommand c = (WmlCommand) WmlParser.commands.elementAt(i);
+            removeCommand(c);
+        }
         WmlParser.displayWml(instance, wml, card);
     }
 
     public void commandAction(Command c, Displayable d) {
+        if (c instanceof WmlCommand) {
+            WmlCommand wc = (WmlCommand) c;
+            WmlAnchorItem.activate(wc.action, wc.target);
+            return;
+        }
         switch (c.getPriority()) {
             case CMD_BACK: {
                 History.back();
@@ -82,20 +91,7 @@ public class MainScreen extends ListScreen implements CommandListener {
         }
         if (i instanceof WmlAnchorItem) {
             WmlAnchorItem anchor = (WmlAnchorItem) i;
-            switch (anchor.action) {
-                case WmlAnchorItem.ACTION_GO: {
-                    History.visit(anchor.target, true);
-                    break;
-                }
-                case WmlAnchorItem.ACTION_PREV: {
-                    History.back();
-                    break;
-                }
-                case WmlAnchorItem.ACTION_REFRESH: {
-                    History.getCurrent().refresh();
-                    break;
-                }
-            }
+            WmlAnchorItem.activate(anchor.action, anchor.target);
         }
     }
 }

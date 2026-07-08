@@ -17,5 +17,22 @@ public class WmlAnchorItem extends LinkItem {
         this.action = action;
         this.target = target;
     }
+
+    public static void activate(int action, String target) {
+        switch (action) {
+            case ACTION_GO: {
+                History.visit(target, true);
+                break;
+            }
+            case ACTION_PREV: {
+                History.back();
+                break;
+            }
+            case ACTION_REFRESH: {
+                History.getCurrent().refresh();
+                break;
+            }
+        }
+    } 
 }
 //#endif
