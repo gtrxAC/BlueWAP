@@ -290,4 +290,45 @@ public class Util {
 
 		return false;
 	}
+
+    public static String removeDuplicateWhitespace(String text) {
+        boolean atWhitespace = false;
+
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
+                if (atWhitespace) {
+                    text = text.substring(0, i) + text.substring(i + 1);
+                } else {
+                    text = text.substring(0, i) + " " + text.substring(i + 1);
+                    atWhitespace = true;
+                }
+            } else {
+                atWhitespace = false;
+            }
+        }
+        return text;
+    }
+
+    public static String trimLeft(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
+                continue;
+            }
+            return text.substring(i);
+        }
+        return "";
+    }
+
+    public static String trimRight(String text) {
+        for (int i = text.length() - 1; i >= 0; i--) {
+            char c = text.charAt(i);
+            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
+                continue;
+            }
+            return text.substring(0, i + 1);
+        }
+        return "";
+    }
 }

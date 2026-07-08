@@ -140,7 +140,7 @@ public class WmlParser extends KXmlParser {
         while (true) {
             if (getEventType() == TEXT) {
                 addWarning(CARD_NESTED_TAGS);
-                appendToLastItem(getText().trim());
+                appendToLastItem(getText());
             }
             if (getEventType() == START_TAG) {
                 if ("p".equals(getName())) {
@@ -198,7 +198,7 @@ public class WmlParser extends KXmlParser {
 
         while (true) {
             if (getEventType() == TEXT) {
-                appendToLastItem(getText().trim());
+                appendToLastItem(getText());
             }
             if (getEventType() == START_TAG) {
                 if ("a".equals(getName())) {
@@ -262,7 +262,7 @@ public class WmlParser extends KXmlParser {
 
         while (true) {
             if (getEventType() == TEXT) {
-                appendToLastItem(getText().trim());
+                appendToLastItem(getText());
             }
             else if (getEventType() == START_TAG) {
                 if (isFormattingTag()) {
@@ -533,7 +533,7 @@ public class WmlParser extends KXmlParser {
             if (getEventType() == TEXT) {
                 addWarning(TABLE_NESTED_TAGS);
                 if (!isLineBegin) appendToLastItem(", ");
-                appendToLastItem(getText().trim());
+                appendToLastItem(getText());
             }
             else if (getEventType() == START_TAG) {
                 if ("tr".equals(getName())) {
@@ -579,7 +579,7 @@ public class WmlParser extends KXmlParser {
 
         while (true) {
             if (getEventType() == TEXT) {
-                appendToLastItem(getText().trim());
+                appendToLastItem(getText());
             }
             else if (getEventType() == START_TAG) {
                 if (isFormattingTag()) {
@@ -641,11 +641,12 @@ public class WmlParser extends KXmlParser {
     }
 
     private void appendToLastItem(String text) {
+        text = Util.removeDuplicateWhitespace(text);
         if (
             lastItemTerminated || output.items.size() == 0 ||
             !(getLastItem() instanceof StringItem) || getLastItem() instanceof WmlAnchorItem
         ) {
-            output.addItem(new StringItem(text));
+            output.addItem(new StringItem(Util.trimLeft(text)));
             lastItemTerminated = false;
         } else {
             ((StringItem) getLastItem()).text += text;
