@@ -143,13 +143,13 @@ public class WmlParser extends KXmlParser {
                     parseP();
                 }
                 else if ("do".equals(getName())) {
-                    notSupported();
+                    parseDo();
                 }
                 else if ("onevent".equals(getName())) {
-                    notSupported();
+                    parseOnevent();
                 }
                 else if ("timer".equals(getName())) {
-                    notSupported();
+                    parseTimer();
                 }
                 else {
                     addWarning(CARD_NESTED_TAGS);
@@ -207,7 +207,7 @@ public class WmlParser extends KXmlParser {
                     lastItemTerminated = true;
                 }
                 else if ("do".equals(getName())) {
-                    notSupported();
+                    parseDo();
                 }
                 else if ("fieldset".equals(getName())) {
                     lastItemTerminated = true;
@@ -221,10 +221,10 @@ public class WmlParser extends KXmlParser {
                     parseImg();
                 }
                 else if ("select".equals(getName())) {
-                    notSupported();
+                    parseSelect();
                 }
                 else if ("table".equals(getName())) {
-                    notSupported();
+                    parseTable();
                 }
                 else if (isFormattingTag()) {
                     parseFormattingTag();
@@ -277,7 +277,7 @@ public class WmlParser extends KXmlParser {
                     parseImg();
                 }
                 else if ("table".equals(getName())) {
-                    notSupported();
+                    parseTable();
                 }
                 else {
                     addWarning(FORMATTING_TAG_NESTED_TAGS);
@@ -428,6 +428,187 @@ public class WmlParser extends KXmlParser {
         return "Image";
     }
 
+    public void parseDo() throws Exception {
+        final String DO_NESTED_TAGS =
+            "expected <go>, <noop>, <prev>, <refresh>, or </do>";
+
+        String text = getAttributeValue(null, "label");
+        if (text == null) text = "";
+
+        String type = getAttributeValue(null, "type");
+        if (type == null) {
+            addWarning("<do> does not have 'type' attribute");
+            type = "unknown";
+        }
+
+        int action = WmlAnchorItem.ACTION_NONE;
+        String target = null;
+
+        nextItem();
+
+        while (true) {
+            if (getEventType() == TEXT) {
+                addWarning(DO_NESTED_TAGS);
+                text += getText().trim();
+            }
+            else if (getEventType() == START_TAG) {
+                if ("go".equals(getName())) {
+                    action = WmlAnchorItem.ACTION_GO;
+                    target = getAttributeValue(null, "href");
+                    if (target == null) {
+                        addWarning("<go> does not have 'href' attribute");
+                        target = "#";
+                    }
+                    skipSubTree();  // variables and postfield not supported
+                }
+                else if ("noop".equals(getName())) {
+                    action = WmlAnchorItem.ACTION_NONE;
+                    skipSubTree();
+                }
+                else if ("prev".equals(getName())) {
+                    action = WmlAnchorItem.ACTION_PREV;
+                    skipSubTree();  // variables and postfield not supported
+                }
+                else if ("refresh".equals(getName())) {
+                    action = WmlAnchorItem.ACTION_REFRESH;
+                    skipSubTree();  // variables and postfield not supported
+                }
+                else {
+                    addWarning(DO_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if ("do".equals(getName())) {
+                    break;
+                } else {
+                    addWarning(DO_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_DOCUMENT) {
+                addWarning("unexpected end of file");
+                break;
+            }
+            nextItem();
+        }
+
+        if (text.length() == 0) {
+            text = type.substring(0, 1).toUpperCase() + type.substring(1);
+        }
+
+        output.addItem(new WmlAnchorItem(text.trim(), action, target));
+    }
+
+    public void parseOnevent() throws Exception {
+        addWarning("<onevent> is not supported yet");
+        skipSubTree();
+    }
+
+    public void parseTimer() throws Exception {
+        addWarning("<timer> is not supported yet");
+        skipSubTree();
+    }
+
+    public void parseSelect() throws Exception {
+        addWarning("<timer> is not supported yet");
+        appendLine("[SELECT]");
+        skipSubTree();
+    }
+
+    public void parseTable() throws Exception {
+        final String TABLE_NESTED_TAGS = "expected text, <tr>, <td>, or </table>";
+
+        lastItemTerminated = true;
+        boolean isLineBegin = true;
+        
+        nextItem();
+
+        while (true) {
+            if (getEventType() == TEXT) {
+                addWarning(TABLE_NESTED_TAGS);
+                if (!isLineBegin) appendToLastItem(", ");
+                appendToLastItem(getText().trim());
+            }
+            else if (getEventType() == START_TAG) {
+                if ("tr".equals(getName())) {
+                    isLineBegin = true;
+                    lastItemTerminated = true;
+                }
+                else if ("td".equals(getName())) {
+                    if (!isLineBegin) appendToLastItem(", ");
+                    parseTd();
+                    isLineBegin = false;
+                }
+                else {
+                    addWarning(TABLE_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if ("table".equals(getName())) {
+                    break;
+                }
+                else if ("tr".equals(getName())) {
+                    // ignore
+                }
+                else if ("td".equals(getName())) {
+                    // ignore
+                }
+                else {
+                    addWarning(TABLE_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_DOCUMENT) {
+                addWarning("unexpected end of file");
+                break;
+            }
+            nextItem();
+        }
+    }
+
+    public void parseTd() throws Exception {
+        final String TD_NESTED_TAGS =
+            "expected text, formatting tag, <a>, <anchor>, <br>, <img>, or </td>";
+
+        nextItem();
+
+        while (true) {
+            if (getEventType() == TEXT) {
+                appendToLastItem(getText().trim());
+            }
+            else if (getEventType() == START_TAG) {
+                if (isFormattingTag()) {
+                    parseFormattingTag();
+                }
+                else if ("a".equals(getName())) {
+                    parseA();
+                }
+                else if ("anchor".equals(getName())) {
+                    parseAnchor();
+                }
+                else if ("br".equals(getName())) {
+                    lastItemTerminated = true;
+                }
+                else if ("img".equals(getName())) {
+                    parseImg();
+                }
+                else {
+                    addWarning(TD_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if ("td".equals(getName())) {
+                    break;
+                } else {
+                    addWarning(TD_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_DOCUMENT) {
+                addWarning("unexpected end of file");
+                break;
+            }
+            nextItem();
+        }
+    }
+
     // _________________________________________________________________________
     //
     //  Parsing utilities
@@ -469,13 +650,7 @@ public class WmlParser extends KXmlParser {
         lastItemTerminated = true;
     }
 
-    private void notSupported() throws Exception {
-        appendLine("[" + getName().toUpperCase() + "]");
-        skipSubTree();
-    }
-
     private void nextItem() throws Exception {
-        System.out.println(getPositionDescription());
         next();
         ignoreWhitespace();
     }
