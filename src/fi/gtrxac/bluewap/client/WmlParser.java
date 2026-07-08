@@ -208,7 +208,8 @@ public class WmlParser extends KXmlParser {
     }
 
     private void parseP(String tagName) throws Exception {
-        final String P_NESTED_TAGS = "expected text, <a>, <anchor>, <b>, <big>, <br>, <do>, <em>, <fieldset>, <i>, <input>, <img>, <select>, <small>, <strong>, <table>, <u>, or </p>";
+        final String P_NESTED_TAGS =
+            "expected text, <a>, <anchor>, <b>, <big>, <br>, <do>, <em>, <fieldset>, <i>, <input>, <img>, <select>, <small>, <strong>, <table>, <u>, or </" + tagName + ">";
 
         nextItem();
 
@@ -359,7 +360,7 @@ public class WmlParser extends KXmlParser {
                     text += "\n";
                 }
                 else if ("img".equals(getName())) {
-                    parseImg();
+                    text += parseImgInAnchor();
                 }
                 else {
                     addWarning(A_NESTED_TAGS);
@@ -409,7 +410,7 @@ public class WmlParser extends KXmlParser {
                     skipSubTree();  // variables and postfield not supported
                 }
                 else if ("img".equals(getName())) {
-                    parseImg();
+                    text += parseImgInAnchor();
                 }
                 else if ("prev".equals(getName())) {
                     action = WmlAnchorItem.ACTION_PREV;
@@ -444,6 +445,12 @@ public class WmlParser extends KXmlParser {
             text = "Link";
         }
         output.addItem(new WmlAnchorItem(text.trim(), action, target));
+    }
+
+    public String parseImgInAnchor() throws Exception {
+        String result = getImgAltText();
+        skipSubTree();
+        return result;
     }
 
     public void parseImg() throws Exception {
@@ -554,25 +561,22 @@ public class WmlParser extends KXmlParser {
         final String TABLE_NESTED_TAGS = "expected text, <tr>, <td>, or </table>";
 
         lastItemTerminated = true;
-        boolean isLineBegin = true;
         
         nextItem();
 
         while (true) {
             if (getEventType() == TEXT) {
                 addWarning(TABLE_NESTED_TAGS);
-                if (!isLineBegin) appendToLastItem(", ");
-                appendToLastItem(getText());
+                appendLine(getText());
             }
             else if (getEventType() == START_TAG) {
                 if ("tr".equals(getName())) {
-                    isLineBegin = true;
-                    lastItemTerminated = true;
+                    output.addItem(new SpacerItem());
                 }
-                else if ("td".equals(getName())) {
-                    if (!isLineBegin) appendToLastItem(", ");
-                    parseTd();
-                    isLineBegin = false;
+                else if ("td".equals(getName()) || (isHtml && "th".equals(getName()))) {
+                    lastItemTerminated = true;
+                    parseTd(getName());
+                    lastItemTerminated = true;
                 }
                 else {
                     addWarning(TABLE_NESTED_TAGS);
@@ -580,12 +584,13 @@ public class WmlParser extends KXmlParser {
             }
             else if (getEventType() == END_TAG) {
                 if ("table".equals(getName())) {
+                    output.addItem(new SpacerItem());
                     break;
                 }
                 else if ("tr".equals(getName())) {
                     // ignore
                 }
-                else if ("td".equals(getName())) {
+                else if ("td".equals(getName()) || (isHtml && "th".equals(getName()))) {
                     // ignore
                 }
                 else {
@@ -600,9 +605,9 @@ public class WmlParser extends KXmlParser {
         }
     }
 
-    public void parseTd() throws Exception {
+    public void parseTd(String tagName) throws Exception {
         final String TD_NESTED_TAGS =
-            "expected text, formatting tag, <a>, <anchor>, <br>, <img>, or </td>";
+            "expected text, formatting tag, <a>, <anchor>, <br>, <img>, or </" + tagName + ">";
 
         nextItem();
 
@@ -631,7 +636,7 @@ public class WmlParser extends KXmlParser {
                 }
             }
             else if (getEventType() == END_TAG) {
-                if ("td".equals(getName())) {
+                if (tagName.equals(getName())) {
                     break;
                 } else {
                     addWarning(TD_NESTED_TAGS);
