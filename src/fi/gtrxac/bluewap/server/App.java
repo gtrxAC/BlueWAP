@@ -29,7 +29,15 @@ public class App extends AppBase implements BluetoothServerListener {
             server.start();
             LogScreen.log("BlueWAP server started");
             LogScreen.log("Device name: " + server.getLocalName());
-            LogScreen.log("Device address: " + server.getLocalAddress());
+
+            String addr = server.getLocalAddress();
+
+            if (addr.equals("(unknown)")) {
+                LogScreen.log("If the client device does not show device names when searching, find the BT address of this device to identify it from the list.");
+                LogScreen.log("(e.g. on Android: Settings -> About phone -> Status information)");
+            } else {
+                LogScreen.log("Device address: " + addr);
+            }
         }
         catch (Exception e) {
             bluetoothError(e);

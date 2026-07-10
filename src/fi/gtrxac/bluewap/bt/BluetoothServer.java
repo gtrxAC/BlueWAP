@@ -84,7 +84,9 @@ public class BluetoothServer implements Runnable {
     public String getLocalAddress() {
         try {
             setupLocalDevice();
-            return localDevice.getBluetoothAddress();
+            String addr = localDevice.getBluetoothAddress();
+            if (addr.equals("020000000000")) return "(unknown)";
+            return addr;
         }
         catch (IOException e) {
             return "(unknown)";
