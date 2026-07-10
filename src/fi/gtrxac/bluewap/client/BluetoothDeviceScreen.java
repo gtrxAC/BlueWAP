@@ -2,21 +2,22 @@
 package fi.gtrxac.bluewap.client;
 
 import fi.gtrxac.bluewap.*;
+import fi.gtrxac.bluewap.bt.*;
 import fi.gtrxac.bluewap.ui.*;
 import java.util.Vector;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
+import javax.bluetooth.*;
 
-public class BluetoothDeviceScreen extends ListScreen implements BluetoothListener, CommandListener {
+public class BluetoothDeviceScreen extends ListScreen implements BluetoothClientListener, CommandListener {
     private static final int CMD_BACK = 0;
     private static final int CMD_SELECT = 1;
 
     private ButtonItem searchButton = new ButtonItem("Search devices");
-    private Vector deviceNames = new Vector();
-    private Vector deviceUrls = new Vector();
+    private Vector devices = new Vector();
     private Vector deviceItems = new Vector();
-    private Bluetooth bluetooth;
+    private BluetoothClient client;
 
     public BluetoothDeviceScreen() {
         super(2, 2);
@@ -40,53 +41,68 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothListen
             searchDevices();
         }
         else {
-            for (int j = 0; j < deviceItems.size(); j++) {
-                if (deviceItems.elementAt(j) == i) {
-                    BluetoothHTTP.selectedConnectionUrl = (String) deviceUrls.elementAt(j);
-                    App.popScreen();
-                    break;
-                }
-            }
+            addItem(new StringItem("Connecting..."));
+
+            int idx = deviceItems.indexOf(i);
+            RemoteDevice dev = (RemoteDevice) devices.elementAt(idx);
+            initClient();
+            client.connect(dev);
         }
     }
 
+    private void initClient() {
+        if (client != null) return;
+        client = new BluetoothClient(Config.BLUETOOTH_UUID, Config.BLUETOOTH_SERVICE, this);
+    }
+
     private void clearAndRefresh() {
-        deviceNames.removeAllElements();
-        deviceUrls.removeAllElements();
+        devices.removeAllElements();
         deviceItems.removeAllElements();
         removeAllItems();
         addItem(searchButton);
     }
 
     private void searchDevices() {
+        initClient();
+        if (client.isSearching()) return;
+
         clearAndRefresh();
         addItem(new StringItem("Searching..."));
-
-        bluetooth = new Bluetooth(Config.BLUETOOTH_UUID, Config.BLUETOOTH_SERVICE, this);
-        bluetooth.search();
+        client.search();
     }
 
-    public void btSearchCompleted(String[] names, String[] urls) {
-        clearAndRefresh();
+    public void bluetoothDeviceFound(String name, RemoteDevice device, DeviceClass cod) {
+        if (devices.size() == 0) {
+            clearAndRefresh();
+        }
+        devices.addElement(device);
+        ButtonItem item = new ButtonItem(name);
+        deviceItems.addElement(item);
+        addItem(item);
+    }
 
-        if (names.length == 0) {
+    public void bluetoothSearchCompleted() {
+        if (devices.size() == 0) {
+            clearAndRefresh();
             addItem(new StringItem("No devices found. Make sure the server device is set to visible, then try again."));
-            return;
-        }
-        for (int i = 0; i < names.length; i++) {
-            if (names[i] != null && names[i].length() > 0) {
-                deviceNames.addElement(names[i]);
-                deviceUrls.addElement(urls[i]);
-                ButtonItem deviceItem = new ButtonItem(names[i]);
-                deviceItems.addElement(deviceItem);
-                addItem(deviceItem);
-            }
+        } else {
+            addItem(new StringItem("Search completed."));
         }
     }
 
-    public void btError(Exception e) {
+    public void bluetoothSearchError(Exception e) {
         e.printStackTrace();
-        clearAndRefresh();
+        addItem(new StringItem("An error occurred:"));
+        addItem(new StringItem(e.toString()));
+    }
+
+    public void bluetoothConnected(String url) {
+        BluetoothHTTP.selectedConnectionUrl = url;
+        App.popScreen();
+    }
+
+    public void bluetoothConnectError(Exception e) {
+        e.printStackTrace();
         addItem(new StringItem("An error occurred:"));
         addItem(new StringItem(e.toString()));
     }

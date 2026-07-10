@@ -15,7 +15,7 @@ public class MenuScreen extends ListScreen implements CommandListener {
     public static final int CMD_BACK = 0;
     public static final int CMD_SELECT = 1;
 
-    public static final boolean supportsBluetooth = Util.checkClass("javax.bluetooth.UUID");
+    public static final boolean supportsBluetooth = Util.checkClass("javax.bluetooth.RemoteDevice");
 
     String url = History.getCurrent().url.toString(false);
     TextFieldItem urlField = new TextFieldItem("Address", url, 2000, 0);

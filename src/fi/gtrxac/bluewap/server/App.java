@@ -2,6 +2,7 @@
 package fi.gtrxac.bluewap.server;
 
 import fi.gtrxac.bluewap.*;
+import fi.gtrxac.bluewap.bt.*;
 import fi.gtrxac.bluewap.ui.*;
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.Display;
@@ -9,11 +10,11 @@ import javax.microedition.io.*;
 import java.io.*;
 import java.util.*;
 
-public class App extends AppBase implements BluetoothListener {
-    private Bluetooth bluetooth;
+public class App extends AppBase implements BluetoothServerListener {
+    private BluetoothServer server;
     public static Vector connections = new Vector();
 
-    public static final boolean supportsBluetooth = Util.checkClass("javax.bluetooth.UUID");
+    public static final boolean supportsBluetooth = Util.checkClass("javax.bluetooth.RemoteDevice");
 
     public void init() {
         pushScreen(LogScreen.instance);
@@ -22,24 +23,25 @@ public class App extends AppBase implements BluetoothListener {
             LogScreen.log("This device does not support Java Bluetooth API (JSR-82). BlueWAP Server cannot run.");
             return;
         }
-        bluetooth = new Bluetooth(Config.BLUETOOTH_UUID, Config.BLUETOOTH_SERVICE, this);
-        bluetooth.listen();
-        LogScreen.log("BlueWAP server started");
-        LogScreen.log("Device name: " + bluetooth.localName);
+        server = new BluetoothServer(Config.BLUETOOTH_UUID, Config.BLUETOOTH_SERVICE, this);
+
+        try {
+            server.start();
+            LogScreen.log("BlueWAP server started");
+            LogScreen.log("Device name: " + server.getLocalName());
+            LogScreen.log("Device address: " + server.getLocalAddress());
+        }
+        catch (Exception e) {
+            bluetoothError(e);
+        }
     }
 
-    public void btSearchCompleted(String[] deviceNames, String[] deviceURLs) {
-
-    }
-
-    public void btError(Exception e) {
+    public void bluetoothError(Exception e) {
+        e.printStackTrace();
         LogScreen.log(e.toString());
     }
 
-    /**
-     * Called from a separate thread
-     */
-    public void btConnected(StreamConnection conn) {
+    public void bluetoothConnected(StreamConnection conn) {
         LogScreen.log("Device connected");
 
         BluetoothConnection bc = new BluetoothConnection(conn);

@@ -78,6 +78,19 @@ public class BluetoothServer implements Runnable {
         return localName;
     }
 
+    /**
+     * Gets the current device's Bluetooth MAC address.
+     */
+    public String getLocalAddress() {
+        try {
+            setupLocalDevice();
+            return localDevice.getBluetoothAddress();
+        }
+        catch (IOException e) {
+            return "(unknown)";
+        }
+    }
+
     private static void setupLocalDevice() throws IOException {
         if (localDevice != null) return;
         localDevice = LocalDevice.getLocalDevice();
@@ -95,8 +108,9 @@ public class BluetoothServer implements Runnable {
         }
 
         try {
-            Long.parseLong(uuid.substring(0, 16), 16);
-            Long.parseLong(uuid.substring(16), 16);
+            Long.parseLong(uuid.substring(0, 10), 16);
+            Long.parseLong(uuid.substring(10, 20), 16);
+            Long.parseLong(uuid.substring(20), 16);
         }
         catch (NumberFormatException e) {
             throw new IllegalArgumentException("UUID is not in hex format");

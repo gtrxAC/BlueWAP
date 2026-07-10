@@ -1,6 +1,5 @@
 package fi.gtrxac.bluewap.bt;
 
-import javax.bluetooth.*;
 import java.util.*;
 import javax.microedition.io.*;
 
