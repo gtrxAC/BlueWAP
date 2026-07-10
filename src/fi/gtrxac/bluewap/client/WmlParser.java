@@ -38,6 +38,7 @@ public class WmlParser extends KXmlParser {
         ByteArrayInputStream is = new ByteArrayInputStream(wmlBytes);
         setInput(is, null);
         defineEntityReplacementText("nbsp", " ");
+        defineEntityReplacementText("copy", "©");
     }
 
     public static void displayWml(ListScreen output, String wml, String cardId) {
@@ -174,6 +175,10 @@ public class WmlParser extends KXmlParser {
                 else if ("timer".equals(getName())) {
                     parseTimer();
                 }
+                else if (parseTagInP()) {
+                    // already handled, ignore but warn
+                    addWarning("<" + getName() + "> should be inside <p>");
+                }
                 else {
                     addWarning(CARD_NESTED_TAGS);
                     skipSubTree();
@@ -218,43 +223,8 @@ public class WmlParser extends KXmlParser {
                 appendToLastItem(getText());
             }
             if (getEventType() == START_TAG) {
-                if ("a".equals(getName())) {
-                    parseA();
-                }
-                else if ("anchor".equals(getName())) {
-                    parseAnchor();
-                }
-                else if ("br".equals(getName())) {
-                    lastItemTerminated = true;
-                }
-                else if ("do".equals(getName())) {
-                    parseDo();
-                }
-                else if ("fieldset".equals(getName())) {
-                    lastItemTerminated = true;
-                }
-                else if ("input".equals(getName())) {
-                    // not usable yet
-                    output.addItem(new TextFieldItem("Input text", "not implemented", 2000, 0));
-                    skipSubTree();
-                }
-                else if ("img".equals(getName())) {
-                    parseImg();
-                }
-                else if ("select".equals(getName())) {
-                    parseSelect();
-                }
-                else if ("table".equals(getName())) {
-                    parseTable();
-                }
-                else if (isFormattingTag()) {
-                    parseFormattingTag();
-                }
-                else if (isHtml && ("script".equals(getName()) || "style".equals(getName()))) {
-                    skipSubTree();
-                }
-                else if (isHtml && ",p,div,h1,h2,h3,h4,h5,h6,".indexOf("," + getName() + ",") != -1) {
-                    parseP(getName());
+                if (parseTagInP()) {
+                    // already handled, ignore
                 }
                 else {
                     addWarning(P_NESTED_TAGS);
@@ -274,6 +244,60 @@ public class WmlParser extends KXmlParser {
             nextItem();
         }
         lastItemTerminated = true;
+    }
+
+    private boolean parseTagInP() throws Exception {
+        if ("a".equals(getName())) {
+            parseA();
+            return true;
+        }
+        if ("anchor".equals(getName())) {
+            parseAnchor();
+            return true;
+        }
+        if ("br".equals(getName())) {
+            lastItemTerminated = true;
+            return true;
+        }
+        if ("do".equals(getName())) {
+            parseDo();
+            return true;
+        }
+        if ("fieldset".equals(getName())) {
+            lastItemTerminated = true;
+            return true;
+        }
+        if ("input".equals(getName())) {
+            // not usable yet
+            output.addItem(new TextFieldItem("Input text", "not implemented", 2000, 0));
+            skipSubTree();
+            return true;
+        }
+        if ("img".equals(getName())) {
+            parseImg();
+            return true;
+        }
+        if ("select".equals(getName())) {
+            parseSelect();
+            return true;
+        }
+        if ("table".equals(getName())) {
+            parseTable();
+            return true;
+        }
+        if (isFormattingTag()) {
+            parseFormattingTag();
+            return true;
+        }
+        if (isHtml && ("script".equals(getName()) || "style".equals(getName()))) {
+            skipSubTree();
+            return true;
+        }
+        if (isHtml && ",p,div,h1,h2,h3,h4,h5,h6,".indexOf("," + getName() + ",") != -1) {
+            parseP(getName());
+            return true;
+        }
+        return false;
     }
 
     private void parseFormattingTag() throws Exception {
