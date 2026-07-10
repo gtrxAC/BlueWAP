@@ -454,7 +454,14 @@ public class WmlParser extends KXmlParser {
     }
 
     public void parseImg() throws Exception {
-        output.addItem(new StringItem(getImgAltText()));
+        String src = getAttributeValue(null, "src");
+
+        if (src != null) {
+            output.addItem(new WmlImageItem(src, getImgAltText()));
+        } else {
+            addWarning("<img> tag does not have 'src' attribute");
+            output.addItem(new StringItem(getImgAltText()));
+        }
         skipSubTree();
     }
 
