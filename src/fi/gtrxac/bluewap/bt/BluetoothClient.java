@@ -162,8 +162,18 @@ public class BluetoothClient implements DiscoveryListener, Runnable {
     }
 
 	public synchronized void deviceDiscovered(RemoteDevice device, DeviceClass cod) {
-        if (state != STATE_SEARCHING) return;
-        new DeviceNameFinder(device, cod, listener).start();
+        String name = device.getBluetoothAddress();
+
+        String friendlyName = null;
+        try {
+            friendlyName = device.getFriendlyName(true);
+        }
+        catch (Exception e) {}
+
+        if (friendlyName != null && friendlyName.length() != 0) {
+            name = friendlyName;
+        }
+        listener.bluetoothDeviceFound(name, device, cod);
 	}
 
     public synchronized void inquiryCompleted(int discType) {
@@ -205,40 +215,5 @@ public class BluetoothClient implements DiscoveryListener, Runnable {
             listener.bluetoothConnectError(e);
         }
         state = STATE_IDLE;
-    }
-
-    private class DeviceNameFinder extends Thread {
-        private RemoteDevice device;
-        private DeviceClass cod;
-        private BluetoothClientListener listener;
-        
-        public DeviceNameFinder(RemoteDevice dev, DeviceClass c, BluetoothClientListener l) {
-            device = dev;
-            cod = c;
-            listener = l;
-        }
-
-        public void run() {
-            String name = device.getBluetoothAddress();
-
-            for (int attempt = 0; attempt < 3; attempt++) {
-                String friendlyName = null;
-                try {
-                    Thread.sleep(500);
-                    friendlyName = device.getFriendlyName(true);
-                }
-                catch (Exception e) {}
-
-                if (friendlyName != null) {
-                    if (friendlyName.length() != 0) {
-                        name = friendlyName;
-                    }
-                    break;
-                }
-            }
-            if (state == STATE_SEARCHING) {
-                listener.bluetoothDeviceFound(name, device, cod);
-            }
-        }
     }
 }
