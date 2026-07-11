@@ -43,19 +43,13 @@ public class LogScreen extends ListScreen implements CommandListener {
     private void refresh() {
         removeAllItems();
 
-        StringItem lastItem = null;
-
         for (int i = 0; i < lines.size(); i++) {
             String line = (String) lines.elementAt(i);
             StringItem lineItem = new StringItem(line);
             addItem(lineItem);
-            if (i == lines.size() - 1) {
-                lastItem = lineItem;
-            }
         }
 
-        sizeChanged();  // calculate item heights because they are needed now
-        scroll = Math.max(-itemPadding, lastItem.y + lastItem.height - height);
+        setHighlightedItem(lines.size() - 1);
     }
 
     public void commandAction(Command c, Displayable d) {

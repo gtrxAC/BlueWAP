@@ -184,4 +184,17 @@ public abstract class ListScreen extends Screen {
         selected.itemSelected();
         itemSelected(selected);
     }
+
+    public void setHighlightedItem(Item item) {
+        int index = items.indexOf(item);
+        if (index == -1) return;
+        setHighlightedItem(index);
+    }
+
+    public void setHighlightedItem(int index) {
+        selectedIndex = index;
+        resizeIfNeeded();
+        makeSelectedItemVisible();
+        AppBase.repaint();
+    }
 }

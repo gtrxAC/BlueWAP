@@ -21,7 +21,7 @@ public abstract class Screen implements CommandListener {
         needsResize = true;
     }
 
-    public void prepareAndDraw(Graphics g) {
+    protected void resizeIfNeeded() {
         if (needsResize) {
             width = AppCanvas.instance.getWidth();
             height = AppCanvas.instance.getHeight();
@@ -29,6 +29,10 @@ public abstract class Screen implements CommandListener {
             sizeChanged();
             needsResize = false;
         }
+    }
+
+    public void prepareAndDraw(Graphics g) {
+        resizeIfNeeded();
         draw(g);
     }
 
