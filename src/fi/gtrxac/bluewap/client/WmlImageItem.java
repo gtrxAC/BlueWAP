@@ -1,17 +1,23 @@
 //#ifdef BLUEWAP_CLIENT
 package fi.gtrxac.bluewap.client;
 
-import fi.gtrxac.bluewap.*;
+import com.gtrxac.discord.*;
+import fi.gtrxac.bluewap.URL;
+import fi.gtrxac.bluewap.HTTP;
 import fi.gtrxac.bluewap.ui.*;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.Graphics;
 import java.io.*;
+import java.util.*;
 
 public class WmlImageItem extends StringItem implements Runnable {
     private URL url;
     private Image image;
     private boolean haveRequested;
+
+    private static final int IMAGE_CACHE_SIZE = 10;
+    private static Hashtable imageCache = new Hashtable();
     
     public WmlImageItem(String url, String altText) {
         super(altText);
@@ -43,11 +49,22 @@ public class WmlImageItem extends StringItem implements Runnable {
     }
 
     public void run() {
+        image = getOrFetchImage(url);
+        App.resizeAllScreens();
+    }
+
+    private Image getOrFetchImage(URL url) {
+        String urlStr = url.toString(false);
+
+        CachedImage result = (CachedImage) imageCache.get(urlStr);
+        if (result != null) return result.getImage();
+
         InputStream is = null;
         try {
-            is = HTTP.createRequest(url.toString(false)).getResponseStream();
-            image = parseWbmp(is);
-            App.resizeAllScreens();
+            is = HTTP.createRequest(urlStr).getResponseStream();
+            result = new CachedImage(parseWbmp(is));
+
+            Util.hashtablePutCachedImageWithLimit(imageCache, urlStr, result, IMAGE_CACHE_SIZE);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -55,6 +72,9 @@ public class WmlImageItem extends StringItem implements Runnable {
         finally {
             try { is.close(); } catch (Exception e) {}
         }
+
+        if (result == null) return null;
+        return result.getImage();
     }
 
     private Image parseWbmp(InputStream is) throws Exception {
