@@ -4,16 +4,19 @@ import javax.bluetooth.*;
 import java.util.*;
 import javax.microedition.io.*;
 
-public class BluetoothClient implements DiscoveryListener {
+public class BluetoothClient implements DiscoveryListener, Runnable {
 	private UUID[] uuids;
     private String serviceName;
     private BluetoothClientListener listener;
 
 	private DiscoveryAgent discAgent;
-	private boolean searching;
-	private boolean discoveringServices;
-    private boolean waitingToConnect;
     private RemoteDevice selectedDevice;
+    private int state;
+
+    private static final int STATE_IDLE = 0;
+    private static final int STATE_SEARCHING = 1;
+    private static final int STATE_DISCOVERING_SERVICES = 2;
+    private static final int STATE_WAITING_TO_CONNECT = 3;
 
     /**
      * Create a new Bluetooth manager instance.
@@ -27,10 +30,12 @@ public class BluetoothClient implements DiscoveryListener {
         this.uuids = new UUID[] { new UUID(uuid, false) };
         this.serviceName = serviceName;
         this.listener = listener;
+        this.state = STATE_IDLE;
 	}
 
     /**
      * Get a list of previously known devices returned by the system (e.g. paired devices).
+     * Many devices do not support this feature. If there are no known devices or if the device does not keep track of known devices, an empty array is returned.
      */
     public RemoteDevice[] getKnownDevices() {
         try {
@@ -44,16 +49,50 @@ public class BluetoothClient implements DiscoveryListener {
     }
 
     /**
+     * Automatically find and connect to the first found device that is running the server for this application.
+     * This feature should be used with caution, as the 
+     */
+    public synchronized void autoConnect() {
+        if (state != STATE_IDLE) return;
+
+        try {
+            setupDiscoveryAgent();
+            new Thread(this).start();
+            state = STATE_SEARCHING;
+        }
+        catch (Exception e) {
+            listener.bluetoothSearchError(e);
+        }
+    }
+
+    public void run() {
+        try {
+            String url = discAgent.selectService(
+                uuids[0], ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
+
+            if (url != null) {
+                listener.bluetoothConnected(url);
+            } else {
+                listener.bluetoothSearchError(new Exception("no devices found"));
+            }
+        }
+        catch (Exception e) {
+            listener.bluetoothSearchError(e);
+        }
+        state = STATE_IDLE;
+    }
+
+    /**
      * Start searching for other devices.
      * The bluetoothDeviceFound callback will be run for every device that was found.
      */
-    public void search() {
-        if (searching) return;
+    public synchronized void search() {
+        if (state != STATE_IDLE) return;
 
         try {
             setupDiscoveryAgent();
             discAgent.startInquiry(DiscoveryAgent.GIAC, this);
-            searching = true;
+            state = STATE_SEARCHING;
         }
         catch (Exception e) {
             listener.bluetoothSearchError(e);
@@ -63,25 +102,24 @@ public class BluetoothClient implements DiscoveryListener {
     /**
      * Cancel a running search for other devices.
      */
-	public void stopSearching() {
-		if (!searching) return;
-
+	public synchronized void stopSearching() {
+        if (state != STATE_SEARCHING) return;
 		discAgent.cancelInquiry(this);
-		searching = false;
+		state = STATE_IDLE;
 	}
 
     /**
      * Check if a device search is currently in progress.
      */
-    public boolean isSearching() {
-        return searching;
+    public synchronized boolean isSearching() {
+        return state == STATE_SEARCHING;
     }
 
     /**
      * Check if a device connection is currently being established.
      */
-    public boolean isConnecting() {
-        return waitingToConnect || discoveringServices;
+    public synchronized boolean isConnecting() {
+        return state == STATE_WAITING_TO_CONNECT || state == STATE_DISCOVERING_SERVICES;
     }
 
     /**
@@ -89,13 +127,13 @@ public class BluetoothClient implements DiscoveryListener {
      * The other device must be running a BluetoothServer with the same service name and UUID.
      * When connected, the bluetoothConnected callback is called with an URL which can be used to open a StreamConnection.
      */
-    public void connect(RemoteDevice device) {
+    public synchronized void connect(RemoteDevice device) {
         if (isConnecting()) return;
 
         selectedDevice = device;
 
-        if (searching) {
-            waitingToConnect = true;
+        if (state == STATE_SEARCHING) {
+            state = STATE_WAITING_TO_CONNECT;
             stopSearching();
             // connection happens in inquiryCompleted
         } else {
@@ -103,7 +141,7 @@ public class BluetoothClient implements DiscoveryListener {
         }
     }
 
-    private void setupDiscoveryAgent() throws Exception {
+    private synchronized void setupDiscoveryAgent() throws Exception {
         if (discAgent != null) return;
         LocalDevice local = LocalDevice.getLocalDevice();
 
@@ -113,35 +151,38 @@ public class BluetoothClient implements DiscoveryListener {
         discAgent = local.getDiscoveryAgent();
     }
 
-    private void discoverServices() {
-        waitingToConnect = false;
-        discoveringServices = true;
-
+    private synchronized void discoverServices() {
         try {
-            discAgent.searchServices(null, uuids, selectedDevice, this);   
+            discAgent.searchServices(null, uuids, selectedDevice, this);
+            state = STATE_DISCOVERING_SERVICES;
         }
         catch (Exception e) {
             listener.bluetoothConnectError(e);
         }
     }
 
-	public void deviceDiscovered(RemoteDevice device, DeviceClass cod) {
+	public synchronized void deviceDiscovered(RemoteDevice device, DeviceClass cod) {
+        if (state != STATE_SEARCHING) return;
         new DeviceNameFinder(device, cod, listener).start();
 	}
 
-    public void inquiryCompleted(int discType) {
-        searching = false;
-
-        if (waitingToConnect && discType == INQUIRY_TERMINATED) {
+    public synchronized void inquiryCompleted(int discType) {
+        if (state == STATE_WAITING_TO_CONNECT) {
             discoverServices();
-        } else {
-            listener.bluetoothSearchCompleted();
+        }
+        else if (state == STATE_SEARCHING) {
+            if (discType == INQUIRY_ERROR) {
+                listener.bluetoothSearchError(new Exception("device search failed"));
+            } else {
+                listener.bluetoothSearchCompleted();
+            }
+            state = STATE_IDLE;
         }
     }
 
-    public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
-        discoveringServices = false;
-        
+    public synchronized void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
+        if (state != STATE_DISCOVERING_SERVICES) return;
+
         if (servRecord.length == 0 || servRecord[0] == null) {
             Exception e = new Exception("cannot connect, make sure the app is running on the other device");
             listener.bluetoothConnectError(e);
@@ -149,11 +190,11 @@ public class BluetoothClient implements DiscoveryListener {
         }
         String url = servRecord[0].getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
         listener.bluetoothConnected(url);
+        state = STATE_IDLE;
     }
 
-    public void serviceSearchCompleted(int transID, int respCode) {
-        if (!discoveringServices) return;
-        discoveringServices = false;
+    public synchronized void serviceSearchCompleted(int transID, int respCode) {
+        if (state != STATE_DISCOVERING_SERVICES) return;
 
         if (respCode == SERVICE_SEARCH_DEVICE_NOT_REACHABLE) {
             Exception e = new Exception("device unreachable");
@@ -163,6 +204,7 @@ public class BluetoothClient implements DiscoveryListener {
             Exception e = new Exception("cannot connect, make sure the app is running on the other device (error " + respCode + ")");
             listener.bluetoothConnectError(e);
         }
+        state = STATE_IDLE;
     }
 
     private class DeviceNameFinder extends Thread {
@@ -194,7 +236,9 @@ public class BluetoothClient implements DiscoveryListener {
                     break;
                 }
             }
-            listener.bluetoothDeviceFound(name, device, cod);
+            if (state == STATE_SEARCHING) {
+                listener.bluetoothDeviceFound(name, device, cod);
+            }
         }
     }
 }

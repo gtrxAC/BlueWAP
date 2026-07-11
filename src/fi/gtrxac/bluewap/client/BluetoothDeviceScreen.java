@@ -15,6 +15,7 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
     private static final int CMD_SELECT = 1;
 
     private ButtonItem searchButton = new ButtonItem("Search devices");
+    private ButtonItem autoConnectButton = new ButtonItem("Auto connect");
     private Vector devices = new Vector();
     private Vector deviceItems = new Vector();
     private BluetoothClient client;
@@ -22,6 +23,22 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
     public BluetoothDeviceScreen() {
         super(2, 2);
         addItem(searchButton);
+        addItem(autoConnectButton);
+
+        initClient();
+        RemoteDevice[] devices = client.getKnownDevices();
+
+        for (int i = 0; i < devices.length; i++) {
+            String name = null;
+            try {
+                name = devices[i].getFriendlyName(false);
+            }
+            catch (Exception e) {
+                name = devices[i].getBluetoothAddress();
+            }
+            addDeviceItem(name, devices[i]);
+        }
+
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
         addCommand(new Command("Select", Command.SCREEN, CMD_SELECT));
         setCommandListener(this);
@@ -29,6 +46,9 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
 
     public void commandAction(Command c, Displayable d) {
         if (c.getPriority() == CMD_BACK) {
+            if (client != null) {
+                client.stopSearching();
+            }
             App.popScreen();
         }
         else if (c.getPriority() == CMD_SELECT) {
@@ -38,7 +58,10 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
 
     protected void itemSelected(Item i) {
         if (i == searchButton) {
-            searchDevices();
+            searchDevices(false);
+        }
+        else if (i == autoConnectButton) {
+            searchDevices(true);
         }
         else {
             addItem(new StringItem("Connecting..."));
@@ -60,25 +83,32 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
         deviceItems.removeAllElements();
         removeAllItems();
         addItem(searchButton);
+        addItem(autoConnectButton);
     }
 
-    private void searchDevices() {
+    private void searchDevices(boolean autoConnect) {
         initClient();
         if (client.isSearching()) return;
 
         clearAndRefresh();
         addItem(new StringItem("Searching..."));
-        client.search();
+
+        if (autoConnect) client.autoConnect();
+        else client.search();
+    }
+
+    private void addDeviceItem(String name, RemoteDevice device) {
+        devices.addElement(device);
+        ButtonItem item = new ButtonItem(name);
+        deviceItems.addElement(item);
+        addItem(item);
     }
 
     public void bluetoothDeviceFound(String name, RemoteDevice device, DeviceClass cod) {
         if (devices.size() == 0) {
             clearAndRefresh();
         }
-        devices.addElement(device);
-        ButtonItem item = new ButtonItem(name);
-        deviceItems.addElement(item);
-        addItem(item);
+        addDeviceItem(name, device);
     }
 
     public void bluetoothSearchCompleted() {
