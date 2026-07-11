@@ -61,7 +61,7 @@ public class BluetoothClient implements DiscoveryListener, Runnable {
             state = STATE_SEARCHING;
         }
         catch (Exception e) {
-            listener.bluetoothSearchError(e);
+            handleError(e);
         }
     }
 
@@ -77,7 +77,7 @@ public class BluetoothClient implements DiscoveryListener, Runnable {
             }
         }
         catch (Exception e) {
-            listener.bluetoothSearchError(e);
+            handleError(e);
         }
         state = STATE_IDLE;
     }
@@ -95,7 +95,7 @@ public class BluetoothClient implements DiscoveryListener, Runnable {
             state = STATE_SEARCHING;
         }
         catch (Exception e) {
-            listener.bluetoothSearchError(e);
+            handleError(e);
         }
 	}
 
@@ -140,6 +140,14 @@ public class BluetoothClient implements DiscoveryListener, Runnable {
             discoverServices();
         }
     }
+
+    private void handleError(Exception e) {
+        // Symbian error code
+        if (e.toString().indexOf("-44") != -1) {
+            e = new Exception("Bluetooth is not enabled");
+        }
+        listener.bluetoothSearchError(e);
+    } 
 
     private synchronized void setupDiscoveryAgent() throws Exception {
         if (discAgent != null) return;
