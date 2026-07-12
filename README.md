@@ -13,9 +13,9 @@ BlueWAP currently supports a basic subset of WML (Wireless Markup Language). As 
 ### Working
 * Basic text paragraphs
 * Hyperlinks
+* Images (WBMP only)
 * Input fields (unusable)
 
 ### Not implemented
-* Images
 * Text formatting
 * Input field functionality
