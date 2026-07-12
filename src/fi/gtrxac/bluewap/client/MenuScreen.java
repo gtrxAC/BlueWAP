@@ -8,6 +8,7 @@ import java.util.Vector;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Font;
 import org.kxml2.io.*;
 import org.xmlpull.v1.*;
 
@@ -23,6 +24,7 @@ public class MenuScreen extends ListScreen implements CommandListener {
     RadioButtonItem standardItem;
     RadioButtonItem bluetoothItem;
     private int connectionMode = HTTP.CONNECTION_TYPE;
+    RadioButtonGroup fontSizeGroup;
 
     public MenuScreen() {
         super(2, 2);
@@ -40,6 +42,18 @@ public class MenuScreen extends ListScreen implements CommandListener {
         } else {
             addItem("Connecting via cellular/Wi-Fi. This device does not support Java Bluetooth API.");
         }
+
+        addItem("Font size:");
+        fontSizeGroup = new RadioButtonGroup();
+        addItem(new RadioButtonItem(fontSizeGroup, "Small"));
+        addItem(new RadioButtonItem(fontSizeGroup, "Medium"));
+        addItem(new RadioButtonItem(fontSizeGroup, "Large"));
+
+        int sizeIndex = Settings.fontSize == Font.SIZE_SMALL ? 0 :
+            Settings.fontSize == Font.SIZE_MEDIUM ? 1 : 2;
+
+        fontSizeGroup.setTickedIndex(sizeIndex);
+
         addItem("History:");
 
         for (int i = History.menuUrls.size() - 1; i >= 0; i--) {
@@ -55,6 +69,11 @@ public class MenuScreen extends ListScreen implements CommandListener {
     public void commandAction(Command c, Displayable d) {
         switch (c.getPriority()) {
             case CMD_BACK: {
+                int[] fontSizes = { Font.SIZE_SMALL, Font.SIZE_MEDIUM, Font.SIZE_LARGE };
+                Settings.fontSize = fontSizes[fontSizeGroup.getTickedIndex()];
+                Settings.save();
+                Fonts.loadFonts(Settings.fontSize);
+
                 App.popScreen();
                 break;
             }

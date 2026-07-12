@@ -10,18 +10,19 @@ import javax.microedition.lcdui.Graphics;
 public class StringItem extends Item {
     public String text;
 
+    private Font definedFont;
     private Font font;
     private String[] textLines;
 
     public StringItem(String text) {
-        this(text, Fonts.plain);
+        this(text, null);
         textLines = new String[] { text };
     }
 
     public StringItem(String text, Font font) {
         super(false);
         this.text = text;
-        this.font = font;
+        this.definedFont = font;
     }
 
     public void draw(Graphics g, int width, boolean selected) {
@@ -38,6 +39,10 @@ public class StringItem extends Item {
     }
 
     public void sizeChanged(int width) {
+        // Allow font size to change if font was not defined in constructor
+        font = definedFont;
+        if (font == null) font = Fonts.plain;
+
         textLines = Util.wordWrap(text, width, font);
         height = font.getHeight()*textLines.length;
     }
