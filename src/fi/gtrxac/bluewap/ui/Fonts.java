@@ -22,8 +22,4 @@ public class Fonts {
 
         AppBase.resizeAllScreens();
     }
-
-    static {
-        loadFonts(Font.SIZE_MEDIUM);
-    }
 }

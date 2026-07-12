@@ -23,6 +23,7 @@ public abstract class AppBase extends MIDlet {
         if (started) return;
         started = true;
         disp = Display.getDisplay(this);
+        Fonts.loadFonts(Font.SIZE_SMALL);
 
         init();
 

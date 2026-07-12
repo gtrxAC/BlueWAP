@@ -2,6 +2,7 @@ package fi.gtrxac.bluewap;
 
 import javax.microedition.io.*;
 import javax.microedition.lcdui.Font;
+import javax.microedition.rms.*;
 import java.io.*;
 import java.util.*;
 
@@ -331,4 +332,23 @@ public class Util {
         }
         return "";
     }
+
+	public static void setOrAddRecord(RecordStore rms, int index, String data) throws Exception {
+		setOrAddRecord(rms, index, stringToBytes(data));
+	}
+
+	public static void setOrAddRecord(RecordStore rms, int index, byte[] data) throws Exception {
+		if (rms.getNumRecords() >= index) {
+			rms.setRecord(index, data, 0, data.length);
+		} else {
+			rms.addRecord(data, 0, data.length);
+		}
+	}
+
+	public static void closeRecordStore(RecordStore rms) {
+		try {
+			rms.closeRecordStore();
+		}
+		catch (Exception e) {}
+	}
 }

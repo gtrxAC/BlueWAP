@@ -39,7 +39,10 @@ public class MenuScreen extends ListScreen implements CommandListener {
         } else {
             addItem(new StringItem("Connecting via cellular/Wi-Fi. This device does not support Java Bluetooth API."));
         }
-
+            RadioButtonGroup g = new RadioButtonGroup();
+            addItem(new StringItem("Connection mode:"));
+            addItem(new RadioButtonItem(g, "Standard"));
+            addItem(new RadioButtonItem(g, "Bluetoth tete test test test fhsdjkfhjkdsfh dsjfhjkdshf jhjfs djfhk"));
         addItem(new StringItem("History:"));
 
         for (int i = History.menuUrls.size() - 1; i >= 0; i--) {
