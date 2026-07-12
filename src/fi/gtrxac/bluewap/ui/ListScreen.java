@@ -10,13 +10,8 @@ import java.util.*;
 public abstract class ListScreen extends Screen {
     public int scroll;
     public int selectedIndex;
-
     public int itemPadding;
-
     public Vector items;
-
-    // private static final int MARGIN = Item.smallFont.getHeight()/7;  // left and right margin of the screen
-    // private static final int PADDING = Item.smallFont.getHeight()/8;  // space between items
     
     public ListScreen(int margin, int itemPadding) {
         super(margin);
@@ -65,7 +60,7 @@ public abstract class ListScreen extends Screen {
 
                 if (selected.height > height && selected.y + selected.height - scroll > height) {
                     // Item is taller than screen -> scroll down by two lines
-                    scroll += Item.smallFont.getHeight()*2;
+                    scroll += Fonts.height*2;
                 } else {
                     int newSel = getNextSelectableItem();
                     if (newSel != -1) selectedIndex = newSel;
@@ -77,7 +72,7 @@ public abstract class ListScreen extends Screen {
 
                 if (selected.height > height && selected.y - scroll < 0) {
                     // Item is taller than screen -> scroll up by two lines
-                    scroll -= Item.smallFont.getHeight()*2;
+                    scroll -= Fonts.height*2;
                 } else {
                     int newSel = getPreviousSelectableItem();
                     if (newSel != -1) selectedIndex = newSel;

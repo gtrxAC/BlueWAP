@@ -7,7 +7,6 @@ import javax.microedition.lcdui.Graphics;
  * Represents any item that can be shown in a ListScreen.
  */
 public abstract class Item {
-    // int width;
     public int height;
     public int y;
     private boolean selectable;
@@ -15,17 +14,6 @@ public abstract class Item {
     protected Item(boolean selectable) {
         this.selectable = selectable;
     }
-
-    public static final Font smallFont =
-        Font.getFont(Font.FACE_PROPORTIONAL, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-    public static final Font smallBoldFont =
-        Font.getFont(Font.FACE_PROPORTIONAL, Font.STYLE_BOLD, Font.SIZE_SMALL);
-    public static final Font smallUnderlinedFont =
-        Font.getFont(Font.FACE_PROPORTIONAL, Font.STYLE_UNDERLINED, Font.SIZE_SMALL);
-
-    public static final int SMALL_FONT_HEIGHT = smallFont.getHeight();
-    public static final int SMALL_BOLD_FONT_HEIGHT = smallBoldFont.getHeight();
-    public static final int SMALL_UNDERLINED_FONT_HEIGHT = smallUnderlinedFont.getHeight();
 
      /**
      * Draw this item at the current y position. The width of the screen is provided as a parameter.

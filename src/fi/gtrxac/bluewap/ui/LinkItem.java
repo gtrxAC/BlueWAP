@@ -29,11 +29,11 @@ public class LinkItem extends Item {
 
         if (textLines == null) sizeChanged(width);
         
-        g.setFont(smallUnderlinedFont);
+        g.setFont(Fonts.underlined);
         int y = 0;
         for (int i = 0; i < textLines.length; i++) {
             g.drawString(textLines[i], 0, y, 0);
-            y += SMALL_UNDERLINED_FONT_HEIGHT;
+            y += Fonts.underlinedHeight;
         }
 
         if (selected) {
@@ -42,13 +42,13 @@ public class LinkItem extends Item {
     }
 
     public void sizeChanged(int width) {
-        textLines = Util.wordWrap(text, width, smallUnderlinedFont);
-        height = SMALL_UNDERLINED_FONT_HEIGHT*textLines.length;
+        textLines = Util.wordWrap(text, width, Fonts.underlined);
+        height = Fonts.underlinedHeight*textLines.length;
 
         maxStringWidth = 0;
 
         for (int i = 0; i < textLines.length; i++) {
-            int stringWidth = smallUnderlinedFont.stringWidth(textLines[i]);
+            int stringWidth = Fonts.underlined.stringWidth(textLines[i]);
 
             if (stringWidth > maxStringWidth) {
                 maxStringWidth = stringWidth;

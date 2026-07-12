@@ -15,6 +15,6 @@ public class SpacerItem extends Item {
     }
 
     public void sizeChanged(int width) {
-        height = Math.max(3, smallFont.getHeight()/4/2*2 + 1);
+        height = Math.max(3, Fonts.height/4/2*2 + 1);
     }
 }

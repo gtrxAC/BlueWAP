@@ -14,7 +14,7 @@ public class StringItem extends Item {
     private String[] textLines;
 
     public StringItem(String text) {
-        this(text, smallFont);
+        this(text, Fonts.plain);
         textLines = new String[] { text };
     }
 

@@ -49,12 +49,12 @@ public class ButtonItem extends Item {
             g.drawRect(0, 0, width - 1, height - 1);
         }
         
-        g.setFont(smallBoldFont);
+        g.setFont(Fonts.bold);
         g.setColor(selected ? selectedTextColor : textColor);
-        g.drawString(text, width/2, (height - smallBoldFont.getHeight())/2, Graphics.HCENTER | Graphics.TOP);
+        g.drawString(text, width/2, (height - Fonts.boldHeight)/2, Graphics.HCENTER | Graphics.TOP);
     }
 
     public void sizeChanged(int width) {
-        height = smallBoldFont.getHeight()*3/2;
+        height = Fonts.boldHeight*3/2;
     }
 }
