@@ -30,10 +30,10 @@ public class RadioButtonItem extends Item {
             g.setColor(0x111111);
         }
 
-        int pad = 0;//Fonts.height/7;
+        int pad = Fonts.height/10;
         g.drawImage(ticked ? tickedImage : untickedImage, pad, pad, 0);
 
-        int strOffset = Fonts.height*5/4;
+        int strOffset = Fonts.height*6/5;
         g.translate(strOffset, 0);
         strItem.draw(g, width - strOffset, false);
         g.translate(-strOffset, 0);
@@ -43,28 +43,49 @@ public class RadioButtonItem extends Item {
         }
     }
 
+    private Image createRadioButtonImage(int size, boolean ticked) {
+        int renderSize = (size*4 + 13)/14*14;
+        int blockSize = renderSize/14;
+
+        Image result = Image.createImage(renderSize, renderSize);
+        Graphics g = result.getGraphics();
+
+        // outline
+        g.setColor(0x9A9A9A);
+        g.fillArc(blockSize, blockSize, blockSize*12, blockSize*12, 0, 360);
+
+        // fill insides
+        g.setColor(0xDDDDDD);
+        g.fillArc(blockSize*2, blockSize*2, blockSize*10, blockSize*10, 0, 360);
+
+        // black dot for ticked button
+        if (ticked) {
+            g.setColor(0x111111);
+            g.fillArc(blockSize*4, blockSize*4, blockSize*6, blockSize*6, 0, 360);
+        }
+        
+        // make transparent
+        int[] rgb = new int[renderSize*renderSize];
+        result.getRGB(rgb, 0, renderSize, 0, 0, renderSize, renderSize);
+        result = null;
+
+        for (int i = 0; i < rgb.length; i++) {
+            if (rgb[i] == 0xFFFFFFFF) rgb[i] = 0x00FFFFFF;
+        }
+
+        result = Image.createRGBImage(rgb, renderSize, renderSize, true);
+
+        return ImageUtils.resize(result, size, size, true, true);
+    }
+
     public void sizeChanged(int width) {
-        int newImageSize = Fonts.height;// - Fonts.height/7*2;
+        int newImageSize = Fonts.height - Fonts.height/10*2;
 
         if (imageSize != newImageSize) {
-            try {
-                untickedImage = null;
-                untickedImage = Image.createImage("/u.png");
-                untickedImage = ImageUtils.resize(untickedImage, newImageSize, newImageSize, true, true);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try {
-                tickedImage = null;
-                tickedImage = Image.createImage("/t.png");
-                tickedImage = ImageUtils.resize(tickedImage, newImageSize, newImageSize, true, true);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-
+            untickedImage = null;
+            tickedImage = null;
+            untickedImage = createRadioButtonImage(newImageSize, false);
+            tickedImage = createRadioButtonImage(newImageSize, true);
             imageSize = newImageSize;
         }
 
