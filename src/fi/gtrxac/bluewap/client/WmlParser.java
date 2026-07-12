@@ -53,8 +53,8 @@ public class WmlParser extends KXmlParser {
             }
             catch (Exception e) {
                 e.printStackTrace();
-                output.addItem(new StringItem("Failed to load page:"));
-                output.addItem(new StringItem(e.toString()));
+                output.addItem("Failed to load page:");
+                output.addItem(e.toString());
             }
 
             try {
@@ -74,7 +74,7 @@ public class WmlParser extends KXmlParser {
         catch (XmlPullParserException e) {
             addWarning("page does not begin with a tag, treating it as raw text");
             output.addItem(MainScreen.systemBrowserButton);
-            output.addItem(new StringItem(wml));
+            output.addItem(wml);
             return;
         }
 
@@ -484,7 +484,7 @@ public class WmlParser extends KXmlParser {
             output.addItem(new WmlImageItem(src, getImgAltText()));
         } else {
             addWarning("<img> tag does not have 'src' attribute");
-            output.addItem(new StringItem(getImgAltText()));
+            output.addItem(getImgAltText());
         }
         skipSubTree();
     }
@@ -711,7 +711,7 @@ public class WmlParser extends KXmlParser {
             lastItemTerminated || output.items.size() == 0 ||
             !(getLastItem() instanceof StringItem) || getLastItem() instanceof WmlAnchorItem
         ) {
-            output.addItem(new StringItem(Util.trimLeft(text)));
+            output.addItem(Util.trimLeft(text));
             lastItemTerminated = false;
         } else {
             ((StringItem) getLastItem()).text += text;
@@ -719,7 +719,7 @@ public class WmlParser extends KXmlParser {
     }
 
     private void appendLine(String text) {
-        output.addItem(new StringItem(text));
+        output.addItem(text);
         lastItemTerminated = true;
     }
 

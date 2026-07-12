@@ -86,7 +86,7 @@ public class MainScreen extends ListScreen implements CommandListener {
                 }
             }
             catch (Exception e) {
-                addItem(new StringItem(e.toString()));
+                addItem(e.toString());
             }
         }
         if (i instanceof WmlAnchorItem) {

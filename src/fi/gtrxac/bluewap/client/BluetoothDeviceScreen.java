@@ -64,7 +64,7 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
             searchDevices(true);
         }
         else {
-            addItem(new StringItem("Connecting..."));
+            addItem("Connecting...");
 
             int idx = deviceItems.indexOf(i);
             RemoteDevice dev = (RemoteDevice) devices.elementAt(idx);
@@ -91,7 +91,7 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
         if (client.isSearching()) return;
 
         clearAndRefresh();
-        addItem(new StringItem("Searching..."));
+        addItem("Searching...");
 
         if (autoConnect) client.autoConnect();
         else client.search();
@@ -114,16 +114,16 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
     public void bluetoothSearchCompleted() {
         if (devices.size() == 0) {
             clearAndRefresh();
-            addItem(new StringItem("No devices found. Make sure the server device is set to visible, then try again."));
+            addItem("No devices found. Make sure the server device is set to visible, then try again.");
         } else {
-            addItem(new StringItem("Search completed."));
+            addItem("Search completed.");
         }
     }
 
     public void bluetoothSearchError(Exception e) {
         e.printStackTrace();
-        addItem(new StringItem("An error occurred:"));
-        addItem(new StringItem(e.toString()));
+        addItem("An error occurred:");
+        addItem(e.toString());
     }
 
     public void bluetoothConnected(String url) {
@@ -133,8 +133,8 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
 
     public void bluetoothConnectError(Exception e) {
         e.printStackTrace();
-        addItem(new StringItem("An error occurred:"));
-        addItem(new StringItem(e.toString()));
+        addItem("An error occurred:");
+        addItem(e.toString());
     }
 }
 //#endif

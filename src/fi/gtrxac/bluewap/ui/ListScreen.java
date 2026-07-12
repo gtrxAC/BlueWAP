@@ -164,6 +164,10 @@ public abstract class ListScreen extends Screen {
         AppBase.repaint();
     }
 
+    public void addItem(String str) {
+        addItem(new StringItem(str));
+    }
+
     public void removeAllItems() {
         selectedIndex = 0;
         scroll = -itemPadding;
