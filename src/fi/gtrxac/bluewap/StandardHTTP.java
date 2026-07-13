@@ -114,6 +114,7 @@ public class StandardHTTP extends HTTP {
 			clientUa += " ";
 		}
 		clientUa += "BlueWAPServer/" + AppBase.instance.getAppProperty("MIDlet-Version");
+		setHeader("User-Agent", clientUa);
 //#endif
 
 		for (int redirs = 0; redirs < 5; redirs++) {
