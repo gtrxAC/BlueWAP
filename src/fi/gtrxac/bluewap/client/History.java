@@ -72,14 +72,18 @@ public class History implements Runnable {
             StringBuffer urlBuf = new StringBuffer();
             urlBuf.append(url);
 
+            boolean hasQuery = (url.indexOf("?") != -1);
+
             for (Enumeration e = postfields.keys(); e.hasMoreElements(); ) {
                 String key = (String) e.nextElement();
                 String value = (String) postfields.get(key);
                 
-                urlBuf.append((url.indexOf("?") != -1) ? "&" : "?")
+                urlBuf.append(hasQuery ? "&" : "?")
                     .append(Util.urlEncode(WmlVariables.parse(key)))
                     .append("=")
                     .append(Util.urlEncode(WmlVariables.parse(value)));
+
+                hasQuery = true;
             }
             url = urlBuf.toString();
         }
