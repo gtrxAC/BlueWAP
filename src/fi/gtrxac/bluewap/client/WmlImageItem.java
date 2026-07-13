@@ -66,8 +66,6 @@ public class WmlImageItem extends StringItem implements Runnable {
         try {
             HTTP h = HTTP.createRequest(urlStr);
             String type = h.getResponseHeader("Content-Type");
-            System.out.println("" + type);
-
             is = h.getResponseStream();
 
             Image img = null;

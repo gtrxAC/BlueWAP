@@ -97,8 +97,6 @@ public class History implements Runnable {
 
             if (isPost) postData = queryBuf.toString();
             else url = queryBuf.toString();
-
-            System.out.println("" + postData);
         }
 
         // if we've gone back in the history, remove all entries after the current one
