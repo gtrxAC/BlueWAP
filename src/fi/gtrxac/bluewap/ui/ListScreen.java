@@ -132,6 +132,8 @@ public abstract class ListScreen extends Screen {
 
     // from discord j2me, modified
     private void makeSelectedItemVisible() {
+        if (items.size() == 0) return;
+
         Item selected = (Item) items.elementAt(selectedIndex);
         int itemPos = selected.y - scroll;
 

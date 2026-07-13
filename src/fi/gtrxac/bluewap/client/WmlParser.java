@@ -22,6 +22,9 @@ public class WmlParser extends KXmlParser {
     public static Vector commands = new Vector(5);
 
     private WmlParser(ListScreen output, String wml, String cardId) throws Exception {
+        // If card name is empty, treat it as null -> always show the first card
+        if ("".equals(cardId)) cardId = null;
+
         this.output = output;
         this.wml = wml.trim();
         this.cardId = cardId;
