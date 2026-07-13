@@ -21,7 +21,7 @@ public class BluetoothHTTP extends HTTP {
 	}
 
 	protected InputStream makeRequest() throws Exception {
-		execute(method, url, headers, data);
+		execute(method, url, requestHeaders, data);
 		if (responseBytes == null) responseBytes = new byte[0];
 
 		return new ByteArrayInputStream(responseBytes);
@@ -38,7 +38,7 @@ public class BluetoothHTTP extends HTTP {
 		dos = null;
 	}
 
-	private void execute(String method, String url, Hashtable headers, byte[] data) throws Exception {
+	private void execute(String method, String url, Hashtable requestHeaders, byte[] data) throws Exception {
 		// No existing connection -> open new connection
 		if (bc == null) {
 			try {
@@ -67,7 +67,7 @@ public class BluetoothHTTP extends HTTP {
 		}
 
 		try {
-			writeRequest(dos, method, url, headers, data);
+			writeRequest(dos, method, url, requestHeaders, data);
 			dos.flush();
 			readResponse(dis);
 		}
@@ -78,31 +78,29 @@ public class BluetoothHTTP extends HTTP {
 		}
 	}
 
-	private void writeRequest(DataOutputStream dos, String method, String url, Hashtable headers, byte[] data) throws IOException {
+	private void writeRequest(DataOutputStream dos, String method, String url, Hashtable requestHeaders, byte[] data) throws IOException {
 		dos.writeByte(BluetoothConnection.PROTOCOL_CURRENT);
 		writeString(dos, method);
 		writeString(dos, url);
 
-		int headerCount = 0;
-		if (headers != null) {
-			headerCount = headers.size();
-		}
-		dos.writeInt(headerCount);
-		if (headers != null) {
-			for (Enumeration e = headers.keys(); e.hasMoreElements(); ) {
+		if (requestHeaders != null) {
+			dos.writeInt(requestHeaders.size());
+
+			for (Enumeration e = requestHeaders.keys(); e.hasMoreElements(); ) {
 				String key = (String) e.nextElement();
-				String value = (String) headers.get(key);
+				String value = (String) requestHeaders.get(key);
 				writeString(dos, key);
 				writeString(dos, value);
 			}
-		}
-
-		if (data == null) {
+		} else {
 			dos.writeInt(0);
 		}
-		else {
+
+		if (data != null) {
 			dos.writeInt(data.length);
 			dos.write(data, 0, data.length);
+		} else {
+			dos.writeInt(0);
 		}
 	}
 
@@ -133,7 +131,7 @@ public class BluetoothHTTP extends HTTP {
 		dis.readFully(body);
 		this.responseCode = responseCode;
 		this.responseBytes = body;
-		this.headers = responseHeaders;
+		this.responseHeaders = responseHeaders;
 	}
 
 	private void writeString(DataOutputStream dos, String value) throws IOException {

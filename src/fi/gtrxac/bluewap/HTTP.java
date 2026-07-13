@@ -28,7 +28,8 @@ public abstract class HTTP {
 	protected String method;
 	protected String url;
 	protected byte[] data;
-	protected Hashtable headers;
+	protected Hashtable requestHeaders;
+	protected Hashtable responseHeaders;
 	protected int responseCode;
 	protected byte[] responseBytes;
 	protected InputStream is;
@@ -37,9 +38,10 @@ public abstract class HTTP {
 	protected HTTP(String method, String url) {
 		this.method = method;
 		this.url = url;
-		this.headers = new Hashtable();
-		headers.put("Accept", DEFAULT_ACCEPT);
-		headers.put("User-Agent", DEFAULT_USER_AGENT);
+		this.requestHeaders = new Hashtable();
+		this.responseHeaders = new Hashtable();
+		requestHeaders.put("Accept", DEFAULT_ACCEPT);
+		requestHeaders.put("User-Agent", DEFAULT_USER_AGENT);
 	}
 
 	public static HTTP createRequest(String method, String url) {
@@ -82,7 +84,7 @@ public abstract class HTTP {
 	 * Set a HTTP request header that will be sent to the server with this request.
 	 */
 	public HTTP setHeader(String key, String value) {
-		headers.put(key, value);
+		requestHeaders.put(key, value);
 		return this;
 	}
 
@@ -93,13 +95,13 @@ public abstract class HTTP {
 		this.data = data;
 
 		if (data != null) {
-			headers.put("Content-Length", String.valueOf(data.length));
+			requestHeaders.put("Content-Length", String.valueOf(data.length));
 		} else {
-			headers.remove("Content-Length");
+			requestHeaders.remove("Content-Length");
 		}
 
-		if (!headers.containsKey("Content-Type")) {
-			headers.put("Content-Type", DEFAULT_CONTENT_TYPE);
+		if (!requestHeaders.containsKey("Content-Type")) {
+			requestHeaders.put("Content-Type", DEFAULT_CONTENT_TYPE);
 		}
 		return this;
 	}
@@ -125,6 +127,14 @@ public abstract class HTTP {
 	public int getResponseCode() throws Exception {
 		checkMakeRequest();
 		return responseCode;
+	}
+
+	/**
+	 * Get the value of a HTTP response header sent by the server.
+	 */
+	public String getResponseHeader(String name) throws Exception {
+		checkMakeRequest();
+		return (String) responseHeaders.get(name);
 	}
 
 	/**

@@ -34,9 +34,9 @@ public class StandardHTTP extends HTTP {
 			throw requestMethodException;
 		}
 
-		for (Enumeration e = headers.keys(); e.hasMoreElements(); ) {
+		for (Enumeration e = requestHeaders.keys(); e.hasMoreElements(); ) {
 			String key = (String) e.nextElement();
-			String value = (String) headers.get(key);
+			String value = (String) requestHeaders.get(key);
 			hc.setRequestProperty(key, value);
 		}
 
@@ -106,7 +106,7 @@ public class StandardHTTP extends HTTP {
 
 	protected InputStream makeRequest() throws Exception {
 //#ifdef BLUEWAP_SERVER
-		String clientUa = (String) headers.get("User-Agent");
+		String clientUa = (String) requestHeaders.get("User-Agent");
 		if (clientUa == null) {
 			clientUa = "";
 		}
@@ -131,5 +131,13 @@ public class StandardHTTP extends HTTP {
 	protected void closeTransport() {
 		try { if (os != null) os.close(); } catch (Exception e) {}
 		try { if (hc != null) hc.close(); } catch (Exception e) {}
+	}
+
+	/**
+	 * Get the value of a HTTP response header sent by the server.
+	 */
+	public String getResponseHeader(String name) throws Exception {
+		checkMakeRequest();
+		return hc.getHeaderField(name);
 	}
 }

@@ -60,16 +60,33 @@ public class WmlImageItem extends StringItem implements Runnable {
 
         InputStream is = null;
         try {
-            is = HTTP.createRequest(urlStr).getResponseStream();
+            HTTP h = HTTP.createRequest(urlStr);
+            String type = h.getResponseHeader("Content-Type");
+            System.out.println("" + type);
 
-            Image img = parseWbmp(is);
+            is = h.getResponseStream();
 
-            int scaleMultiplier = Math.max(1, Fonts.height/16);
+            Image img = null;
+            
+            if ("image/vnd.wap.wbmp".equals(type)) {
+                img = parseWbmp(is);
+            } else {
+                img = Image.createImage(is);
+            }
 
-            if (scaleMultiplier > 1) {
-                int scaleWidth = img.getWidth()*scaleMultiplier;
+            int screenWidth = AppCanvas.instance.getWidth();
+            int scaleMultiplier = Math.max(1, Math.min(Fonts.height/16, screenWidth/128));
+            int scaleWidth = img.getWidth()*scaleMultiplier;
+
+            // Upscale if possible (for high-res screens)
+            if (scaleMultiplier > 1 && scaleWidth < screenWidth) {
                 int scaleHeight = img.getHeight()*scaleMultiplier;
                 img = ImageUtils.resize(img, scaleWidth, scaleHeight, false, false);
+            }
+            // Downscale if image too big for the screen
+            else if (img.getWidth() > screenWidth) {
+                int scaleRatio = screenWidth*1000/img.getWidth();
+                img = ImageUtils.resize(img, screenWidth, img.getHeight()*scaleRatio/1000, true, true);
             }
 
             result = new CachedImage(img);
