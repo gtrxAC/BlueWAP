@@ -530,7 +530,7 @@ public class WmlParser extends KXmlParser {
             output.addItem(new WmlImageItem(src, getImgAltText()));
         } else {
             addWarning("<img> tag does not have 'src' attribute");
-            output.addItem(getImgAltText());
+            output.addItem(new WmlStringItem(getImgAltText()));
         }
         skipSubTree();
     }
@@ -809,7 +809,7 @@ public class WmlParser extends KXmlParser {
             lastItemTerminated || output.items.size() == 0 ||
             !(getLastItem() instanceof StringItem) || getLastItem() instanceof WmlAnchorItem
         ) {
-            output.addItem(Util.trimLeft(text));
+            output.addItem(new WmlStringItem(Util.trimLeft(text)));
             lastItemTerminated = false;
         } else {
             ((StringItem) getLastItem()).text += text;
@@ -817,7 +817,7 @@ public class WmlParser extends KXmlParser {
     }
 
     private void appendLine(String text) {
-        output.addItem(text);
+        output.addItem(new WmlStringItem(text));
         lastItemTerminated = true;
     }
 

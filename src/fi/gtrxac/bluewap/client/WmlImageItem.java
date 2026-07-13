@@ -17,6 +17,7 @@ public class WmlImageItem extends StringItem implements Runnable {
     private URL url;
     private Image image;
     private boolean haveRequested;
+    private String altText;
 
     private static final int IMAGE_CACHE_SIZE = 10;
     private static Hashtable imageCache = new Hashtable();
@@ -28,6 +29,8 @@ public class WmlImageItem extends StringItem implements Runnable {
             this.url = new URL(url, History.getCurrent().url);
         }
         catch (Exception e) {}
+
+        this.altText = altText;
     }
 
     public void draw(Graphics g, int width, boolean selected) {
@@ -43,6 +46,7 @@ public class WmlImageItem extends StringItem implements Runnable {
     }
 
     public void sizeChanged(int width) {
+        text = WmlVariables.parse(altText);
         super.sizeChanged(width);
         if (image != null) height = image.getHeight();
     }

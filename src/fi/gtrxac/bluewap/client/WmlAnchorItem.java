@@ -10,6 +10,7 @@ public class WmlAnchorItem extends LinkItem {
     public static final int ACTION_PREV = 2;
     public static final int ACTION_REFRESH = 3;
 
+    String rawText;
     int action;
     String target;
     Hashtable postfields;
@@ -17,10 +18,16 @@ public class WmlAnchorItem extends LinkItem {
 
     public WmlAnchorItem(String text, int action, String target, Hashtable postfields, Hashtable setvars) {
         super(text);
+        this.rawText = text;
         this.action = action;
         this.target = target;
         this.postfields = postfields;
         this.setvars = setvars;
+    }
+
+    public void sizeChanged(int width) {
+        text = WmlVariables.parse(rawText);
+        super.sizeChanged(width);
     }
 
     public static void activate(int action, String target, Hashtable postfields, Hashtable setvars) {
@@ -28,7 +35,7 @@ public class WmlAnchorItem extends LinkItem {
 
         switch (action) {
             case ACTION_GO: {
-                History.visit(target, true, postfields);
+                History.visit(WmlVariables.parse(target), true, postfields);
                 break;
             }
             case ACTION_PREV: {
