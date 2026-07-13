@@ -9,12 +9,14 @@ public class WmlCommand extends Command {
     String target;
     Hashtable postfields;
     Hashtable setvars;
+    boolean isPost;
 
-    public WmlCommand(String label, int prio, int action, String target, Hashtable postfields, Hashtable setvars) {
+    public WmlCommand(String label, int prio, int action, String target, Hashtable postfields, Hashtable setvars, boolean isPost) {
         super(label, Command.SCREEN, prio);
         this.action = action;
         this.target = target;
         this.postfields = postfields;
         this.setvars = setvars;
+        this.isPost = isPost;
     }
 }

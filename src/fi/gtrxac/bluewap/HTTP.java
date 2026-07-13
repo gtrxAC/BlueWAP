@@ -8,7 +8,7 @@ import javax.microedition.lcdui.Image;
 
 public abstract class HTTP {
 	private static final String DEFAULT_ACCEPT = "text/vnd.wap.wml, image/vnd.wap.wbmp";
-	private static final String DEFAULT_CONTENT_TYPE = "application/json";
+	private static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
 
 	private static final String DEFAULT_USER_AGENT =
 //#ifdef BLUEWAP_CLIENT

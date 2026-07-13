@@ -15,14 +15,16 @@ public class WmlAnchorItem extends LinkItem {
     String target;
     Hashtable postfields;
     Hashtable setvars;
+    boolean isPost;
 
-    public WmlAnchorItem(String text, int action, String target, Hashtable postfields, Hashtable setvars) {
+    public WmlAnchorItem(String text, int action, String target, Hashtable postfields, Hashtable setvars, boolean isPost) {
         super(text);
         this.rawText = text;
         this.action = action;
         this.target = target;
         this.postfields = postfields;
         this.setvars = setvars;
+        this.isPost = isPost;
     }
 
     public void sizeChanged(int width) {
@@ -30,12 +32,12 @@ public class WmlAnchorItem extends LinkItem {
         super.sizeChanged(width);
     }
 
-    public static void activate(int action, String target, Hashtable postfields, Hashtable setvars) {
+    public static void activate(int action, String target, Hashtable postfields, Hashtable setvars, boolean isPost) {
         executeSetvars(setvars);
 
         switch (action) {
             case ACTION_GO: {
-                History.visit(WmlVariables.parse(target), true, postfields);
+                History.visit(WmlVariables.parse(target), true, postfields, isPost);
                 break;
             }
             case ACTION_PREV: {

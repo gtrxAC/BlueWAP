@@ -10,12 +10,15 @@ public class History implements Runnable {
     public String card;
     public boolean loaded;
     public String contentType;
+    public String postData;
 
     private static Vector list = new Vector();
     public static Vector menuUrls = new Vector();
     private static int currentIndex = -1;
     
-    private History(String url, boolean relative) {
+    private History(String url, boolean relative, String postData) {
+        this.postData = postData;
+
         if (url.equals("warnings://")) {
             try {
                 this.url = new URL(url);
@@ -66,33 +69,43 @@ public class History implements Runnable {
         menuUrls.addElement(url);
     }
 
-    public static synchronized void visit(String url, boolean relative, Hashtable postfields) {
-        // Add postfields as query parameters to url
-        if (postfields != null) {
-            StringBuffer urlBuf = new StringBuffer();
-            urlBuf.append(url);
+    public static synchronized void visit(String url, boolean relative, Hashtable postfields, boolean isPost) {
+        String postData = null;
 
-            boolean hasQuery = (url.indexOf("?") != -1);
+        if (postfields != null && (isPost || postfields.size() >= 1)) {
+            StringBuffer queryBuf = new StringBuffer();
+            
+            if (!isPost) {
+                queryBuf.append(url);
+                queryBuf.append((url.indexOf("?") != -1) ? "&" : "?");
+            }
+
+            boolean isFirst = true;
 
             for (Enumeration e = postfields.keys(); e.hasMoreElements(); ) {
                 String key = (String) e.nextElement();
                 String value = (String) postfields.get(key);
                 
-                urlBuf.append(hasQuery ? "&" : "?")
-                    .append(Util.urlEncode(WmlVariables.parse(key)))
+                if (!isFirst) queryBuf.append("&");
+                
+                queryBuf.append(Util.urlEncode(WmlVariables.parse(key)))
                     .append("=")
                     .append(Util.urlEncode(WmlVariables.parse(value)));
 
-                hasQuery = true;
+                isFirst = false;
             }
-            url = urlBuf.toString();
+
+            if (isPost) postData = queryBuf.toString();
+            else url = queryBuf.toString();
+
+            System.out.println("" + postData);
         }
 
         // if we've gone back in the history, remove all entries after the current one
         if (currentIndex < list.size() - 1) {
             list.setSize(currentIndex + 1);
         }
-        History hist = new History(url, relative);
+        History hist = new History(url, relative, postData);
         list.addElement(hist);
         addMenuUrlsItem(hist.url.toString(false));
         forward();
@@ -155,7 +168,8 @@ public class History implements Runnable {
     }
 
     private String fetchHttp(String url) throws Exception {
-        HTTP http = HTTP.createRequest(url);
+        HTTP http = HTTP.createRequest((postData != null) ? "POST" : "GET", url);
+        if (postData != null) http.setData(postData);
         contentType = http.getResponseHeader("Content-Type");
         String result = http.getResponseString();
         this.url = new URL(http.getUrl());

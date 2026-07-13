@@ -399,7 +399,7 @@ public class WmlParser extends KXmlParser {
             }
             nextItem();
         }
-        addAnchorItem(text, WmlAnchorItem.ACTION_GO, target, null, null);
+        addAnchorItem(text, WmlAnchorItem.ACTION_GO, target, null, null, false);
     }
 
     public void parseAnchor() throws Exception {
@@ -411,6 +411,7 @@ public class WmlParser extends KXmlParser {
         String target = null;
         Hashtable postfields = new Hashtable(3);
         Hashtable setvars = new Hashtable(3);
+        boolean isPost = false;
 
         nextItem();
 
@@ -425,6 +426,7 @@ public class WmlParser extends KXmlParser {
                 else if ("go".equals(getName())) {
                     action = WmlAnchorItem.ACTION_GO;
                     target = getGoTarget();
+                    isPost = getGoMethod();
                     text += parseGo(postfields, setvars);
                 }
                 else if ("img".equals(getName())) {
@@ -455,7 +457,7 @@ public class WmlParser extends KXmlParser {
             }
             nextItem();
         }
-        addAnchorItem(text, action, target, postfields, setvars);
+        addAnchorItem(text, action, target, postfields, setvars, isPost);
     }
 
     public String parseGo(Hashtable postfieldsOutput, Hashtable setvarsOutput) throws Exception {
@@ -510,11 +512,11 @@ public class WmlParser extends KXmlParser {
         skipSubTree();
     }
 
-    public void addAnchorItem(String text, int action, String target, Hashtable postfields, Hashtable setvars) {
+    public void addAnchorItem(String text, int action, String target, Hashtable postfields, Hashtable setvars, boolean isPost) {
         if (text == null || text.trim().length() == 0) {
             text = "Link";
         }
-        output.addItem(new WmlAnchorItem(text.trim(), action, target, postfields, setvars));
+        output.addItem(new WmlAnchorItem(text.trim(), action, target, postfields, setvars, isPost));
     }
 
     public String parseImgInAnchor() throws Exception {
@@ -573,6 +575,7 @@ public class WmlParser extends KXmlParser {
         String target = null;
         Hashtable postfields = new Hashtable(3);
         Hashtable setvars = new Hashtable(3);
+        boolean isPost = false;
 
         nextItem();
 
@@ -585,6 +588,7 @@ public class WmlParser extends KXmlParser {
                 if ("go".equals(getName())) {
                     action = WmlAnchorItem.ACTION_GO;
                     target = getGoTarget();
+                    isPost = getGoMethod();
                     text += parseGo(postfields, setvars);
                 }
                 else if ("noop".equals(getName())) {
@@ -622,7 +626,7 @@ public class WmlParser extends KXmlParser {
         }
         
         int prio = commands.size() + 100;
-        WmlCommand cmd = new WmlCommand(text, prio, action, target, postfields, setvars);
+        WmlCommand cmd = new WmlCommand(text, prio, action, target, postfields, setvars, isPost);
         commands.addElement(cmd);
         output.addCommand(cmd);
     }
@@ -633,6 +637,16 @@ public class WmlParser extends KXmlParser {
         
         addWarning("<go> does not have 'href' attribute");
         return "#";
+    }
+
+    public boolean getGoMethod() {
+        String method = getAttributeValue(null, "method");
+        if (method == null) return false;
+        if (method.equals("post")) return true;
+        if (method.equals("get")) return false;
+
+        addWarning("<go> method should be 'get' or 'post'");
+        return false;
     }
 
     public String parsePrevOrRefresh(Hashtable setvarsOutput) throws Exception {
