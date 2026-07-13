@@ -70,7 +70,11 @@ public class RadioButtonItem extends Item {
         result = null;
 
         for (int i = 0; i < rgb.length; i++) {
-            if (rgb[i] == 0xFFFFFFFF) rgb[i] = 0x00FFFFFF;
+            // Make every unrendered (white) pixel transparent (0 alpha).
+            // Using the same color as the button's outline to avoid ugly outlines
+            if (rgb[i] == 0xFFFFFFFF) {
+                rgb[i] = 0x009A9A9A;
+            }
         }
 
         result = Image.createRGBImage(rgb, renderSize, renderSize, true);
