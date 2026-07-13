@@ -5,6 +5,8 @@ import com.gtrxac.discord.*;
 import fi.gtrxac.bluewap.URL;
 import fi.gtrxac.bluewap.HTTP;
 import fi.gtrxac.bluewap.ui.*;
+import tube42.lib.imagelib.ImageUtils;
+
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.Graphics;
@@ -41,11 +43,8 @@ public class WmlImageItem extends StringItem implements Runnable {
     }
 
     public void sizeChanged(int width) {
-        if (image != null) {
-            height = image.getHeight();
-            return;
-        }
         super.sizeChanged(width);
+        if (image != null) height = image.getHeight();
     }
 
     public void run() {
@@ -62,8 +61,18 @@ public class WmlImageItem extends StringItem implements Runnable {
         InputStream is = null;
         try {
             is = HTTP.createRequest(urlStr).getResponseStream();
-            result = new CachedImage(parseWbmp(is));
 
+            Image img = parseWbmp(is);
+
+            int scaleMultiplier = Math.max(1, Fonts.height/16);
+
+            if (scaleMultiplier > 1) {
+                int scaleWidth = img.getWidth()*scaleMultiplier;
+                int scaleHeight = img.getHeight()*scaleMultiplier;
+                img = ImageUtils.resize(img, scaleWidth, scaleHeight, false, false);
+            }
+
+            result = new CachedImage(img);
             Util.hashtablePutCachedImageWithLimit(imageCache, urlStr, result, IMAGE_CACHE_SIZE);
         }
         catch (Exception e) {

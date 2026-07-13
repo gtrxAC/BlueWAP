@@ -16,12 +16,12 @@ public class StringItem extends Item {
 
     public StringItem(String text) {
         this(text, null);
-        textLines = new String[] { text };
     }
 
     public StringItem(String text, Font font) {
         super(false);
         this.text = text;
+        this.textLines = new String[] { text };
         this.definedFont = font;
     }
 
@@ -30,7 +30,7 @@ public class StringItem extends Item {
         g.setColor(0x111111);
         int y = 0;
 
-        if (textLines == null) sizeChanged(width);
+        if (font == null) sizeChanged(width);
 
         for (int i = 0; i < textLines.length; i++) {
             g.drawString(textLines[i], 0, y, 0);
