@@ -11,7 +11,7 @@ public class App extends AppBase {
     public void init() {
         Fonts.loadFonts(Settings.fontSize);
         pushScreen(MainScreen.instance);
-        History.visit("jar://home.wml", false);
+        History.visit("jar://home.wml", false, null);
     }
 }
 //#endif

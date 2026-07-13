@@ -66,7 +66,24 @@ public class History implements Runnable {
         menuUrls.addElement(url);
     }
 
-    public static synchronized void visit(String url, boolean relative) {
+    public static synchronized void visit(String url, boolean relative, Hashtable postfields) {
+        // Add postfields as query parameters to url
+        if (postfields != null) {
+            StringBuffer urlBuf = new StringBuffer();
+            urlBuf.append(url);
+
+            for (Enumeration e = postfields.keys(); e.hasMoreElements(); ) {
+                String key = (String) e.nextElement();
+                String value = (String) postfields.get(key);
+                
+                urlBuf.append((url.indexOf("?") != -1) ? "&" : "?")
+                    .append(Util.urlEncode(WmlVariables.parse(key)))
+                    .append("=")
+                    .append(Util.urlEncode(WmlVariables.parse(value)));
+            }
+            url = urlBuf.toString();
+        }
+
         // if we've gone back in the history, remove all entries after the current one
         if (currentIndex < list.size() - 1) {
             list.setSize(currentIndex + 1);

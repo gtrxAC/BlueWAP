@@ -106,7 +106,7 @@ public class MenuScreen extends ListScreen implements CommandListener {
             return;
         }
         App.popScreen();
-        History.visit(url, false);
+        History.visit(url, false, null);
     }
 
     private void setConnectionMode(int mode) {

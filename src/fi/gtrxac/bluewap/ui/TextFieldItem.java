@@ -59,6 +59,7 @@ public class TextFieldItem extends Item implements CommandListener {
         if (c.getPriority() == 0) {
             TextBox t = (TextBox) d;
             value = t.getString();
+            valueChanged(value);
         }
         AppBase.disp.setCurrent(AppCanvas.instance);
     }
@@ -69,4 +70,6 @@ public class TextFieldItem extends Item implements CommandListener {
     public String getValue() {
         return value;
     }
+
+    public void valueChanged(String newValue) {}
 }

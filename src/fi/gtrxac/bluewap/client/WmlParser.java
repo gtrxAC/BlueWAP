@@ -3,7 +3,7 @@ package fi.gtrxac.bluewap.client;
 
 import fi.gtrxac.bluewap.*;
 import fi.gtrxac.bluewap.ui.*;
-import java.util.Vector;
+import java.util.*;
 import java.io.*;
 import org.kxml2.io.*;
 import org.xmlpull.v1.*;
@@ -278,9 +278,7 @@ public class WmlParser extends KXmlParser {
             return true;
         }
         if ("input".equals(getName())) {
-            // not usable yet
-            output.addItem(new TextFieldItem("Input text", "not implemented", 2000, 0));
-            skipSubTree();
+            parseInput();
             return true;
         }
         if ("img".equals(getName())) {
@@ -359,18 +357,6 @@ public class WmlParser extends KXmlParser {
             nextItem();
         }
     }
-         
-            // // ignore script and style so they are not shown as text
-            // else if (getEventType() == XmlPullParser.START_TAG && "script".equals(getName())) {
-            //     addWarning("<script> is not supported, you are likely viewing an HTML page");
-            //     skipSubTree();
-            //     next();
-            // }
-            // else if (getEventType() == XmlPullParser.START_TAG && "style".equals(getName())) {
-            //     addWarning("<style> is not supported, you are likely viewing an HTML page");
-            //     skipSubTree();
-            //     next();
-            // }
 
     public void parseA() throws Exception {
         final String A_NESTED_TAGS = "expected text, <img>, <br>, or </a>";
@@ -413,7 +399,7 @@ public class WmlParser extends KXmlParser {
             }
             nextItem();
         }
-        addAnchorItem(text, WmlAnchorItem.ACTION_GO, target);
+        addAnchorItem(text, WmlAnchorItem.ACTION_GO, target, null, null);
     }
 
     public void parseAnchor() throws Exception {
@@ -423,6 +409,8 @@ public class WmlParser extends KXmlParser {
         String text = "";
         int action = WmlAnchorItem.ACTION_NONE;
         String target = null;
+        Hashtable postfields = new Hashtable(3);
+        Hashtable setvars = new Hashtable(3);
 
         nextItem();
 
@@ -436,23 +424,19 @@ public class WmlParser extends KXmlParser {
                 }
                 else if ("go".equals(getName())) {
                     action = WmlAnchorItem.ACTION_GO;
-                    target = getAttributeValue(null, "href");
-                    if (target == null) {
-                        addWarning("<go> does not have 'href' attribute");
-                        target = "#";
-                    }
-                    skipSubTree();  // variables and postfield not supported
+                    target = getGoTarget();
+                    text += parseGo(postfields, setvars);
                 }
                 else if ("img".equals(getName())) {
                     text += parseImgInAnchor();
                 }
                 else if ("prev".equals(getName())) {
                     action = WmlAnchorItem.ACTION_PREV;
-                    skipSubTree();  // variables and postfield not supported
+                    skipSubTree();  // setvar not supported
                 }
                 else if ("refresh".equals(getName())) {
                     action = WmlAnchorItem.ACTION_REFRESH;
-                    skipSubTree();  // variables and postfield not supported
+                    skipSubTree();  // setvar not supported
                 }
                 else {
                     addWarning(ANCHOR_NESTED_TAGS);
@@ -471,14 +455,66 @@ public class WmlParser extends KXmlParser {
             }
             nextItem();
         }
-        addAnchorItem(text, action, target);
+        addAnchorItem(text, action, target, postfields, setvars);
     }
 
-    public void addAnchorItem(String text, int action, String target) {
+    public String parseGo(Hashtable postfieldsOutput, Hashtable setvarsOutput) throws Exception {
+        final String GO_NESTED_TAGS = "expected <postfield>, <setvar>, or </go>";
+
+        String addText = "";
+
+        nextItem();
+
+        while (true) {
+            if (getEventType() == TEXT) {
+                addWarning(GO_NESTED_TAGS);
+                addText += getText().trim();
+            }
+            else if (getEventType() == START_TAG) {
+                if ("postfield".equals(getName())) {
+                    parsePostfieldOrSetvar(postfieldsOutput);
+                }
+                else if ("setvar".equals(getName())) {
+                    parsePostfieldOrSetvar(setvarsOutput);
+                }
+                else {
+                    addWarning(GO_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if ("go".equals(getName())) {
+                    break;
+                } else {
+                    addWarning(GO_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_DOCUMENT) {
+                addWarning("unexpected end of file");
+                break;
+            }
+            nextItem();
+        }
+        return addText;
+    }
+
+    public void parsePostfieldOrSetvar(Hashtable output) throws Exception {
+        String name = getAttributeValue(null, "name");
+        String value = getAttributeValue(null, "value");
+
+        if (name == null) addWarning("<" + getName() + "> does not have 'name' attribute");
+        if (value == null) addWarning("<" + getName() + "> does not have 'value' attribute");
+
+        if (name != null && value != null) {
+            output.put(name, value);
+        }
+        skipSubTree();
+    }
+
+    public void addAnchorItem(String text, int action, String target, Hashtable postfields, Hashtable setvars) {
         if (text == null || text.trim().length() == 0) {
             text = "Link";
         }
-        output.addItem(new WmlAnchorItem(text.trim(), action, target));
+        output.addItem(new WmlAnchorItem(text.trim(), action, target, postfields, setvars));
     }
 
     public String parseImgInAnchor() throws Exception {
@@ -509,6 +545,17 @@ public class WmlParser extends KXmlParser {
         return "Image";
     }
 
+    public void parseInput() throws Exception {
+        String name = getAttributeValue(null, "name");
+        String value = getAttributeValue(null, "value");
+        
+        if (name == null) addWarning("<input> tag does not have 'name' attribute");
+        if (value == null) value = "";
+        
+        output.addItem(new WmlInputItem(name, value));
+        skipSubTree();
+    }
+
     public void parseDo() throws Exception {
         final String DO_NESTED_TAGS =
             "expected <go>, <noop>, <prev>, <refresh>, or </do>";
@@ -524,6 +571,8 @@ public class WmlParser extends KXmlParser {
 
         int action = WmlAnchorItem.ACTION_NONE;
         String target = null;
+        Hashtable postfields = new Hashtable(3);
+        Hashtable setvars = new Hashtable(3);
 
         nextItem();
 
@@ -535,12 +584,8 @@ public class WmlParser extends KXmlParser {
             else if (getEventType() == START_TAG) {
                 if ("go".equals(getName())) {
                     action = WmlAnchorItem.ACTION_GO;
-                    target = getAttributeValue(null, "href");
-                    if (target == null) {
-                        addWarning("<go> does not have 'href' attribute");
-                        target = "#";
-                    }
-                    skipSubTree();  // variables and postfield not supported
+                    target = getGoTarget();
+                    text += parseGo(postfields, setvars);
                 }
                 else if ("noop".equals(getName())) {
                     action = WmlAnchorItem.ACTION_NONE;
@@ -548,11 +593,11 @@ public class WmlParser extends KXmlParser {
                 }
                 else if ("prev".equals(getName())) {
                     action = WmlAnchorItem.ACTION_PREV;
-                    skipSubTree();  // variables and postfield not supported
+                    text += parsePrevOrRefresh(setvars);
                 }
                 else if ("refresh".equals(getName())) {
                     action = WmlAnchorItem.ACTION_REFRESH;
-                    skipSubTree();  // variables and postfield not supported
+                    text += parsePrevOrRefresh(setvars);
                 }
                 else {
                     addWarning(DO_NESTED_TAGS);
@@ -577,9 +622,52 @@ public class WmlParser extends KXmlParser {
         }
         
         int prio = commands.size() + 100;
-        WmlCommand cmd = new WmlCommand(text, prio, action, target);
+        WmlCommand cmd = new WmlCommand(text, prio, action, target, postfields, setvars);
         commands.addElement(cmd);
         output.addCommand(cmd);
+    }
+
+    public String getGoTarget() {
+        String target = getAttributeValue(null, "href");
+        if (target != null) return target;
+        
+        addWarning("<go> does not have 'href' attribute");
+        return "#";
+    }
+
+    public String parsePrevOrRefresh(Hashtable setvarsOutput) throws Exception {
+        final String PREV_REFRESH_NESTED_TAGS = "expected <setvar> or </" + getName() + ">";
+
+        String addText = "";
+
+        nextItem();
+
+        while (true) {
+            if (getEventType() == TEXT) {
+                addWarning(PREV_REFRESH_NESTED_TAGS);
+                addText += getText().trim();
+            }
+            else if (getEventType() == START_TAG) {
+                if ("setvar".equals(getName())) {
+                    parsePostfieldOrSetvar(setvarsOutput);
+                } else {
+                    addWarning(PREV_REFRESH_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if ("go".equals(getName())) {
+                    break;
+                } else {
+                    addWarning(PREV_REFRESH_NESTED_TAGS);
+                }
+            }
+            else if (getEventType() == END_DOCUMENT) {
+                addWarning("unexpected end of file");
+                break;
+            }
+            nextItem();
+        }
+        return addText;
     }
 
     public void parseOnevent() throws Exception {
