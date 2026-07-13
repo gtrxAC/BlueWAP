@@ -12,6 +12,7 @@ public class WmlParser extends KXmlParser {
     private ListScreen output;
     private String wml;
     private String cardId;
+    private String contentType;
     private boolean haveShownCard;
     private boolean lastItemTerminated;
     private boolean isHtml;
@@ -21,13 +22,14 @@ public class WmlParser extends KXmlParser {
 
     public static Vector commands = new Vector(5);
 
-    private WmlParser(ListScreen output, String wml, String cardId) throws Exception {
+    private WmlParser(ListScreen output, String wml, String cardId, String contentType) throws Exception {
         // If card name is empty, treat it as null -> always show the first card
         if ("".equals(cardId)) cardId = null;
 
         this.output = output;
         this.wml = wml.trim();
         this.cardId = cardId;
+        this.contentType = contentType;
         this.haveShownCard = false;
         this.lastItemTerminated = false;
         this.isHtml = false;
@@ -44,13 +46,13 @@ public class WmlParser extends KXmlParser {
         defineEntityReplacementText("copy", "©");
     }
 
-    public static void displayWml(ListScreen output, String wml, String cardId) {
+    public static void displayWml(ListScreen output, String wml, String cardId, String contentType) {
         synchronized (History.getCurrent()) {
             output.removeAllItems();
             WmlParser p = null;
 
             try {
-                p = new WmlParser(output, wml, cardId);
+                p = new WmlParser(output, wml, cardId, contentType);
                 p.setFeature("http://xmlpull.org/v1/doc/relaxedrelaxedrelaxed", true);
                 p.parseWml();
             }
@@ -75,9 +77,14 @@ public class WmlParser extends KXmlParser {
             nextTag();
         }
         catch (XmlPullParserException e) {
-            addWarning("page does not begin with a tag, treating it as raw text");
             output.addItem(MainScreen.systemBrowserButton);
-            output.addItem(wml);
+
+            if (contentType != null && contentType.startsWith("image/")) {
+                output.addItem(new WmlImageItem(History.getCurrent().url.toString(false), ""));
+            } else {
+                addWarning("page does not begin with a tag, treating it as raw text");
+                output.addItem(wml);
+            }
             return;
         }
 

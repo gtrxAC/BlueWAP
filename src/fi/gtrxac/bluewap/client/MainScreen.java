@@ -36,12 +36,12 @@ public class MainScreen extends ListScreen implements CommandListener {
         addCommand(new Command("Warnings", Command.SCREEN, CMD_WARNINGS));
     }
 
-    public void displayWml(String wml, String card) {
+    public void displayWml(String wml, String card, String contentType) {
         for (int i = 0; i < WmlParser.commands.size(); i++) {
             WmlCommand c = (WmlCommand) WmlParser.commands.elementAt(i);
             removeCommand(c);
         }
-        WmlParser.displayWml(instance, wml, card);
+        WmlParser.displayWml(instance, wml, card, contentType);
     }
 
     public void commandAction(Command c, Displayable d) {

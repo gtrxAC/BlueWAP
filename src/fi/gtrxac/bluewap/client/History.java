@@ -9,6 +9,7 @@ public class History implements Runnable {
     public String wml;
     public String card;
     public boolean loaded;
+    public String contentType;
 
     private static Vector list = new Vector();
     public static Vector menuUrls = new Vector();
@@ -102,7 +103,7 @@ public class History implements Runnable {
     private static void screenChanged() {
         History curr = getCurrent();
         String card = (curr.loaded) ? curr.card : null;
-        MainScreen.instance.displayWml(curr.wml, card);
+        MainScreen.instance.displayWml(curr.wml, card, curr.contentType);
     }
 
     public void run() {
@@ -134,6 +135,7 @@ public class History implements Runnable {
 
     private String fetchHttp(String url) throws Exception {
         HTTP http = HTTP.createRequest(url);
+        contentType = http.getResponseHeader("Content-Type");
         String result = http.getResponseString();
         this.url = new URL(http.getUrl());
         return result;
