@@ -131,6 +131,8 @@ public abstract class HTTP {
 
 	/**
 	 * Get the value of a HTTP response header sent by the server.
+	 * Must be called before the other `getResponse*()` methods.
+	 * If the other `getResponse*()` methods are not called for this request, then `close()` must be used.
 	 */
 	public String getResponseHeader(String name) throws Exception {
 		checkMakeRequest();
@@ -152,9 +154,12 @@ public abstract class HTTP {
 	public byte[] getResponseBytes() throws Exception {
 		checkMakeRequest();
 		if (responseBytes != null) {
+			close();
 			return responseBytes;
 		}
-		return Util.readBytes(is, 0, 1024, 2048);
+		byte[] result = Util.readBytes(is, 0, 1024, 2048);
+		close();
+		return result;
 	}
 
 	/**
@@ -168,7 +173,9 @@ public abstract class HTTP {
 	 * Get server response as an image.
 	 */
 	public Image getResponseImage() throws Exception {
-		return Image.createImage(getResponseStream());
+		Image result = Image.createImage(getResponseStream());
+		close();
+		return result;
 	}
 	
 	/**
