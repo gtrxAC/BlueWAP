@@ -39,7 +39,7 @@ public class WmlImageItem extends StringItem implements Runnable {
             return;
         }
         if (!haveRequested && this.url != null) {
-            new Thread(this).run();
+            new Thread(this).start();
             haveRequested = true;
         }
         super.draw(g, width, selected);

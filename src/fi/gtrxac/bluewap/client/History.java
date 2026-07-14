@@ -124,6 +124,7 @@ public class History implements Runnable {
     public void refresh() {
         this.wml = WmlTemplates.LOADING;
         this.loaded = false;
+        screenChanged();
         new Thread(this).start();
     }
 
@@ -134,6 +135,8 @@ public class History implements Runnable {
 
     private static void screenChanged() {
         History curr = getCurrent();
+        if (curr == null) return;
+        
         String card = (curr.loaded) ? curr.card : null;
         MainScreen.instance.displayWml(curr.wml, card, curr.contentType);
     }
