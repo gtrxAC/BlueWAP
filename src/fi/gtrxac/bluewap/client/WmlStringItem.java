@@ -11,7 +11,7 @@ public class WmlStringItem extends StringItem {
     }
     
     public void sizeChanged(int width) {
-        text = WmlVariables.parse(rawText);
+        text = WmlVariables.parse(rawText, false);
         super.sizeChanged(width);
     }
 }

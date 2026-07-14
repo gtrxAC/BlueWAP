@@ -281,6 +281,51 @@ public class Util {
 			|| c == '.'
 			|| c == '~';
 	}
+
+    public static String urlDecode(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c == '+') {
+                bytes.write(32);
+            }
+			else if (c == '%' && i + 2 < value.length()) {
+                int hi = hexDigit(value.charAt(i + 1));
+                int lo = hexDigit(value.charAt(i + 2));
+                if (hi >= 0 && lo >= 0) {
+                    bytes.write((hi << 4) | lo);
+                    i += 2;
+                } else {
+                    bytes.write((byte) c);
+                }
+            } else {
+                bytes.write((byte) c);
+            }
+        }
+
+        try {
+            return new String(bytes.toByteArray(), "UTF-8");
+        } catch (Exception e) {
+            return new String(bytes.toByteArray());
+        }
+    }
+
+    private static int hexDigit(char c) {
+        if (c >= '0' && c <= '9') {
+            return c - '0';
+        }
+        if (c >= 'A' && c <= 'F') {
+            return c - 'A' + 10;
+        }
+        if (c >= 'a' && c <= 'f') {
+            return c - 'a' + 10;
+        }
+        return -1;
+    }
 	
 	public static boolean checkClass(String s) {
 		try {

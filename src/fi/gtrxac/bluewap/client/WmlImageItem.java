@@ -46,7 +46,7 @@ public class WmlImageItem extends StringItem implements Runnable {
     }
 
     public void sizeChanged(int width) {
-        text = WmlVariables.parse(altText);
+        text = WmlVariables.parse(altText, false);
         super.sizeChanged(width);
         if (image != null) height = image.getHeight();
     }

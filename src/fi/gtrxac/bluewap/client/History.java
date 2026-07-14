@@ -88,9 +88,9 @@ public class History implements Runnable {
                 
                 if (!isFirst) queryBuf.append("&");
                 
-                queryBuf.append(Util.urlEncode(WmlVariables.parse(key)))
+                queryBuf.append(Util.urlEncode(WmlVariables.parse(key, false)))
                     .append("=")
-                    .append(Util.urlEncode(WmlVariables.parse(value)));
+                    .append(Util.urlEncode(WmlVariables.parse(value, false)));
 
                 isFirst = false;
             }

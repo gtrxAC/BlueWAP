@@ -28,7 +28,7 @@ public class WmlAnchorItem extends LinkItem {
     }
 
     public void sizeChanged(int width) {
-        text = WmlVariables.parse(rawText);
+        text = WmlVariables.parse(rawText, false);
         super.sizeChanged(width);
     }
 
@@ -37,7 +37,7 @@ public class WmlAnchorItem extends LinkItem {
 
         switch (action) {
             case ACTION_GO: {
-                History.visit(WmlVariables.parse(target), true, postfields, isPost);
+                History.visit(WmlVariables.parse(target, true), true, postfields, isPost);
                 break;
             }
             case ACTION_PREV: {
@@ -58,7 +58,7 @@ public class WmlAnchorItem extends LinkItem {
 			String key = (String) e.nextElement();
 			String value = (String) setvars.get(key);
 			
-            WmlVariables.set(WmlVariables.parse(key), WmlVariables.parse(value));
+            WmlVariables.set(WmlVariables.parse(key, false), WmlVariables.parse(value, false));
 		}
     }
 }
