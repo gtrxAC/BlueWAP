@@ -1,3 +1,4 @@
+//#ifndef NO_BLUETOOTH
 package fi.gtrxac.bluewap.bt;
 
 import javax.bluetooth.*;
@@ -12,3 +13,4 @@ public interface BluetoothClientListener {
     public void bluetoothConnected(String url);
     public void bluetoothConnectError(Exception e);
 }
+//#endif

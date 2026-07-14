@@ -16,14 +16,20 @@ public class MenuScreen extends ListScreen implements CommandListener {
     public static final int CMD_BACK = 0;
     public static final int CMD_SELECT = 1;
 
+//#ifndef NO_BLUETOOTH
     public static final boolean supportsBluetooth = Util.checkClass("javax.bluetooth.RemoteDevice");
+//#endif
 
     String url = History.getCurrent().url.toString(false);
     TextFieldItem urlField = new TextFieldItem("Address", url, 2000, 0);
     ButtonItem goButton = new ButtonItem("Go!");
+
+//#ifndef NO_BLUETOOTH
     RadioButtonItem standardItem;
     RadioButtonItem bluetoothItem;
     private int connectionMode = HTTP.CONNECTION_TYPE;
+//#endif
+
     RadioButtonGroup fontSizeGroup;
 
     public MenuScreen() {
@@ -33,6 +39,7 @@ public class MenuScreen extends ListScreen implements CommandListener {
         addItem(urlField);
         addItem(goButton);
 
+//#ifndef NO_BLUETOOTH
         if (supportsBluetooth) {
             addItem("Connection mode:");
             RadioButtonGroup g = new RadioButtonGroup();
@@ -42,6 +49,7 @@ public class MenuScreen extends ListScreen implements CommandListener {
         } else {
             addItem("Connecting via cellular/Wi-Fi. This device does not support Java Bluetooth API.");
         }
+//#endif
 
         addItem("Font size:");
         fontSizeGroup = new RadioButtonGroup();
@@ -88,6 +96,7 @@ public class MenuScreen extends ListScreen implements CommandListener {
         if (i instanceof LinkItem) {
             visit(((LinkItem) i).text);
         }
+//#ifndef NO_BLUETOOTH
         if (i == standardItem) {
             setConnectionMode(HTTP.CONNECTION_TYPE_STANDARD);
         }
@@ -95,20 +104,24 @@ public class MenuScreen extends ListScreen implements CommandListener {
             setConnectionMode(HTTP.CONNECTION_TYPE_BLUETOOTH);
             App.pushScreen(new BluetoothDeviceScreen());
         }
+//#endif
         else if (i == goButton) {
             visit(urlField.getValue());
         }
     }
 
     private void visit(String url) {
+//#ifndef NO_BLUETOOTH
         if (connectionMode == HTTP.CONNECTION_TYPE_BLUETOOTH && BluetoothHTTP.selectedConnectionUrl == null) {
             App.pushScreen(new BluetoothDeviceScreen());
             return;
         }
+//#endif
         App.popScreen();
         History.visit(url, false, null, false);
     }
 
+//#ifndef NO_BLUETOOTH
     private void setConnectionMode(int mode) {
         connectionMode = mode;
         HTTP.setConnectionType(mode);
@@ -116,5 +129,6 @@ public class MenuScreen extends ListScreen implements CommandListener {
             BluetoothHTTP.selectedConnectionUrl = null;
         }
     }
+//#endif
 }
 //#endif

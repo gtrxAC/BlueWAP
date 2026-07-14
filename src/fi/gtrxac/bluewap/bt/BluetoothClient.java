@@ -1,3 +1,4 @@
+//#ifndef NO_BLUETOOTH
 package fi.gtrxac.bluewap.bt;
 
 import javax.bluetooth.*;
@@ -225,3 +226,4 @@ public class BluetoothClient implements DiscoveryListener, Runnable {
         state = STATE_IDLE;
     }
 }
+//#endif

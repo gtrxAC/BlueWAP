@@ -6,8 +6,14 @@
     "excludes": ["j.png"]
   },
   {
+    "name": "bluewap_client_nobt_debug",
+    "defines": ["BLUEWAP_CLIENT", "DEBUG", "NO_BLUETOOTH"],
+    "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
+    "excludes": ["j.png"]
+  },
+  {
     "name": "bluewap_server_debug",
-    "defines": ["BLUETOOTH_SERVER", "BLUEWAP_SERVER", "DEBUG"],
+    "defines": ["BLUEWAP_SERVER", "DEBUG"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
     "excludes": ["i.png", "15pmm01.wml", "bs0dd.wml", "home.wml", "ultraata.wml"]
   },
@@ -18,8 +24,14 @@
     "excludes": ["j.png"]
   },
   {
+    "name": "bluewap_client_nobt_release",
+    "defines": ["BLUEWAP_CLIENT", "NO_BLUETOOTH"],
+    "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
+    "excludes": ["j.png"]
+  },
+  {
     "name": "bluewap_server_release",
-    "defines": ["BLUETOOTH_SERVER", "BLUEWAP_SERVER"],
+    "defines": ["BLUEWAP_SERVER"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
     "excludes": ["i.png", "15pmm01.wml", "bs0dd.wml", "home.wml", "ultraata.wml"]
   }

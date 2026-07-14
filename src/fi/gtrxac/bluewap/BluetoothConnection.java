@@ -1,3 +1,4 @@
+//#ifndef NO_BLUETOOTH
 package fi.gtrxac.bluewap;
 
 import javax.microedition.io.*;
@@ -27,3 +28,4 @@ public class BluetoothConnection {
         try { conn.close(); } catch (Exception e) {}
     }
 }
+//#endif

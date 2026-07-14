@@ -20,9 +20,11 @@ public abstract class HTTP {
 		AppBase.instance.getAppProperty("MIDlet-Version");
 
 //#ifdef BLUEWAP_CLIENT
+//#ifndef NO_BLUETOOTH
 	public static final int CONNECTION_TYPE_STANDARD = 0;
 	public static final int CONNECTION_TYPE_BLUETOOTH = 1;
 	public static int CONNECTION_TYPE = CONNECTION_TYPE_STANDARD;
+//#endif
 //#endif
 
 	protected String method;
@@ -46,9 +48,11 @@ public abstract class HTTP {
 
 	public static HTTP createRequest(String method, String url) {
 //#ifdef BLUEWAP_CLIENT
+//#ifndef NO_BLUETOOTH
 		if (CONNECTION_TYPE == CONNECTION_TYPE_BLUETOOTH) {
 			return new BluetoothHTTP(method, url);
 		}
+//#endif
 //#endif
 		return new StandardHTTP(method, url);
 	}
@@ -58,11 +62,13 @@ public abstract class HTTP {
 	}
 
 //#ifdef BLUEWAP_CLIENT
+//#ifndef NO_BLUETOOTH
 	public static void setConnectionType(int connectionType) {
 		if (connectionType == CONNECTION_TYPE_STANDARD || connectionType == CONNECTION_TYPE_BLUETOOTH) {
 			CONNECTION_TYPE = connectionType;
 		}
 	}
+//#endif
 //#endif
 
 	protected abstract InputStream makeRequest() throws Exception;

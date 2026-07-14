@@ -1,3 +1,4 @@
+//#ifndef NO_BLUETOOTH
 package fi.gtrxac.bluewap.bt;
 
 import javax.bluetooth.*;
@@ -135,3 +136,4 @@ public class BluetoothServer implements Runnable {
         }
     }
 }
+//#endif

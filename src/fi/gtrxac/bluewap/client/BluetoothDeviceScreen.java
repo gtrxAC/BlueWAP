@@ -1,4 +1,5 @@
 //#ifdef BLUEWAP_CLIENT
+//#ifndef NO_BLUETOOTH
 package fi.gtrxac.bluewap.client;
 
 import fi.gtrxac.bluewap.*;
@@ -137,4 +138,5 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
         addItem(e.toString());
     }
 }
+//#endif
 //#endif

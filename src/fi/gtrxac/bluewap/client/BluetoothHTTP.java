@@ -1,4 +1,5 @@
 //#ifdef BLUEWAP_CLIENT
+//#ifndef NO_BLUETOOTH
 package fi.gtrxac.bluewap.client;
 
 import fi.gtrxac.bluewap.*;
@@ -147,4 +148,5 @@ public class BluetoothHTTP extends HTTP {
 		return dis.readUTF();
 	}
 }
+//#endif
 //#endif
