@@ -2,6 +2,7 @@
 package fi.gtrxac.bluewap.client;
 
 import fi.gtrxac.bluewap.*;
+import fi.gtrxac.bluewap.http.*;
 import java.util.*;
 
 public class History implements Runnable {
@@ -156,16 +157,7 @@ public class History implements Runnable {
 
     private String fetch(URL url) throws Exception {
         String urlStr = url.toString(false);
-
-        if (url.protocol.equals("http") || url.protocol.equals("https")) {
-            return fetchHttp(urlStr);
-        }
-        else if (url.protocol.equals("jar") || url.protocol.equals("file")) {
-            return Util.readFile("/" + url.getPath());
-        }
-        else {
-            throw new Exception("Unsupported protocol '" + url.protocol + "'");
-        }
+        return fetchHttp(urlStr);
     }
 
     private String fetchHttp(String url) throws Exception {

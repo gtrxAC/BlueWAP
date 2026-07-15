@@ -7,7 +7,7 @@
   },
   {
     "name": "bluewap_client_nobt_debug",
-    "defines": ["BLUEWAP_CLIENT", "DEBUG", "NO_BLUETOOTH"],
+    "defines": ["BLUEWAP_CLIENT", "DEBUG", "NO_BLUETOOTH", "NO_HTTP_BLUETOOTH_SUPPORT"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
     "excludes": ["j.png"]
   },
@@ -25,7 +25,7 @@
   },
   {
     "name": "bluewap_client_nobt_release",
-    "defines": ["BLUEWAP_CLIENT", "NO_BLUETOOTH"],
+    "defines": ["BLUEWAP_CLIENT", "NO_BLUETOOTH", "NO_HTTP_BLUETOOTH_SUPPORT"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
     "excludes": ["j.png"]
   },

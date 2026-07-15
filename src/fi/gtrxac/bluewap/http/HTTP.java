@@ -1,5 +1,6 @@
-package fi.gtrxac.bluewap;
+package fi.gtrxac.bluewap.http;
 
+import fi.gtrxac.bluewap.*;
 import fi.gtrxac.bluewap.ui.*;
 import fi.gtrxac.bluewap.client.*;
 import java.io.*;
@@ -7,24 +8,10 @@ import java.util.*;
 import javax.microedition.lcdui.Image;
 
 public abstract class HTTP {
-	private static final String DEFAULT_ACCEPT = "text/vnd.wap.wml, image/vnd.wap.wbmp";
-	private static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=utf-8";
-
-	private static final String DEFAULT_USER_AGENT =
-//#ifdef BLUEWAP_CLIENT
-		"BlueWAP/" +
-//#endif
-//#ifdef BLUEWAP_SERVER
-		"BlueWAPServer/" +
-//#endif
-		AppBase.instance.getAppProperty("MIDlet-Version");
-
-//#ifdef BLUEWAP_CLIENT
-//#ifndef NO_BLUETOOTH
+//#ifndef NO_HTTP_BLUETOOTH_SUPPORT
 	public static final int CONNECTION_TYPE_STANDARD = 0;
 	public static final int CONNECTION_TYPE_BLUETOOTH = 1;
 	public static int CONNECTION_TYPE = CONNECTION_TYPE_STANDARD;
-//#endif
 //#endif
 
 	protected String method;
@@ -42,33 +29,41 @@ public abstract class HTTP {
 		this.url = url;
 		this.requestHeaders = new Hashtable();
 		this.responseHeaders = new Hashtable();
-		requestHeaders.put("Accept", DEFAULT_ACCEPT);
-		requestHeaders.put("User-Agent", DEFAULT_USER_AGENT);
+		requestHeaders.put("Accept", HTTPConfig.DEFAULT_ACCEPT);
+		requestHeaders.put("User-Agent", HTTPConfig.DEFAULT_USER_AGENT);
 	}
 
-	public static HTTP createRequest(String method, String url) {
-//#ifdef BLUEWAP_CLIENT
-//#ifndef NO_BLUETOOTH
+	public static HTTP createRequest(String method, String url) throws Exception {
+		String proto = new URL(url).protocol;
+
+		if (proto.equals("http") || proto.equals("https")) {
+			return createFetchRequest(method, url);
+		}
+		if (proto.equals("file") || proto.equals("jar")) {
+			return new LocalHTTP(url);
+		}
+		throw new Exception("unsupported protocol '" + proto + "'");
+	}
+
+	public static HTTP createRequest(String url) throws Exception {
+		return createRequest("GET", url);
+	}
+
+	private static HTTP createFetchRequest(String method, String url) {
+//#ifndef NO_HTTP_BLUETOOTH_SUPPORT
 		if (CONNECTION_TYPE == CONNECTION_TYPE_BLUETOOTH) {
 			return new BluetoothHTTP(method, url);
 		}
 //#endif
-//#endif
 		return new StandardHTTP(method, url);
 	}
 
-	public static HTTP createRequest(String url) {
-		return createRequest("GET", url);
-	}
-
-//#ifdef BLUEWAP_CLIENT
-//#ifndef NO_BLUETOOTH
+//#ifndef NO_HTTP_BLUETOOTH_SUPPORT
 	public static void setConnectionType(int connectionType) {
 		if (connectionType == CONNECTION_TYPE_STANDARD || connectionType == CONNECTION_TYPE_BLUETOOTH) {
 			CONNECTION_TYPE = connectionType;
 		}
 	}
-//#endif
 //#endif
 
 	protected abstract InputStream makeRequest() throws Exception;
@@ -107,7 +102,7 @@ public abstract class HTTP {
 		}
 
 		if (!requestHeaders.containsKey("Content-Type")) {
-			requestHeaders.put("Content-Type", DEFAULT_CONTENT_TYPE);
+			requestHeaders.put("Content-Type", HTTPConfig.DEFAULT_CONTENT_TYPE);
 		}
 		return this;
 	}
@@ -163,7 +158,7 @@ public abstract class HTTP {
 			close();
 			return responseBytes;
 		}
-		byte[] result = Util.readBytes(is, 0, 1024, 2048);
+		byte[] result = Util.readBytes(is);
 		close();
 		return result;
 	}

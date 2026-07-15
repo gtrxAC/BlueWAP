@@ -2,6 +2,7 @@
 package fi.gtrxac.bluewap.client;
 
 import fi.gtrxac.bluewap.*;
+import fi.gtrxac.bluewap.http.*;
 import fi.gtrxac.bluewap.ui.*;
 import java.io.*;
 import java.util.Vector;

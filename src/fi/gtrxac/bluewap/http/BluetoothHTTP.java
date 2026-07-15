@@ -1,6 +1,5 @@
-//#ifdef BLUEWAP_CLIENT
-//#ifndef NO_BLUETOOTH
-package fi.gtrxac.bluewap.client;
+//#ifndef NO_HTTP_BLUETOOTH_SUPPORT
+package fi.gtrxac.bluewap.http;
 
 import fi.gtrxac.bluewap.*;
 import java.io.*;
@@ -8,8 +7,6 @@ import java.util.*;
 import javax.microedition.io.*;
 
 public class BluetoothHTTP extends HTTP {
-	private static final String BLUETOOTH_SCHEME_PREFIX = "btspp://";
-
 	private static StreamConnection sc;
 	private static BluetoothConnection bc;
 	private static DataInputStream dis;
@@ -148,5 +145,4 @@ public class BluetoothHTTP extends HTTP {
 		return dis.readUTF();
 	}
 }
-//#endif
 //#endif

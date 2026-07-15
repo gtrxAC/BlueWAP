@@ -4,6 +4,7 @@ package fi.gtrxac.bluewap.server;
 import fi.gtrxac.bluewap.*;
 import fi.gtrxac.bluewap.bt.*;
 import fi.gtrxac.bluewap.ui.*;
+import fi.gtrxac.bluewap.http.*;
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.Display;
 import javax.microedition.io.*;

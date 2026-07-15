@@ -3,7 +3,7 @@ package fi.gtrxac.bluewap.client;
 
 import com.gtrxac.discord.*;
 import fi.gtrxac.bluewap.URL;
-import fi.gtrxac.bluewap.HTTP;
+import fi.gtrxac.bluewap.http.*;
 import fi.gtrxac.bluewap.ui.*;
 import tube42.lib.imagelib.ImageUtils;
 
@@ -62,11 +62,12 @@ public class WmlImageItem extends StringItem implements Runnable {
         CachedImage result = (CachedImage) imageCache.get(urlStr);
         if (result != null) return result.getImage();
 
+        HTTP http = null;
         InputStream is = null;
         try {
-            HTTP h = HTTP.createRequest(urlStr);
-            String type = h.getResponseHeader("Content-Type");
-            is = h.getResponseStream();
+            http = HTTP.createRequest(urlStr);
+            String type = http.getResponseHeader("Content-Type");
+            is = http.getResponseStream();
 
             Image img = null;
             
@@ -98,7 +99,7 @@ public class WmlImageItem extends StringItem implements Runnable {
             e.printStackTrace();
         }
         finally {
-            try { is.close(); } catch (Exception e) {}
+            if (http != null) http.close();
         }
 
         if (result == null) return null;
