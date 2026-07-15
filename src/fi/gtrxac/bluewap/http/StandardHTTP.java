@@ -1,5 +1,6 @@
 package fi.gtrxac.bluewap.http;
 
+import com.gtrxac.discord.HTTPQueue;
 import fi.gtrxac.bluewap.*;
 import fi.gtrxac.bluewap.ui.*;
 import java.io.*;
@@ -18,6 +19,7 @@ public class StandardHTTP extends HTTP {
 	}
 //#endif
 
+	private HTTPQueue queueItem;
 	private HttpConnection hc;
 	private OutputStream os;
 
@@ -26,7 +28,9 @@ public class StandardHTTP extends HTTP {
 	}
 
 	private InputStream makeRequestFinal(String finalUrl) throws Exception {
+		queueItem = HTTPQueue.newQueueItem();
 		hc = (HttpConnection) Connector.open(finalUrl);
+		queueItem.hc = hc;
 
 		try {
 			hc.setRequestMethod(method);
@@ -43,11 +47,13 @@ public class StandardHTTP extends HTTP {
 
 		if (data != null) {
 			os = hc.openOutputStream();
+			queueItem.os = os;
 			os.write(data);
 		}
 
 		responseCode = hc.getResponseCode();
 		InputStream result = hc.openInputStream();
+		queueItem.is = result;
 
 //#ifndef NO_HTTP_REDIRECT_SUPPORT
 		if (responseCode >= 300 && responseCode < 400) {
@@ -130,8 +136,7 @@ public class StandardHTTP extends HTTP {
 	}
 
 	protected void closeTransport() {
-		try { if (os != null) os.close(); } catch (Exception e) {}
-		try { if (hc != null) hc.close(); } catch (Exception e) {}
+		queueItem.finished();
 	}
 
 	/**
