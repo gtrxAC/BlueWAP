@@ -10,8 +10,10 @@ import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.TextField;
 import org.kxml2.io.*;
 import org.xmlpull.v1.*;
+import com.gtrxac.discord.HTTPQueue;
 
 public class MenuScreen extends ListScreen implements CommandListener {
     public static final int CMD_BACK = 0;
@@ -32,6 +34,7 @@ public class MenuScreen extends ListScreen implements CommandListener {
 //#endif
 
     RadioButtonGroup fontSizeGroup;
+    TextFieldItem connLimitField = new TextFieldItem("Max. connections", "" + HTTPQueue.maxSlots, 3, TextField.NUMERIC);
 
     public MenuScreen() {
         super(2, 2);
@@ -63,6 +66,9 @@ public class MenuScreen extends ListScreen implements CommandListener {
 
         fontSizeGroup.setTickedIndex(sizeIndex);
 
+        addItem("Max. connections:");
+        addItem(connLimitField);
+
         addItem("History:");
 
         for (int i = History.menuUrls.size() - 1; i >= 0; i--) {
@@ -80,6 +86,8 @@ public class MenuScreen extends ListScreen implements CommandListener {
             case CMD_BACK: {
                 int[] fontSizes = { Font.SIZE_SMALL, Font.SIZE_MEDIUM, Font.SIZE_LARGE };
                 Settings.fontSize = fontSizes[fontSizeGroup.getTickedIndex()];
+                HTTPQueue.maxSlots = Integer.parseInt(connLimitField.getValue());
+                if (HTTPQueue.maxSlots < 1) HTTPQueue.maxSlots = 1;
                 Settings.save();
                 Fonts.loadFonts(Settings.fontSize);
 

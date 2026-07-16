@@ -19,7 +19,7 @@ public class HTTPQueue implements Runnable {
     // private static final int MAX_SLOTS = 8;
 //#endif
 //#endif
-    public static int maxSlots = 1;
+    public static int maxSlots = 4;
 
     private long timestamp;
     public InputStream is;
@@ -45,7 +45,7 @@ public class HTTPQueue implements Runnable {
 
         HTTPQueue result = new HTTPQueue();
         queueItems.addElement(result);
-        System.out.println("Added");
+        // System.out.println("Added");
         return result;
     }
 

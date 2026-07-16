@@ -3,18 +3,20 @@ package fi.gtrxac.bluewap;
 import java.io.*;
 import javax.microedition.io.*;
 import javax.microedition.rms.*;
-
 import javax.microedition.lcdui.*;
+import com.gtrxac.discord.HTTPQueue;
 
 public class Settings {
     public static int fontSize = Font.SIZE_SMALL;
 
     private static void readData(DataInputStream dis) throws Exception {
         fontSize = dis.readUnsignedByte();
+        HTTPQueue.maxSlots = dis.readUnsignedByte();
     }
 
     private static void writeData(DataOutputStream dos) throws Exception {
         dos.writeByte(fontSize);
+        dos.writeByte(HTTPQueue.maxSlots);
     }
 
     static {
@@ -35,6 +37,9 @@ public class Settings {
             readData(dis);
         }
         catch (RecordStoreNotFoundException e) {
+            // ignore
+        }
+        catch (EOFException e) {
             // ignore
         }
         catch (Exception e) {
