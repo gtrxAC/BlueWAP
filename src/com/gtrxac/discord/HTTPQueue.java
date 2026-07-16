@@ -1,5 +1,6 @@
 package com.gtrxac.discord;
 
+import fi.gtrxac.bluewap.Util;
 import java.io.*;
 import java.util.*;
 import javax.microedition.io.*;

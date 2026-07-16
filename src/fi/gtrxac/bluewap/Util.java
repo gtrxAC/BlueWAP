@@ -373,4 +373,14 @@ public class Util {
 		}
 		catch (Exception e) {}
 	}
+
+	public static void sleep(int ms) {
+		try {
+			Thread.sleep(ms);
+		}
+		catch (Exception e) {}
+	}
+
+	public static final boolean isJ2MELoader =
+		"The Android Project".equals(System.getProperty("java.vendor"));
 }

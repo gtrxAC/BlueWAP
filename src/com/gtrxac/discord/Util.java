@@ -34,11 +34,4 @@ public class Util {
 		hashtableCheckLimit(ht, limit);
 		ht.put(key, value);
 	}
-
-	public static void sleep(int ms) {
-		try {
-			Thread.sleep(ms);
-		}
-		catch (Exception e) {}
-	}
 }

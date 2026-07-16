@@ -2,6 +2,7 @@ package fi.gtrxac.bluewap.ui;
 
 import java.util.Vector;
 import javax.microedition.lcdui.*;
+import fi.gtrxac.bluewap.Util;
 
 /**
  * The canvas that shows and handles all screens managed by the UI framework.
@@ -38,13 +39,19 @@ public class AppCanvas extends Canvas {
     void updateCommands() {
         Screen curr = AppBase.getCurrentScreen();
 
-        for (int i = 0; i < canvasCommands.size(); i++) {
-            removeCommand((Command) canvasCommands.elementAt(i));
+        // Remove canvas commands that do not belong to current screen
+        for (int i = 0; i < canvasCommands.size(); ) {
+            Command c = (Command) canvasCommands.elementAt(i);
+            if (curr == null || curr.getCommands().indexOf(c) == -1) {
+                removeCommand(c);
+                canvasCommands.removeElementAt(i);
+                if (Util.isJ2MELoader) Util.sleep(20);
+            }
+            else i++;
         }
-        canvasCommands.removeAllElements();
-        setCommandListener(null);
 
         if (curr == null) {
+            setCommandListener(null);
             return;
         }
 
@@ -54,10 +61,14 @@ public class AppCanvas extends Canvas {
             setCommandListener(curr);
         }
 
+        // Add current screen's commands that are not in canvas
         for (int i = 0; i < curr.getCommands().size(); i++) {
-            Command command = (Command) curr.getCommands().elementAt(i);
-            addCommand(command);
-            canvasCommands.addElement(command);
+            Command c = (Command) curr.getCommands().elementAt(i);
+            if (canvasCommands.indexOf(c) == -1) {
+                addCommand(c);
+                canvasCommands.addElement(c);
+                if (Util.isJ2MELoader) Util.sleep(20);
+            }
         }
     }
 
