@@ -18,19 +18,19 @@
     "excludes": ["i.png", "15pmm01.wml", "bs0dd.wml", "home.wml", "ultraata.wml"]
   },
   {
-    "name": "bluewap_client_release",
+    "name": "bluewap_client",
     "defines": ["BLUEWAP_CLIENT"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
     "excludes": ["j.png"]
   },
   {
-    "name": "bluewap_client_nobt_release",
+    "name": "bluewap_client_nobt",
     "defines": ["BLUEWAP_CLIENT", "NO_BLUETOOTH", "NO_HTTP_BLUETOOTH_SUPPORT"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
     "excludes": ["j.png"]
   },
   {
-    "name": "bluewap_server_release",
+    "name": "bluewap_server",
     "defines": ["BLUEWAP_SERVER"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
     "excludes": ["i.png", "15pmm01.wml", "bs0dd.wml", "home.wml", "ultraata.wml"]
