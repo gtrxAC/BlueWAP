@@ -23,3 +23,4 @@ BlueWAP currently supports most of the basic features of WML (Wireless Markup La
 * `<template>`
 * Events (`onenterforward`/`backward`, timers)
 * Text formatting
+* Most optional attributes (e.g. `localsrc`, `accesskey`)
