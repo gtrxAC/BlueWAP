@@ -2,7 +2,6 @@
 package fi.gtrxac.bluewap.bt;
 
 import javax.bluetooth.*;
-
 import java.io.IOException;
 import java.util.*;
 import javax.microedition.io.*;
@@ -128,7 +127,13 @@ public class BluetoothServer implements Runnable {
         while (running) {
             try {
                 StreamConnection conn = server.acceptAndOpen();
-                if (running) listener.bluetoothConnected(conn);
+                if (running) {
+                    // new thread for handling this connection - so this thread can listen for further connections
+                    new BluetoothServerConnection(listener, conn).start();
+                } else {
+                    // server already closed so connection was not needed - close immediately
+                    conn.close();
+                }
             }
             catch (Exception e) {
                 if (running) listener.bluetoothError(e);

@@ -5,15 +5,18 @@ import fi.gtrxac.bluewap.*;
 import fi.gtrxac.bluewap.bt.*;
 import fi.gtrxac.bluewap.ui.*;
 import fi.gtrxac.bluewap.http.*;
+import javax.bluetooth.*;
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.Display;
 import javax.microedition.io.*;
 import java.io.*;
 import java.util.*;
 
-public class App extends AppBase implements BluetoothServerListener {
+public class App extends AppBase implements BluetoothServerListener, BluetoothHTTPProtocol {
     private BluetoothServer server;
     public static Vector connections = new Vector();
+    public static Vector iStreams = new Vector();
+    public static Vector oStreams = new Vector();
 
     public static final boolean supportsBluetooth = Util.checkClass("javax.bluetooth.RemoteDevice");
 
@@ -50,36 +53,34 @@ public class App extends AppBase implements BluetoothServerListener {
         LogScreen.log(e.toString());
     }
 
-    public void bluetoothConnected(StreamConnection conn) {
-        LogScreen.log("Device connected");
-
-        BluetoothConnection bc = new BluetoothConnection(conn);
-        connections.addElement(bc);
-        DataInputStream input = null;
-        DataOutputStream output = null;
-
+    public void bluetoothConnected(StreamConnection conn, DataInputStream dis, DataOutputStream dos) {
+        String devName = "Device";
         try {
-            bc.open();
-            input = bc.input;
-            output = bc.output;
+            RemoteDevice dev = RemoteDevice.getRemoteDevice(conn);
+            String devFriendlyName = dev.getFriendlyName(true);
+
+            if (devFriendlyName.length() > 0) {
+                devName = devFriendlyName;
+            }
         }
-        catch (Exception e) {
-            // Error with BT connection - close connection
-            bc.close();
-            return;
-        }
+        catch (Exception e) {}
+
+        LogScreen.log(devName + " connected");
+
+        connections.addElement(conn);
+        iStreams.addElement(dis);
+        oStreams.addElement(dos);
         
         while (true) {
             RequestData request = null;
 
             try {
-                request = readRequest(input);
+                request = readRequest(dis);
                 LogScreen.log(request.method + " " + request.url);
             }
             catch (Exception e) {
                 // Error with BT connection - close connection
-                bc.close();
-                return;
+                break;
             }
 
             StandardHTTP http = null;
@@ -113,13 +114,12 @@ public class App extends AppBase implements BluetoothServerListener {
                         WmlTemplates.ERROR_END;
 
                     writeResponse(
-                        output, 500, new Hashtable(), resultUrl,
+                        dos, 500, new Hashtable(), resultUrl,
                         Util.stringToBytes(errorWml), request.version);
                 }
                 catch (Exception ex) {
                     // Error with BT connection while sending error response - close connection
-                    bc.close();
-                    return;
+                    break;
                 }
                 continue;
             }
@@ -129,25 +129,27 @@ public class App extends AppBase implements BluetoothServerListener {
 
             try {
                 writeResponse(
-                    output, respCode, new Hashtable(), resultUrl,
+                    dos, respCode, new Hashtable(), resultUrl,
                     body, request.version);
                     
                 LogScreen.log("Response sent");
             }
             catch (Exception e) {
                 // Error with BT connection - close connection
-                bc.close();
-                return;
+                break;
             }
         }
+
+        LogScreen.log(devName + " disconnected");
+
+        connections.removeElement(conn);
+        iStreams.removeElement(dis);
+        oStreams.removeElement(dos);
     }
 
     private RequestData readRequest(DataInputStream input) throws IOException {
         byte version = input.readByte();
-        if (
-            version < BluetoothConnection.PROTOCOL_BASE ||
-            version > BluetoothConnection.PROTOCOL_CURRENT
-        ) {
+        if (version < PROTOCOL_BASE || version > PROTOCOL_CURRENT) {
             throw new IOException("Unsupported Bluetooth protocol version: " + version);
         }
 
@@ -184,7 +186,7 @@ public class App extends AppBase implements BluetoothServerListener {
             }
         }
 
-        if (version >= BluetoothConnection.PROTOCOL_ADDED_RESULT_URL) {
+        if (version >= PROTOCOL_ADDED_RESULT_URL) {
             writeString(output, resultUrl);
         }
 

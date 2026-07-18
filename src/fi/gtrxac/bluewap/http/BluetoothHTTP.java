@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.*;
 import javax.microedition.io.*;
 
-public class BluetoothHTTP extends HTTP {
+public class BluetoothHTTP extends HTTP implements BluetoothHTTPProtocol {
 	private static StreamConnection sc;
 	private static BluetoothConnection bc;
 	private static DataInputStream dis;
@@ -77,7 +77,7 @@ public class BluetoothHTTP extends HTTP {
 	}
 
 	private void writeRequest(DataOutputStream dos, String method, String url, Hashtable requestHeaders, byte[] data) throws IOException {
-		dos.writeByte(BluetoothConnection.PROTOCOL_CURRENT);
+		dos.writeByte(PROTOCOL_CURRENT);
 		writeString(dos, method);
 		writeString(dos, url);
 
@@ -104,10 +104,7 @@ public class BluetoothHTTP extends HTTP {
 
 	private void readResponse(DataInputStream dis) throws IOException {
 		int version = dis.readByte();
-		if (
-			version < BluetoothConnection.PROTOCOL_BASE ||
-			version > BluetoothConnection.PROTOCOL_CURRENT
-		) {
+		if (version < PROTOCOL_BASE || version > PROTOCOL_CURRENT) {
 			throw new IOException("Unsupported Bluetooth protocol version: " + version);
 		}
 
@@ -120,7 +117,7 @@ public class BluetoothHTTP extends HTTP {
 			responseHeaders.put(key, value);
 		}
 
-		if (version >= BluetoothConnection.PROTOCOL_ADDED_RESULT_URL) {
+		if (version >= PROTOCOL_ADDED_RESULT_URL) {
 			url = readString(dis);
 		}
 
