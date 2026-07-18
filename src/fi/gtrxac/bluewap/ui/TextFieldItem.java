@@ -43,7 +43,7 @@ public class TextFieldItem extends Item implements CommandListener {
         g.drawString(value, x, y, 0);
     }
 
-    public void sizeChanged(int width) {
+    public void recalc(int width) {
         height = Math.max(Fonts.height*4/3, Fonts.height + 6);
     }
 

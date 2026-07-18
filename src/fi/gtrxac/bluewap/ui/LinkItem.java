@@ -27,7 +27,7 @@ public class LinkItem extends Item {
             g.setColor(0x3355CC);
         }
 
-        if (textLines == null) sizeChanged(width);
+        if (textLines == null) recalc(width);
         
         g.setFont(Fonts.underlined);
         int y = 0;
@@ -41,7 +41,7 @@ public class LinkItem extends Item {
         }
     }
 
-    public void sizeChanged(int width) {
+    public void recalc(int width) {
         textLines = Util.wordWrap(text, width, Fonts.underlined);
         height = Fonts.underlinedHeight*textLines.length;
 

@@ -5,10 +5,6 @@ import javax.microedition.io.*;
 import java.io.*;
 
 public class BluetoothConnection {
-	public static final byte PROTOCOL_BASE = 1;
-	public static final byte PROTOCOL_ADDED_RESULT_URL = 2;
-	public static final byte PROTOCOL_CURRENT = 2;
-
     public StreamConnection conn;
     public DataInputStream input;
     public DataOutputStream output;

@@ -14,7 +14,7 @@ public class SpacerItem extends Item {
         g.drawLine(0, height/2, width, height/2);
     }
 
-    public void sizeChanged(int width) {
+    public void recalc(int width) {
         height = Math.max(3, Fonts.height/4/2*2 + 1);
     }
 }

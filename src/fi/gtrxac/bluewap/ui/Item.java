@@ -30,8 +30,11 @@ public abstract class Item {
      * This method should calculate the height of the item and assign a value to the 'height' field.
      * @param width Screen width in pixels
      */
-    public abstract void sizeChanged(int width);
+    public abstract void recalc(int width);
 
+    /**
+     * Called when this item is selected (OK button pressed or selectItem() called when it's highlighted)
+     */
     public void itemSelected() {}
 
     public boolean isSelectable() {

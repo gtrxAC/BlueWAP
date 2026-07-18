@@ -86,12 +86,11 @@ public abstract class AppBase extends MIDlet {
         return (Screen) screens.peek();
     }
 
-    public static void resizeAllScreens() {
+    public static void recalcAllScreens() {
         for (int i = 0; i < screens.size(); i++) {
             Screen s = (Screen) screens.elementAt(i);
-            s.needsResize = true;
+            s.needRecalc();
         }
-        repaint();
     }
 
     public static void repaint() {

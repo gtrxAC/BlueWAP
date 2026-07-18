@@ -82,7 +82,7 @@ public class RadioButtonItem extends Item {
         return ImageUtils.resize(result, size, size, true, true);
     }
 
-    public void sizeChanged(int width) {
+    public void recalc(int width) {
         int newImageSize = Fonts.height - Fonts.height/10*2;
 
         if (imageSize != newImageSize) {
@@ -93,7 +93,7 @@ public class RadioButtonItem extends Item {
             imageSize = newImageSize;
         }
 
-        strItem.sizeChanged(width - Fonts.height*5/4);
+        strItem.recalc(width - Fonts.height*5/4);
         height = strItem.height;
     }
 

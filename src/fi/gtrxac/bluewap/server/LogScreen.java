@@ -18,8 +18,6 @@ public class LogScreen extends ListScreen implements CommandListener {
 
     public static final LogScreen instance = new LogScreen();
 
-    Vector lines = new Vector();
-
     public LogScreen() {
         super(2, 2);
 
@@ -33,23 +31,14 @@ public class LogScreen extends ListScreen implements CommandListener {
     }
 
     private void addLogItem(String item) {
-        lines.addElement(item);
-        while (lines.size() > 50) {
-            lines.removeElementAt(0);
+        addItem(item);
+        while (getItemCount() > 50) {
+            removeItem(0);
         }
-        refresh();
-    }
-
-    private void refresh() {
-        removeAllItems();
-
-        for (int i = 0; i < lines.size(); i++) {
-            String line = (String) lines.elementAt(i);
-            StringItem lineItem = new StringItem(line);
-            addItem(lineItem);
+        // scroll to bottom if we were near the bottom
+        if (highlightedIndex >= getItemCount() - 8) {
+            setHighlightedItem(getItemCount() - 1);
         }
-
-        setHighlightedItem(lines.size() - 1);
     }
 
     public void commandAction(Command c, Displayable d) {

@@ -54,7 +54,7 @@ public class ButtonItem extends Item {
         g.drawString(text, width/2, (height - Fonts.boldHeight)/2, Graphics.HCENTER | Graphics.TOP);
     }
 
-    public void sizeChanged(int width) {
+    public void recalc(int width) {
         height = Fonts.boldHeight*3/2;
     }
 }

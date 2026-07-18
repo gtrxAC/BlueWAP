@@ -20,6 +20,6 @@ public class Fonts {
         boldHeight = bold.getHeight();
         underlinedHeight = underlined.getHeight();
 
-        AppBase.resizeAllScreens();
+        AppBase.recalcAllScreens();
     }
 }

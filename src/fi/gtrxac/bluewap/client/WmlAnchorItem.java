@@ -27,9 +27,9 @@ public class WmlAnchorItem extends LinkItem {
         this.isPost = isPost;
     }
 
-    public void sizeChanged(int width) {
+    public void recalc(int width) {
         text = WmlVariables.parse(rawText, false);
-        super.sizeChanged(width);
+        super.recalc(width);
     }
 
     public static void activate(int action, String target, Hashtable postfields, Hashtable setvars, boolean isPost) {

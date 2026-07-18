@@ -10,8 +10,8 @@ public class WmlStringItem extends StringItem {
         rawText = text;
     }
     
-    public void sizeChanged(int width) {
+    public void recalc(int width) {
         text = WmlVariables.parse(rawText, false);
-        super.sizeChanged(width);
+        super.recalc(width);
     }
 }

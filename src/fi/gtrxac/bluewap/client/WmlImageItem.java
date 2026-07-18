@@ -45,15 +45,15 @@ public class WmlImageItem extends StringItem implements Runnable {
         super.draw(g, width, selected);
     }
 
-    public void sizeChanged(int width) {
+    public void recalc(int width) {
         text = WmlVariables.parse(altText, false);
-        super.sizeChanged(width);
+        super.recalc(width);
         if (image != null) height = image.getHeight();
     }
 
     public void run() {
         image = getOrFetchImage(url);
-        App.resizeAllScreens();
+        App.recalcAllScreens();
     }
 
     private Image getOrFetchImage(URL url) {

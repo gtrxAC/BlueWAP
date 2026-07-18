@@ -21,7 +21,7 @@ public class AppCanvas extends Canvas {
     }
 
     protected void sizeChanged(int w, int h) {
-        AppBase.resizeAllScreens();
+        AppBase.recalcAllScreens();
     }
 
     protected void keyPressed(int keyCode) {
