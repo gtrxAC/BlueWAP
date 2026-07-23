@@ -70,8 +70,6 @@ public class WmlParser extends KXmlParser {
     }
 
     private void parseWml() throws Exception {
-        final String WML_NESTED_TAGS = "expected <card>, <head>, <template>, or </wml>";
-
         // go to the first tag, if fails then the page is not xml
         try {
             nextTag();
@@ -110,7 +108,7 @@ public class WmlParser extends KXmlParser {
 
         while (true) {
             if (getEventType() == TEXT) {
-                addWarning(WML_NESTED_TAGS);
+                warnNotAllowed("wml");
             }
             else if (getEventType() == START_TAG) {
                 if ("card".equals(getName())) {
@@ -130,7 +128,7 @@ public class WmlParser extends KXmlParser {
                     parseP("body");
                 }
                 else {
-                    addWarning(WML_NESTED_TAGS);
+                    warnNotAllowed("wml");
                     skipSubTree();
                 }
             }
@@ -138,7 +136,7 @@ public class WmlParser extends KXmlParser {
                 if ((isHtml ? "html" : "wml").equals(getName())) {
                     break;
                 } else {
-                    addWarning(WML_NESTED_TAGS);
+                    warnNotAllowed("wml");
                 }
             }
             else if (getEventType() == END_DOCUMENT) {
@@ -154,8 +152,6 @@ public class WmlParser extends KXmlParser {
     }
 
     private void parseCard() throws Exception {
-        final String CARD_NESTED_TAGS = "expected <do>, <onevent>, <p>, <timer>, or </card>";
-
         // determine if this card is to be shown (specified card id or first card)
         String thisCardId = getAttributeValue(null, "id");
 
@@ -169,7 +165,7 @@ public class WmlParser extends KXmlParser {
 
         while (true) {
             if (getEventType() == TEXT) {
-                addWarning(CARD_NESTED_TAGS);
+                warnNotAllowed("card");
                 appendToLastItem(getText());
             }
             if (getEventType() == START_TAG) {
@@ -190,7 +186,7 @@ public class WmlParser extends KXmlParser {
                     addWarning("<" + getName() + "> should be inside <p>");
                 }
                 else {
-                    addWarning(CARD_NESTED_TAGS);
+                    warnNotAllowed("card");
                     skipSubTree();
                 }
             }
@@ -198,7 +194,7 @@ public class WmlParser extends KXmlParser {
                 if ("card".equals(getName())) {
                     break;
                 } else {
-                    addWarning(CARD_NESTED_TAGS);
+                    warnNotAllowed("card");
                 }
             }
             else if (getEventType() == END_DOCUMENT) {
@@ -223,9 +219,6 @@ public class WmlParser extends KXmlParser {
     }
 
     private void parseP(String tagName) throws Exception {
-        final String P_NESTED_TAGS =
-            "expected text, <a>, <anchor>, <b>, <big>, <br>, <do>, <em>, <fieldset>, <i>, <input>, <img>, <select>, <small>, <strong>, <table>, <u>, or </" + tagName + ">";
-
         nextItem();
 
         while (true) {
@@ -237,7 +230,7 @@ public class WmlParser extends KXmlParser {
                     // already handled, ignore
                 }
                 else {
-                    addWarning(P_NESTED_TAGS);
+                    warnNotAllowed(tagName);
                 }
             }
             else if (getEventType() == END_TAG) {
@@ -248,7 +241,7 @@ public class WmlParser extends KXmlParser {
                     // ignore
                 }
                 else {
-                    addWarning(P_NESTED_TAGS);
+                    warnNotAllowed(tagName);
                 }
             }
             nextItem();
@@ -309,9 +302,6 @@ public class WmlParser extends KXmlParser {
     }
 
     private void parseFormattingTag() throws Exception {
-        final String FORMATTING_TAG_NESTED_TAGS =
-            "expected text, formatting tag, <a>, <anchor>, <br>, <img>, or <table>";
-
         int depth = 1;
         nextItem();
 
@@ -339,7 +329,7 @@ public class WmlParser extends KXmlParser {
                     parseTable();
                 }
                 else {
-                    addWarning(FORMATTING_TAG_NESTED_TAGS);
+                    warnNotAllowed("formatting tag");
                 }
             }
             else if (getEventType() == END_TAG) {
@@ -347,7 +337,7 @@ public class WmlParser extends KXmlParser {
                     depth--;
                     if (depth == 0) break;
                 } else {
-                    addWarning(FORMATTING_TAG_NESTED_TAGS);
+                    warnNotAllowed("formatting tag");
                 }
             }
             else if (getEventType() == END_DOCUMENT) {
@@ -359,8 +349,6 @@ public class WmlParser extends KXmlParser {
     }
 
     public void parseA() throws Exception {
-        final String A_NESTED_TAGS = "expected text, <img>, <br>, or </a>";
-
         String text = "";
         String target = getAttributeRequired("href");
         if (target == null) target = "#";
@@ -379,14 +367,14 @@ public class WmlParser extends KXmlParser {
                     text += parseImgInAnchor();
                 }
                 else {
-                    addWarning(A_NESTED_TAGS);
+                    warnNotAllowed("a");
                 }
             }
             else if (getEventType() == END_TAG) {
                 if ("a".equals(getName())) {
                     break;
                 } else {
-                    addWarning(A_NESTED_TAGS);
+                    warnNotAllowed("a");
                 }
             }
             else if (getEventType() == END_DOCUMENT) {
@@ -399,9 +387,6 @@ public class WmlParser extends KXmlParser {
     }
 
     public void parseAnchor() throws Exception {
-        final String ANCHOR_NESTED_TAGS =
-            "expected text, <br>, <go>, <img>, <prev>, <refresh>, or </anchor>";
-
         String text = "";
         int action = WmlAnchorItem.ACTION_NONE;
         String target = null;
@@ -437,14 +422,14 @@ public class WmlParser extends KXmlParser {
                     skipSubTree();  // setvar not supported
                 }
                 else {
-                    addWarning(ANCHOR_NESTED_TAGS);
+                    warnNotAllowed("anchor");
                 }
             }
             else if (getEventType() == END_TAG) {
                 if ("anchor".equals(getName())) {
                     break;
                 } else {
-                    addWarning(ANCHOR_NESTED_TAGS);
+                    warnNotAllowed("anchor");
                 }
             }
             else if (getEventType() == END_DOCUMENT) {
@@ -457,15 +442,13 @@ public class WmlParser extends KXmlParser {
     }
 
     public String parseGo(Hashtable postfieldsOutput, Hashtable setvarsOutput) throws Exception {
-        final String GO_NESTED_TAGS = "expected <postfield>, <setvar>, or </go>";
-
         String addText = "";
 
         nextItem();
 
         while (true) {
             if (getEventType() == TEXT) {
-                addWarning(GO_NESTED_TAGS);
+                warnNotAllowed("go");
                 addText += getText().trim();
             }
             else if (getEventType() == START_TAG) {
@@ -476,14 +459,14 @@ public class WmlParser extends KXmlParser {
                     parsePostfieldOrSetvar(setvarsOutput);
                 }
                 else {
-                    addWarning(GO_NESTED_TAGS);
+                    warnNotAllowed("go");
                 }
             }
             else if (getEventType() == END_TAG) {
                 if ("go".equals(getName())) {
                     break;
                 } else {
-                    addWarning(GO_NESTED_TAGS);
+                    warnNotAllowed("go");
                 }
             }
             else if (getEventType() == END_DOCUMENT) {
@@ -550,9 +533,6 @@ public class WmlParser extends KXmlParser {
     }
 
     public void parseDo() throws Exception {
-        final String DO_NESTED_TAGS =
-            "expected <go>, <noop>, <prev>, <refresh>, or </do>";
-
         String text = getAttributeValue(null, "label");
         if (text == null) text = "";
 
@@ -569,7 +549,7 @@ public class WmlParser extends KXmlParser {
 
         while (true) {
             if (getEventType() == TEXT) {
-                addWarning(DO_NESTED_TAGS);
+                warnNotAllowed("do");
                 text += getText().trim();
             }
             else if (getEventType() == START_TAG) {
@@ -592,14 +572,14 @@ public class WmlParser extends KXmlParser {
                     text += parsePrevOrRefresh(setvars);
                 }
                 else {
-                    addWarning(DO_NESTED_TAGS);
+                    warnNotAllowed("do");
                 }
             }
             else if (getEventType() == END_TAG) {
                 if ("do".equals(getName())) {
                     break;
                 } else {
-                    addWarning(DO_NESTED_TAGS);
+                    warnNotAllowed("do");
                 }
             }
             else if (getEventType() == END_DOCUMENT) {
@@ -636,29 +616,28 @@ public class WmlParser extends KXmlParser {
     }
 
     public String parsePrevOrRefresh(Hashtable setvarsOutput) throws Exception {
-        final String PREV_REFRESH_NESTED_TAGS = "expected <setvar> or </" + getName() + ">";
-
         String addText = "";
+        String tagName = getName();
 
         nextItem();
 
         while (true) {
             if (getEventType() == TEXT) {
-                addWarning(PREV_REFRESH_NESTED_TAGS);
+                warnNotAllowed(tagName);
                 addText += getText().trim();
             }
             else if (getEventType() == START_TAG) {
                 if ("setvar".equals(getName())) {
                     parsePostfieldOrSetvar(setvarsOutput);
                 } else {
-                    addWarning(PREV_REFRESH_NESTED_TAGS);
+                    warnNotAllowed(tagName);
                 }
             }
             else if (getEventType() == END_TAG) {
                 if ("go".equals(getName())) {
                     break;
                 } else {
-                    addWarning(PREV_REFRESH_NESTED_TAGS);
+                    warnNotAllowed(tagName);
                 }
             }
             else if (getEventType() == END_DOCUMENT) {
@@ -687,15 +666,13 @@ public class WmlParser extends KXmlParser {
     }
 
     public void parseTable() throws Exception {
-        final String TABLE_NESTED_TAGS = "expected text, <tr>, <td>, or </table>";
-
         lastItemTerminated = true;
         
         nextItem();
 
         while (true) {
             if (getEventType() == TEXT) {
-                addWarning(TABLE_NESTED_TAGS);
+                warnNotAllowed("table");
                 appendLine(getText());
             }
             else if (getEventType() == START_TAG) {
@@ -708,7 +685,7 @@ public class WmlParser extends KXmlParser {
                     lastItemTerminated = true;
                 }
                 else {
-                    addWarning(TABLE_NESTED_TAGS);
+                    warnNotAllowed("table");
                 }
             }
             else if (getEventType() == END_TAG) {
@@ -723,7 +700,7 @@ public class WmlParser extends KXmlParser {
                     // ignore
                 }
                 else {
-                    addWarning(TABLE_NESTED_TAGS);
+                    warnNotAllowed("table");
                 }
             }
             else if (getEventType() == END_DOCUMENT) {
@@ -735,9 +712,6 @@ public class WmlParser extends KXmlParser {
     }
 
     public void parseTd(String tagName) throws Exception {
-        final String TD_NESTED_TAGS =
-            "expected text, formatting tag, <a>, <anchor>, <br>, <img>, or </" + tagName + ">";
-
         nextItem();
 
         while (true) {
@@ -761,14 +735,14 @@ public class WmlParser extends KXmlParser {
                     parseImg();
                 }
                 else {
-                    addWarning(TD_NESTED_TAGS);
+                    warnNotAllowed("td");
                 }
             }
             else if (getEventType() == END_TAG) {
                 if (tagName.equals(getName())) {
                     break;
                 } else {
-                    addWarning(TD_NESTED_TAGS);
+                    warnNotAllowed("td");
                 }
             }
             else if (getEventType() == END_DOCUMENT) {
@@ -845,6 +819,16 @@ public class WmlParser extends KXmlParser {
         warningLocations.addElement(getPositionDescription());
     }
 
+    public String tagToString() throws Exception {
+        if (getEventType() == START_TAG) return '<' + getName() + '>';
+        if (getEventType() == END_TAG) return "</" + getName() + '>';
+        return TYPES[getEventType()].toLowerCase();
+    }
+
+    public void warnNotAllowed(String containingTag) throws Exception {
+        addWarning(tagToString() + " not allowed inside <" + containingTag + '>');
+    }
+
     private void createWarningsWml() {
         if (History.getCurrent().url.protocol.equals("warnings")) {
             return;
@@ -859,17 +843,23 @@ public class WmlParser extends KXmlParser {
 
         if (warnings.size() == 0) {
             warningsBuf.append("<p>No problems found with this page.</p>");
+        } else {
+            warningsBuf.append("<table>");
         }
+
         for (int i = 0; i < warnings.size(); i++) {
             String warn = (String) warnings.elementAt(i);
             String warnLoc = (String) warningLocations.elementAt(i);
 
-            warningsBuf.append("<p>Warning: ")
+            warningsBuf.append("<tr><td>")
                 .append(Util.sanitizeWml(warn))
-                .append("</p>")
-                .append("<p>at ")
+                .append("<br/>at ")
                 .append(Util.sanitizeWml(warnLoc))
-                .append("</p>");
+                .append("</td></tr>");
+        }
+
+        if (warnings.size() != 0) {
+            warningsBuf.append("</table>");
         }
 
         warningsBuf.append(WmlTemplates.END);
