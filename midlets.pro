@@ -27,6 +27,5 @@
 -dontnote
 -dontusemixedcaseclassnames
 -repackageclasses ''
--overloadaggressively
--allowaccessmodification
 -adaptresourcefilecontents META-INF/MANIFEST.MF
+-useuniqueclassmembernames
