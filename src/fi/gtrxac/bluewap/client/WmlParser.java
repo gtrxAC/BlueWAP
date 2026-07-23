@@ -362,12 +362,8 @@ public class WmlParser extends KXmlParser {
         final String A_NESTED_TAGS = "expected text, <img>, <br>, or </a>";
 
         String text = "";
-        String target = getAttributeValue(null, "href");
-
-        if (target == null) {
-            addWarning("<a> does not have 'href' attribute");
-            target = "#";
-        }
+        String target = getAttributeRequired("href");
+        if (target == null) target = "#";
 
         nextItem();
 
@@ -500,11 +496,8 @@ public class WmlParser extends KXmlParser {
     }
 
     public void parsePostfieldOrSetvar(Hashtable output) throws Exception {
-        String name = getAttributeValue(null, "name");
-        String value = getAttributeValue(null, "value");
-
-        if (name == null) addWarning("<" + getName() + "> does not have 'name' attribute");
-        if (value == null) addWarning("<" + getName() + "> does not have 'value' attribute");
+        String name = getAttributeRequired("name");
+        String value = getAttributeRequired("value");
 
         if (name != null && value != null) {
             output.put(name, value);
@@ -526,12 +519,11 @@ public class WmlParser extends KXmlParser {
     }
 
     public void parseImg() throws Exception {
-        String src = getAttributeValue(null, "src");
+        String src = getAttributeRequired("src");
 
         if (src != null) {
             output.addItem(new WmlImageItem(src, getImgAltText()));
         } else {
-            addWarning("<img> tag does not have 'src' attribute");
             output.addItem(new WmlStringItem(getImgAltText()));
         }
         skipSubTree();
@@ -543,15 +535,14 @@ public class WmlParser extends KXmlParser {
         result = getAttributeValue(null, "src");
         if (result != null) return result;
 
-        addWarning("<img> tag does not have 'src' or 'alt' attribute");
+        addWarning("<img> does not have 'src' or 'alt' attribute");
         return "Image";
     }
 
     public void parseInput() throws Exception {
-        String name = getAttributeValue(null, "name");
+        String name = getAttributeRequired("name");
         String value = getAttributeValue(null, "value");
         
-        if (name == null) addWarning("<input> tag does not have 'name' attribute");
         if (value == null) value = "";
         
         output.addItem(new WmlInputItem(name, value));
@@ -565,11 +556,8 @@ public class WmlParser extends KXmlParser {
         String text = getAttributeValue(null, "label");
         if (text == null) text = "";
 
-        String type = getAttributeValue(null, "type");
-        if (type == null) {
-            addWarning("<do> does not have 'type' attribute");
-            type = "unknown";
-        }
+        String type = getAttributeRequired("type");
+        if (type == null) type = "unknown";
 
         int action = WmlAnchorItem.ACTION_NONE;
         String target = null;
@@ -632,10 +620,8 @@ public class WmlParser extends KXmlParser {
     }
 
     public String getGoTarget() {
-        String target = getAttributeValue(null, "href");
+        String target = getAttributeRequired("href");
         if (target != null) return target;
-        
-        addWarning("<go> does not have 'href' attribute");
         return "#";
     }
 
@@ -798,6 +784,14 @@ public class WmlParser extends KXmlParser {
     //  Parsing utilities
     // _________________________________________________________________________
     //
+
+    private String getAttributeRequired(String attributeName) {
+        String result = getAttributeValue(null, attributeName);
+        if (result == null) {
+            addWarning("<" + getName() + "> does not have '" + attributeName + "' attribute");
+        }
+        return result;
+    }
 
     private void ignoreWhitespace() throws IOException {
         try {
