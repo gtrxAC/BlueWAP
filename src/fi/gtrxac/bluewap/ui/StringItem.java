@@ -26,11 +26,6 @@ public class StringItem extends Item {
     }
 
     public void draw(Graphics g, int width, boolean selected) {
-        if (font == null) {
-            System.out.println("recalc " + this.toString());
-            recalc(width);
-        }
-
         g.setFont(font);
         g.setColor(0x111111);
         int y = 0;

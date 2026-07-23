@@ -10,9 +10,11 @@ public abstract class Item {
     public int height;
     public int y;
     private boolean selectable;
+    public boolean needsRecalc;
 
     protected Item(boolean selectable) {
         this.selectable = selectable;
+        this.needsRecalc = true;
     }
 
      /**

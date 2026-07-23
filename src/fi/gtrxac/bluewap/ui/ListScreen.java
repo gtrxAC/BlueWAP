@@ -33,6 +33,7 @@ public abstract class ListScreen extends Screen {
             Item item = (Item) items.elementAt(i);
             
             if (g.getTranslateY() + item.height > 0) {
+                item.recalc(getContentWidth());
                 item.draw(g, getContentWidth(), highlightedIndex == i);
             }
             g.translate(0, item.height + itemPadding);
@@ -41,11 +42,12 @@ public abstract class ListScreen extends Screen {
         }
     }
 
-    public void recalc() {
+    public synchronized void recalc() {
         int y = 0;
         for (int i = 0; i < items.size(); i++) {
             Item item = (Item) items.elementAt(i);
             item.recalc(getContentWidth());
+            item.needsRecalc = false;
             item.y = y;
             y += item.height + itemPadding;
         }
@@ -164,7 +166,7 @@ public abstract class ListScreen extends Screen {
         }
     }
 
-    public void addItem(Item i) {
+    public synchronized void addItem(Item i) {
         items.addElement(i);
         needRecalc();
     }
@@ -173,7 +175,7 @@ public abstract class ListScreen extends Screen {
         addItem(new StringItem(str));
     }
 
-    public void removeItem(int index) {
+    public synchronized void removeItem(int index) {
         items.removeElementAt(index);
         needRecalc();
     }
@@ -187,7 +189,7 @@ public abstract class ListScreen extends Screen {
     /**
      * Remove all items from this screen.
      */
-    public void removeAllItems() {
+    public synchronized void removeAllItems() {
         highlightedIndex = 0;
         scroll = -itemPadding;
         items.setSize(0);
