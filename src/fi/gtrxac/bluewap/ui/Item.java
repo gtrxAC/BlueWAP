@@ -62,4 +62,9 @@ public abstract class Item {
     public void drawHighlight(Graphics g, int width) {
         drawHighlight(g, 0, 0, width, height);
     }
+
+    public void needRecalc() {
+        needsRecalc = true;
+        AppBase.repaint();
+    }
 }

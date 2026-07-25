@@ -46,14 +46,14 @@ public class WmlImageItem extends StringItem implements Runnable {
     }
 
     public void recalc(int width) {
-        text = WmlVariables.parse(altText, false);
+        setText(WmlVariables.parse(altText, false));
         super.recalc(width);
         if (image != null) height = image.getHeight();
     }
 
     public void run() {
         image = getOrFetchImage(url);
-        App.recalcAllScreens();
+        needRecalc();
     }
 
     private Image getOrFetchImage(URL url) {

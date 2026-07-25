@@ -794,12 +794,13 @@ public class WmlParser extends KXmlParser {
         text = Util.removeDuplicateWhitespace(text);
         if (
             lastItemTerminated || output.items.size() == 0 ||
-            !(getLastItem() instanceof StringItem) || getLastItem() instanceof WmlAnchorItem
+            !(getLastItem() instanceof WmlStringItem)
         ) {
             output.addItem(new WmlStringItem(Util.trimLeft(text)));
             lastItemTerminated = false;
         } else {
-            ((StringItem) getLastItem()).text += text;
+            WmlStringItem item = (WmlStringItem) getLastItem();
+            item.setRawText(item.getRawText() + text);
         }
     }
 

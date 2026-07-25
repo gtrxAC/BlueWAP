@@ -3,7 +3,7 @@ package fi.gtrxac.bluewap.client;
 import fi.gtrxac.bluewap.ui.*;
 
 public class WmlStringItem extends StringItem {
-    String rawText;
+    private String rawText;
 
     public WmlStringItem(String text) {
         super(text);
@@ -13,5 +13,14 @@ public class WmlStringItem extends StringItem {
     public void recalc(int width) {
         text = WmlVariables.parse(rawText, false);
         super.recalc(width);
+    }
+
+    public String getRawText() {
+        return rawText;
+    }
+
+    public void setRawText(String newRawText) {
+        rawText = newRawText;
+        needRecalc();
     }
 }

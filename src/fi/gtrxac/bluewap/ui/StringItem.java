@@ -8,8 +8,8 @@ import javax.microedition.lcdui.Graphics;
  * A ListScreen item that shows a basic string of text.
  */
 public class StringItem extends Item {
-    public String text;
-
+    protected String text;
+    
     private Font definedFont;
     private Font font;
     private String[] textLines;
@@ -21,7 +21,6 @@ public class StringItem extends Item {
     public StringItem(String text, Font font) {
         super(false);
         this.text = text;
-        this.textLines = new String[] { text };
         this.definedFont = font;
     }
 
@@ -43,5 +42,14 @@ public class StringItem extends Item {
 
         textLines = Util.wordWrap(text, width, font);
         height = font.getHeight()*textLines.length;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String newText) {
+        text = newText;
+        needRecalc();
     }
 }
