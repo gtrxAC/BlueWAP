@@ -36,6 +36,8 @@ public abstract class ListScreen extends Screen {
                 recalcItemsFrom(i, false);
             }
             if (g.getTranslateY() + item.height > 0) {
+                // g.setColor(0xFF0000);
+                // g.drawRect(0, 0, getContentWidth(), item.height);
                 item.draw(g, getContentWidth(), highlightedIndex == i);
             }
             g.translate(0, item.height + itemPadding);

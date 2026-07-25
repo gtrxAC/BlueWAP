@@ -80,62 +80,123 @@ public class Util {
         return Util.replace(text, ">", "&gt;");
     }
 
-	/**
-	 * Get array of text lines to draw (word wrap)
-	 * https://github.com/shinovon/JTube/blob/2.6.1/src/jtube/Util.java
-	 */
-	public static String[] wordWrap(String text, int maxWidth, Font font) {
-		if (text == null || text.length() == 0 || text.equals(" ") || maxWidth < font.charWidth('W') + 2) {
-			return new String[0];
-		}
-		text = replace(text, "\r", "");
-		Vector v = new Vector(3);
-		char[] chars = text.toCharArray();
-		if (text.indexOf('\n') > -1) {
-			int j = 0;
-			for (int i = 0; i < text.length(); i++) {
-				if (chars[i] == '\n') {
-					v.addElement(text.substring(j, i));
-					j = i + 1;
-				}
-			}
-			v.addElement(text.substring(j, text.length()));
-		} else {
-			v.addElement(text);
-		}
-		for (int i = 0; i < v.size(); i++) {
-			String s = (String) v.elementAt(i);
-			if(font.stringWidth(s) >= maxWidth) {
-				int i1 = 0;
-				for (int i2 = 0; i2 < s.length(); i2++) {
-					if (font.stringWidth(s.substring(i1, i2+1)) >= maxWidth) {
-						boolean space = false;
-						for (int j = i2; j > i1; j--) {
-							char c = s.charAt(j);
-							if (c == ' ' || (c >= ',' && c <= '/')) {
-								space = true;
-								v.setElementAt(s.substring(i1, j + 1), i);
-								v.insertElementAt(s.substring(j + 1), i + 1);
-								i += 1;
-								i2 = i1 = j + 1;
-								break;
-							}
-						}
-						if (!space) {
-							i2 = i2 - 2;
-							v.setElementAt(s.substring(i1, i2), i);
-							v.insertElementAt(s.substring(i2), i + 1);
-							i2 = i1 = i2 + 1;
-							i += 1;
-						}
-					}
-				}
-			}
-		}
-		String[] arr = new String[v.size()];
-		v.copyInto(arr);
-		return arr;
-	}
+    private static Font cachedFont;
+    private static int cachedMinWidth;
+    private static int cachedSpaceWidth;
+
+    /**
+     * Get array of text lines to draw (word wrap)
+     * Input string should not begin or end with a space or line break (trim the string if needed)
+     */
+    public static String[] wordWrap(String text, int maxWidth, Font font) {
+        if (text == null || text.length() == 0 || text.equals(" ")) {
+            return new String[0];
+        }
+        if (cachedFont != font) {
+            cachedFont = font;
+            cachedMinWidth = font.charWidth('W') + 2;
+            cachedSpaceWidth = font.charWidth(' ');
+        }
+        if (maxWidth < cachedMinWidth) {
+            return new String[0];
+        }
+        
+		// text = replace(text, "\t", "  ");  // comment out if your string will never have tabs
+        // text = replace(text, "\r", "");  // comment out if your string will never have carriage returns
+        Vector lines = new Vector();
+
+        int lineEnd = text.indexOf('\n');
+        if (lineEnd != -1) {
+            int lineBegin = 0;
+            do {
+                lines.addElement(text.substring(lineBegin, lineEnd));
+                lineBegin = lineEnd + 1;
+                lineEnd = text.indexOf('\n', lineBegin);
+            }
+            while (lineEnd != -1);
+
+            lines.addElement(text.substring(lineBegin));
+        } else {
+            lines.addElement(text);
+        }
+
+        Vector out = new Vector();
+        for (int i = 0; i < lines.size(); i++) {
+            String line = (String) lines.elementAt(i);
+            int lineLength = line.length();
+
+            if (font.stringWidth(line) > maxWidth) {
+                // this line is too long for one screen line, so split it into multiple lines based on word boundaries
+                int pos = 0;
+                int availableWidth = maxWidth;
+                StringBuffer outLine = new StringBuffer();
+
+                loop: while (true) {
+                    // get the next word (from cursor position to the next space character, or to the end of the line)
+                    int nextSpace = line.indexOf(' ', pos);
+                    if (nextSpace == -1) {
+                        nextSpace = lineLength;
+                    }
+                    String thisWord = line.substring(pos, nextSpace);
+                    int thisWordWidth = font.stringWidth(thisWord);
+
+                    if (thisWordWidth < availableWidth) {
+                        // word fits on the current line
+                        outLine.append(thisWord);
+                        availableWidth -= thisWordWidth;
+                    } else {
+                        // word doesn't fit on current line -> finish this line
+                        if (outLine.length() != 0) {
+                            out.addElement(outLine.toString());
+                            outLine.setLength(0);
+                        }
+
+                        if (thisWordWidth < maxWidth) {
+                            // word fits on one line -> add the word to the next line
+                            outLine.append(thisWord);
+                            availableWidth = maxWidth - thisWordWidth;
+                        } else {
+                            // word is too long to fit on one line -> split the word
+                            for (int c = thisWord.length() - 1; c >= 0; c--) {
+                                String splitWord = thisWord.substring(0, c);
+    
+                                if (font.stringWidth(splitWord) < maxWidth) {
+                                    out.addElement(splitWord);
+                                    pos += c;
+                                    break;
+                                }
+                            }
+                            availableWidth = maxWidth;
+                            continue;
+                        }
+                    }
+
+                    // skip past this word
+                    pos += thisWord.length();
+
+                    while (true) {
+                        if (pos >= lineLength) break loop;
+
+                        // add space(s) to the end of the current line (a line will never begin with a space)
+                        if (line.charAt(pos) != ' ') break;
+                        outLine.append(' ');
+                        availableWidth -= cachedSpaceWidth;
+                        pos++;
+                    }
+                }
+                // add the last remaining line to the output if needed
+                if (outLine.length() != 0) {
+                    out.addElement(outLine.toString());
+                }
+            } else {
+                // this whole line fits on one screen line, so add it as-is
+                out.addElement(line);
+            }
+        }
+        String[] arr = new String[out.size()];
+        out.copyInto(arr);
+        return arr;
+    }
 
 	// https://github.com/gtrxAC/discord-j2me/pull/5/commits/193c63f6a00b8e24da7a3582e9d1a92522f9940e
 	public static byte[] readBytes(InputStream inputStream, int initialSize, int bufferSize, int expandSize) throws IOException {

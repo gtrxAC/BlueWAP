@@ -62,6 +62,15 @@ public class WmlParser extends KXmlParser {
                 output.addItem(e.toString());
             }
 
+            // trailing whitespace in items may cause blank lines to appear, so trim them
+            for (int i = 0; i < output.items.size(); i++) {
+                Object item = output.items.elementAt(i);
+                if (!(item instanceof WmlStringItem)) continue;
+
+                WmlStringItem strItem = (WmlStringItem) item;
+                strItem.setRawText(Util.trimRight(strItem.getRawText()));
+            }
+
             try {
                 p.createWarningsWml();
             }
