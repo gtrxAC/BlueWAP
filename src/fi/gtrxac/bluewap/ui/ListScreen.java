@@ -9,6 +9,7 @@ import java.util.*;
  */
 public abstract class ListScreen extends Screen {
     public int scroll;
+    public int maxScroll;
     public int highlightedIndex;
     public int itemPadding;
     public Vector items;
@@ -33,7 +34,7 @@ public abstract class ListScreen extends Screen {
             Item item = (Item) items.elementAt(i);
         
             if (item.needsRecalc) {
-                recalcItemsFrom(i, false);
+                recalcItems(i, false);
             }
             if (g.getTranslateY() + item.height > 0) {
                 // g.setColor(0xFF0000);
@@ -47,10 +48,16 @@ public abstract class ListScreen extends Screen {
     }
 
     public void recalc() {
-        recalcItemsFrom(0, true);
+        recalcItems(0, true);
+        makeSelectedItemVisible();
     }
 
-    private synchronized void recalcItemsFrom(int startIndex, boolean forceAll) {
+    private synchronized void recalcItems(int startIndex, boolean forceAll) {
+        if (items.size() == 0) {
+            maxScroll = scroll = -itemPadding;
+            return;
+        }
+
         int y = 0;
         if (startIndex > 0) {
             Item prevItem = (Item) items.elementAt(startIndex);
@@ -66,6 +73,9 @@ public abstract class ListScreen extends Screen {
             item.y = y;
             y += item.height + itemPadding;
         }
+
+        maxScroll = Math.max(-itemPadding, y - getHeight());
+        if (scroll > maxScroll) scroll = maxScroll;
     }
 
     public void keyEvent(int keyCode, int gameAction) {
@@ -80,6 +90,7 @@ public abstract class ListScreen extends Screen {
                 if (selected.height > getHeight() && selected.y + selected.height - scroll > getHeight()) {
                     // Item is taller than screen -> scroll down by two lines
                     scroll += Fonts.height*2;
+                    if (scroll > maxScroll) scroll = maxScroll;
                 } else {
                     int newSel = getNextSelectableItem();
                     if (newSel != -1) highlightedIndex = newSel;
@@ -92,6 +103,7 @@ public abstract class ListScreen extends Screen {
                 if (selected.height > getHeight() && selected.y - scroll < 0) {
                     // Item is taller than screen -> scroll up by two lines
                     scroll -= Fonts.height*2;
+                    if (scroll < -itemPadding) scroll = -itemPadding;
                 } else {
                     int newSel = getPreviousSelectableItem();
                     if (newSel != -1) highlightedIndex = newSel;
@@ -112,6 +124,7 @@ public abstract class ListScreen extends Screen {
             }
         }
         if (oldHighlightedIndex != highlightedIndex) {
+            recalcItems(0, false);
             makeSelectedItemVisible();
         }
     }
@@ -152,8 +165,6 @@ public abstract class ListScreen extends Screen {
     // from discord j2me, modified
     private void makeSelectedItemVisible() {
         if (items.size() == 0) return;
-
-        recalcIfNeeded();  // calculate item heights
 
         Item selected = (Item) items.elementAt(highlightedIndex);
         int itemPos = selected.y - scroll;
@@ -246,6 +257,7 @@ public abstract class ListScreen extends Screen {
             throw new ArrayIndexOutOfBoundsException();
         }
         highlightedIndex = index;
+        recalcItems(0, false);
         makeSelectedItemVisible();
         AppBase.repaint();
     }
