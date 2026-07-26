@@ -24,6 +24,7 @@ public abstract class ListScreen extends Screen {
     public void draw(Graphics g) {
         g.setColor(0xFFFFFF);
         g.fillRect(0, 0, getWidth(), getHeight());
+        drawScrollbar(g);
         drawItems(g);
     }
 
@@ -38,8 +39,8 @@ public abstract class ListScreen extends Screen {
             }
             if (g.getTranslateY() + item.height > 0) {
                 // g.setColor(0xFF0000);
-                // g.drawRect(0, 0, getContentWidth(), item.height);
-                item.draw(g, getContentWidth(), highlightedIndex == i);
+                // g.drawRect(0, 0, contentWidth, item.height);
+                item.draw(g, contentWidth, highlightedIndex == i);
             }
             g.translate(0, item.height + itemPadding);
 
@@ -47,8 +48,36 @@ public abstract class ListScreen extends Screen {
         }
     }
 
+    private void drawScrollbar(Graphics g) {
+        if (maxScroll <= 0) return;
+
+        int scrollbarAreaWidth = Fonts.height/2;
+        int margin = scrollbarAreaWidth/4;
+        int scrollbarWidth = scrollbarAreaWidth - margin*2;
+        int scrollbarHeight = getHeight() - margin*2;
+        int x = getWidth() - scrollbarAreaWidth + margin;
+
+        // +itemPadding because -itemPadding is the minimum scroll
+        int curScroll = scroll + itemPadding;
+        int scrollRange = maxScroll + itemPadding;
+        int scrollableHeight = maxScroll + getHeight() + itemPadding;
+
+        // graphics programming is fun,, trust me :D
+        int handleHeight = scrollbarHeight*(getHeight()*1000/scrollableHeight)/1000 - margin*2;
+        int handleY = (scrollbarHeight - handleHeight)*(curScroll*1000/scrollRange)/1000 + margin;
+
+        g.setColor(0xDDDDDD);
+        g.fillRect(x, handleY, scrollbarWidth, handleHeight);
+    }
+
     public void recalc() {
         recalcItems(0, true);
+
+        if (maxScroll > 0) {
+            // if screen is scrollable, make space for the scrollbar
+            contentWidth -= Fonts.height/2;
+            recalcItems(0, true);
+        }
         makeSelectedItemVisible();
     }
 
@@ -67,7 +96,7 @@ public abstract class ListScreen extends Screen {
         for (int i = startIndex; i < items.size(); i++) {
             Item item = (Item) items.elementAt(i);
             if (forceAll || item.needsRecalc) {
-                item.recalc(getContentWidth());
+                item.recalc(contentWidth);
                 item.needsRecalc = false;
             }
             item.y = y;

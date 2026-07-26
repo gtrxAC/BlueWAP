@@ -9,7 +9,7 @@ import javax.microedition.lcdui.*;
 public abstract class Screen implements CommandListener {
     private int width;
     private int height;
-    private int contentWidth;
+    protected int contentWidth;
     private int margin;
     private boolean needsRecalc;
 
@@ -92,10 +92,6 @@ public abstract class Screen implements CommandListener {
 
     public int getWidth() {
         return width;
-    }
-
-    public int getContentWidth() {
-        return contentWidth;
     }
 
     public int getHeight() {
