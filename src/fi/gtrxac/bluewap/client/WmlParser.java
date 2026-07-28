@@ -283,7 +283,6 @@ public class WmlParser extends KXmlParser {
         }
         if ("br".equals(getName())) {
             lastItemTerminated = true;
-            skipSubTree();
             return true;
         }
         if ("do".equals(getName())) {
@@ -345,7 +344,6 @@ public class WmlParser extends KXmlParser {
                 }
                 else if ("br".equals(getName())) {
                     lastItemTerminated = true;
-                    skipSubTree();
                 }
                 else if ("img".equals(getName())) {
                     parseImg();
@@ -387,7 +385,6 @@ public class WmlParser extends KXmlParser {
             else if (getEventType() == START_TAG) {
                 if ("br".equals(getName())) {
                     text += "\n";
-                    skipSubTree();
                 }
                 else if ("img".equals(getName())) {
                     text += parseImgInAnchor();
@@ -429,7 +426,6 @@ public class WmlParser extends KXmlParser {
             else if (getEventType() == START_TAG) {
                 if ("br".equals(getName())) {
                     text += "\n";
-                    skipSubTree();
                 }
                 else if ("go".equals(getName())) {
                     action = WmlAnchorItem.ACTION_GO;
@@ -757,7 +753,6 @@ public class WmlParser extends KXmlParser {
                 }
                 else if ("br".equals(getName())) {
                     lastItemTerminated = true;
-                    skipSubTree();
                 }
                 else if ("img".equals(getName())) {
                     parseImg();
@@ -855,6 +850,10 @@ public class WmlParser extends KXmlParser {
     }
 
     public void warnNotAllowed(String containingTag) throws Exception {
+        // ignore <br> which might get parsed as multiple tags
+        // depending on the way it's written and may cause false errors
+        if ("br".equals(getName())) return;
+
         addWarning(tagToString() + " not allowed inside <" + containingTag + '>');
     }
 
