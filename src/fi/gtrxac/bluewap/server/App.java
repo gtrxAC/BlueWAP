@@ -38,7 +38,9 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
 
             if (addr.equals("(unknown)")) {
                 LogScreen.log("If the client device does not show device names when searching, find the BT address of this device to identify it from the list.");
-                LogScreen.log("(e.g. on Android: Settings -> About phone -> Status information)");
+                LogScreen.log("(Settings -> About phone -> Status information)");
+                LogScreen.log("To prevent connection errors, you may have to disable battery optimizations.");
+                LogScreen.log("(Settings -> Apps -> J2ME Loader -> Battery -> Unrestricted)");
             } else {
                 LogScreen.log("Device address: " + addr);
             }
