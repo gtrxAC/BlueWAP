@@ -8,8 +8,15 @@ import java.util.*;
 
 public class Util {
 	public static byte[] stringToBytes(String str) {
+		return stringToBytes(str, null);
+	}
+
+	public static byte[] stringToBytes(String str, String charset) {
+		if (charset == null || charset.length() == 0) {
+			charset = "UTF-8";
+		}
 		try {
-			return str.getBytes("UTF-8");
+			return str.getBytes(charset);
 		}
 		catch (Exception e) {
 			return str.getBytes();
@@ -17,12 +24,37 @@ public class Util {
 	}
 
 	public static String bytesToString(byte[] bytes) {
+		return bytesToString(bytes, null);
+	}
+
+	public static String bytesToString(byte[] bytes, String charset) {
+		if (charset == null || charset.length() == 0) {
+			charset = "UTF-8";
+		}
 		try {
-			return new String(bytes, "UTF-8");
+			return new String(bytes, charset);
 		}
 		catch (Exception e) {
 			return new String(bytes);
 		}
+	}
+
+	public static String getCharsetFromContentType(String contentType) {
+		if (contentType == null) return null;
+
+		int charsetIndex = contentType.toLowerCase().indexOf("charset=");
+		if (charsetIndex == -1) return null;
+
+		int start = charsetIndex + "charset=".length();
+		int end = contentType.length();
+		int semicolonIndex = contentType.indexOf(';', start);
+		if (semicolonIndex != -1) end = semicolonIndex;
+
+		String charset = contentType.substring(start, end).trim();
+		if (charset.length() > 1 && charset.startsWith("\"") && charset.endsWith("\"")) {
+			charset = charset.substring(1, charset.length() - 1);
+		}
+		return charset;
 	}
 
 	public static String replace(String str, String from, String to) {

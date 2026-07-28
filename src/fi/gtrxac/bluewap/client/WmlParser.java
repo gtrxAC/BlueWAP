@@ -39,9 +39,14 @@ public class WmlParser extends KXmlParser {
 
         commands.setSize(0);
 
-        byte[] wmlBytes = Util.stringToBytes(this.wml);
+        String encoding = null;
+        if (contentType != null) {
+            encoding = Util.getCharsetFromContentType(contentType);
+        }
+
+        byte[] wmlBytes = Util.stringToBytes(this.wml, encoding);
         ByteArrayInputStream is = new ByteArrayInputStream(wmlBytes);
-        setInput(is, null);
+        setInput(is, encoding);
         defineEntityReplacementText("nbsp", " ");
         defineEntityReplacementText("copy", "©");
     }

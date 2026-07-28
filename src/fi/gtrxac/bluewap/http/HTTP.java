@@ -167,7 +167,8 @@ public abstract class HTTP {
 	 * Get server response as a string.
 	 */
 	public String getResponseString() throws Exception {
-		return Util.bytesToString(getResponseBytes());
+		String charset = Util.getCharsetFromContentType(getResponseHeader("Content-Type"));
+		return Util.bytesToString(getResponseBytes(), charset);
 	}
 
 	/**
