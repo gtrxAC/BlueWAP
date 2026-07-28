@@ -169,7 +169,7 @@ public class WmlParser extends KXmlParser {
             nextItem();
         }
 
-        if (!haveShownCard) {
+        if (!isHtml && !haveShownCard) {
             addWarning((cardId == null) ? "no cards found" : "card '" + cardId + "' not found");
         }
     }
