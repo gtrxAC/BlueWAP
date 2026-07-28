@@ -52,7 +52,7 @@ public abstract class ListScreen extends Screen {
         if (maxScroll <= 0) return;
 
         int scrollbarAreaWidth = Fonts.height/2;
-        int margin = scrollbarAreaWidth/4;
+        int margin = Fonts.height/7;
         int scrollbarWidth = scrollbarAreaWidth - margin*2;
         int scrollbarHeight = getHeight() - margin*2;
         int x = getWidth() - scrollbarAreaWidth + margin;
@@ -66,7 +66,7 @@ public abstract class ListScreen extends Screen {
         int handleHeight = scrollbarHeight*(getHeight()*1000/scrollableHeight)/1000 - margin*2;
         int handleY = (scrollbarHeight - handleHeight)*(curScroll*1000/scrollRange)/1000 + margin;
 
-        g.setColor(0xDDDDDD);
+        g.setColor(0xCCCCCC);
         g.fillRect(x, handleY, scrollbarWidth, handleHeight);
     }
 
