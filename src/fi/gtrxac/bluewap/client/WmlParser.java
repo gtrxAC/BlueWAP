@@ -89,15 +89,24 @@ public class WmlParser extends KXmlParser {
             nextTag();
         }
         catch (XmlPullParserException e) {
-            output.addItem(MainScreen.systemBrowserButton);
-
-            if (contentType != null && contentType.startsWith("image/")) {
-                output.addItem(new WmlImageItem(History.getCurrent().url.toString(false), ""));
-            } else {
-                addWarning("page does not begin with a tag, treating it as raw text");
-                output.addItem(wml);
+            // if it's html/wml but doesn't have the xml declaration crap,
+            // then skip the first tag (e.g. doctype html) and hope for the best
+            if (contentType != null && (contentType.startsWith("text/vnd.wap.wml") || contentType.startsWith("text/html"))) {
+                addWarning("unrecognized header");
+                nextTag();
             }
-            return;
+            // else show the file as image or text
+            else {
+                output.addItem(MainScreen.systemBrowserButton);
+
+                if (contentType != null && contentType.startsWith("image/")) {
+                    output.addItem(new WmlImageItem(History.getCurrent().url.toString(false), ""));
+                } else {
+                    addWarning("page does not begin with a tag, treating it as raw text");
+                    output.addItem(wml);
+                }
+                return;
+            }
         }
 
         // first tag (ignoring xml header and doctype) is <wml>
