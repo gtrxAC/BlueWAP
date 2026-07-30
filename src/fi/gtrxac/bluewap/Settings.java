@@ -1,6 +1,7 @@
 package fi.gtrxac.bluewap;
 
 import java.io.*;
+import java.util.Vector;
 import javax.microedition.io.*;
 import javax.microedition.rms.*;
 import javax.microedition.lcdui.*;
@@ -8,18 +9,38 @@ import com.gtrxac.discord.HTTPQueue;
 
 public class Settings {
     public static int fontSize = Font.SIZE_SMALL;
+    public static Vector bookmarks;
 
     private static void readData(DataInputStream dis) throws Exception {
         fontSize = dis.readUnsignedByte();
         HTTPQueue.maxSlots = dis.readUnsignedByte();
+
+        int bookmarkCount = dis.readInt();
+        bookmarks = new Vector(bookmarkCount);
+
+        for (int i = 0; i < bookmarkCount; i++) {
+            bookmarks.addElement(dis.readUTF());
+        }
     }
 
     private static void writeData(DataOutputStream dos) throws Exception {
         dos.writeByte(fontSize);
         dos.writeByte(HTTPQueue.maxSlots);
+        dos.writeInt(bookmarks.size());
+
+        for (int i = 0; i < bookmarks.size(); i++) {
+            dos.writeUTF((String) bookmarks.elementAt(i));
+        }
     }
 
     static {
+        // Populate default bookmarks in case there are none saved
+        bookmarks = new Vector();
+        bookmarks.addElement("http://gtrxac.fi");
+        bookmarks.addElement("http://wap.15pmm01.com");
+        bookmarks.addElement("http://wap.ad");
+        bookmarks.addElement("http://wap.hutch3g.eu");
+
         load();
     }
 

@@ -52,6 +52,13 @@ public class MenuScreen extends ListScreen implements CommandListener {
         }
 //#endif
 
+        addItem("Bookmarks:");
+
+        for (int i = 0; i < Settings.bookmarks.size(); i++) {
+            String url = (String) Settings.bookmarks.elementAt(i);
+            addItem(new SingleLineLinkItem(url));
+        }
+        
         addItem("History:");
 
         for (int i = History.menuUrls.size() - 1; i >= 0; i--) {
