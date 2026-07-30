@@ -18,6 +18,8 @@ public class MainScreen extends ListScreen implements CommandListener {
     public static final int CMD_FORWARD = 3;
     public static final int CMD_REFRESH = 4;
     public static final int CMD_WARNINGS = 5;
+    public static final int CMD_SETTINGS = 6;
+    public static final int CMD_QUIT = 7;
 
     public static String warningsWml;
     public static final MainScreen instance = new MainScreen();
@@ -34,6 +36,8 @@ public class MainScreen extends ListScreen implements CommandListener {
         addCommand(new Command("Forward", Command.SCREEN, CMD_FORWARD));
         addCommand(new Command("Refresh", Command.SCREEN, CMD_REFRESH));
         addCommand(new Command("Warnings", Command.SCREEN, CMD_WARNINGS));
+        addCommand(new Command("Settings", Command.SCREEN, CMD_SETTINGS));
+        addCommand(new Command("Quit", Command.EXIT, CMD_QUIT));
     }
 
     public void displayWml(String wml, String card, String contentType) {
@@ -73,6 +77,14 @@ public class MainScreen extends ListScreen implements CommandListener {
             }
             case CMD_WARNINGS: {
                 History.visit("warnings://", false, null, false);
+                break;
+            }
+            case CMD_SETTINGS: {
+                App.pushScreen(new SettingsScreen());
+                break;
+            }
+            case CMD_QUIT: {
+                App.instance.notifyDestroyed();
                 break;
             }
         }

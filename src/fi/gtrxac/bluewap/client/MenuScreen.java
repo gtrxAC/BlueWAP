@@ -33,9 +33,6 @@ public class MenuScreen extends ListScreen implements CommandListener {
     private int connectionMode = HTTP.CONNECTION_TYPE;
 //#endif
 
-    RadioButtonGroup fontSizeGroup;
-    TextFieldItem connLimitField = new TextFieldItem("Max. connections", "" + HTTPQueue.maxSlots, 3, TextField.NUMERIC);
-
     public MenuScreen() {
         super(2, 2);
 
@@ -55,20 +52,6 @@ public class MenuScreen extends ListScreen implements CommandListener {
         }
 //#endif
 
-        addItem("Font size:");
-        fontSizeGroup = new RadioButtonGroup();
-        addItem(new RadioButtonItem(fontSizeGroup, "Small"));
-        addItem(new RadioButtonItem(fontSizeGroup, "Medium"));
-        addItem(new RadioButtonItem(fontSizeGroup, "Large"));
-
-        int sizeIndex = Settings.fontSize == Font.SIZE_SMALL ? 0 :
-            Settings.fontSize == Font.SIZE_MEDIUM ? 1 : 2;
-
-        fontSizeGroup.setTickedIndex(sizeIndex);
-
-        addItem("Max. connections:");
-        addItem(connLimitField);
-
         addItem("History:");
 
         for (int i = History.menuUrls.size() - 1; i >= 0; i--) {
@@ -84,13 +67,6 @@ public class MenuScreen extends ListScreen implements CommandListener {
     public void commandAction(Command c, Displayable d) {
         switch (c.getPriority()) {
             case CMD_BACK: {
-                int[] fontSizes = { Font.SIZE_SMALL, Font.SIZE_MEDIUM, Font.SIZE_LARGE };
-                Settings.fontSize = fontSizes[fontSizeGroup.getTickedIndex()];
-                HTTPQueue.maxSlots = Integer.parseInt(connLimitField.getValue());
-                if (HTTPQueue.maxSlots < 1) HTTPQueue.maxSlots = 1;
-                Settings.save();
-                Fonts.loadFonts(Settings.fontSize);
-
                 App.popScreen();
                 break;
             }
