@@ -73,7 +73,7 @@ public class MenuScreen extends ListScreen implements CommandListener {
 
         for (int i = History.menuUrls.size() - 1; i >= 0; i--) {
             String url = (String) History.menuUrls.elementAt(i);
-            addItem(new LinkItem(url));
+            addItem(new SingleLineLinkItem(url));
         }
 
         setCommandListener(this);
