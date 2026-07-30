@@ -3,16 +3,19 @@ package fi.gtrxac.bluewap.ui;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Canvas;
 import java.util.*;
+import fi.gtrxac.bluewap.Util;
 
 /**
  * A list that can display a vertical scrollable list of Items.
  */
-public abstract class ListScreen extends Screen {
+public abstract class ListScreen extends Screen implements Runnable {
     public int scroll;
     public int maxScroll;
     public int highlightedIndex;
     public int itemPadding;
     public Vector items;
+
+    private int scrollbarHandleHeight;
     
     public ListScreen(int margin, int itemPadding) {
         super(margin);
@@ -63,11 +66,11 @@ public abstract class ListScreen extends Screen {
         int scrollableHeight = maxScroll + getHeight() + itemPadding;
 
         // graphics programming is fun,, trust me :D
-        int handleHeight = scrollbarHeight*(getHeight()*1000/scrollableHeight)/1000 - margin*2;
-        int handleY = (scrollbarHeight - handleHeight)*(curScroll*1000/scrollRange)/1000 + margin;
+        scrollbarHandleHeight = scrollbarHeight*(getHeight()*1000/scrollableHeight)/1000 - margin*2;
+        int handleY = (scrollbarHeight - scrollbarHandleHeight)*(curScroll*1000/scrollRange)/1000 + margin;
 
-        g.setColor(0xCCCCCC);
-        g.fillRect(x, handleY, scrollbarWidth, handleHeight);
+        g.setColor(usingScrollBar ? 0x888888 : 0xCCCCCC);
+        g.fillRect(x, handleY, scrollbarWidth, scrollbarHandleHeight);
     }
 
     public void recalc() {
@@ -221,6 +224,156 @@ public abstract class ListScreen extends Screen {
         }
     }
 
+    // _________________________________________________________________________
+    //
+    //  Touch handling and kinetic scrolling
+    // _________________________________________________________________________
+    //
+
+    private int totalScroll;
+    private int totalScrollAbs;
+
+    public static int scrollUnit;
+    protected int velocity;
+    private long lastPointerTime;
+    private int lastPointerY;
+
+    public boolean usingScrollBar;
+    private int lastScrollBarY;
+    private boolean pressedOnBlank;
+    
+    protected int getMinScroll() {
+        return -itemPadding;
+    }
+
+    protected int getMaxScroll() {
+        return maxScroll;
+    }
+
+    protected void checkScrollInRange() {
+        scroll = Math.min(Math.max(scroll, getMinScroll()), getMaxScroll());
+    }
+
+    private boolean isScrollable() {
+        return getMaxScroll() - getMinScroll() > 0;
+    }
+
+    protected boolean pointerWasTapped() {
+        return totalScrollAbs < Fonts.height/2 && Math.abs(totalScroll) < Fonts.height/4;
+    }
+
+    private void handleScrollBar(int y) {
+        lastScrollBarY = y;
+        int height = getHeight() - scrollbarHandleHeight;
+        y = Math.max(Math.min(y, getHeight() - scrollbarHandleHeight/2), scrollbarHandleHeight/2);
+        y -= scrollbarHandleHeight/2;
+        int ratio = y*1000/height;
+
+        scroll = (getMaxScroll() - getMinScroll())*ratio;
+        // if (scroll%1000 >= 500) scroll += 500;
+        scroll = scroll/1000 + getMinScroll();
+        checkScrollInRange();
+        AppBase.repaint();
+    }
+
+    public void pointerPressed(int x, int y) {
+        // Use scrollbar if the content is tall enough to be scrollable and the user pressed on the right edge of the screen
+        // Note: Scrollbar hitbox is wider than the actual rendered scrollbar
+        usingScrollBar = isScrollable() && x > super.getWidth() - Fonts.height*4/3;
+
+        if (usingScrollBar) {
+            velocity = 0;  // stop any kinetic scrolling
+            totalScrollAbs = 65500;
+            handleScrollBar(y);
+            return;
+        }
+        lastPointerY = y;
+        totalScroll = 0;
+        totalScrollAbs = 0;
+
+        velocity = 0;
+        lastPointerTime = System.currentTimeMillis();
+
+        int tappedItemIndex = getItemIndexAtY(y);
+        if (tappedItemIndex != -1) highlightedIndex = tappedItemIndex;
+
+        AppBase.repaint();
+    }
+
+    public void pointerDragged(int x, int y) {
+        // Scroll position fix on S40 touch (e.g. Asha 300)
+        if (y > 65500) y = 0;
+        
+        if (usingScrollBar) {
+            handleScrollBar(y);
+            return;
+        }
+        int deltaY = y - lastPointerY;
+        scroll -= deltaY;
+        checkScrollInRange();
+
+        // Keep track of velocity
+        long currentTime = System.currentTimeMillis();
+        int timeDelta = (int) (currentTime - lastPointerTime);
+        if (timeDelta > 0) {
+            velocity = deltaY * 1000 / timeDelta;  // Pixels per second
+        }
+        lastPointerY = y;
+        lastPointerTime = currentTime;
+        totalScroll += deltaY;
+        totalScrollAbs += Math.abs(deltaY);
+        AppBase.repaint();
+    }
+    
+    public void pointerReleased(int x, int y) {
+        if (usingScrollBar) {
+            usingScrollBar = false;
+            AppBase.repaint();
+            return;
+        }
+
+        if (!pointerWasTapped()) {
+            // scrolled -> start kinetic scrolling thread if finger was not held in place for too long
+            if (System.currentTimeMillis() <= lastPointerTime + 110 && Math.abs(velocity) > Fonts.height*4) {
+                new Thread(this).start();
+            }
+        } else {
+            // Not scrolled: select item if pressed on one
+            int tappedItemIndex = getItemIndexAtY(y);
+            if (tappedItemIndex != -1) selectItem();
+        }
+        AppBase.repaint();
+    }
+    
+    // Kinetic scrolling thread
+    public void run() {
+        int maxVel = Fonts.height*30;
+
+        while (Math.abs(velocity) > 1) {
+            velocity = Math.min(Math.max(velocity, -maxVel), maxVel);
+            scroll -= velocity/30;
+            velocity = velocity*19/20;
+            checkScrollInRange();
+            AppBase.repaint();
+            Util.sleep(16);
+        }
+    }
+
+    private int getItemIndexAtY(int y) {
+        y += scroll;
+        for (int i = 0; i < items.size(); i++) {
+            Item item = (Item) items.elementAt(i);
+            if (y - item.y < item.height) return i;
+        }
+        return -1;
+    }
+
+    // _________________________________________________________________________
+    //
+    //  Public API
+    // _________________________________________________________________________
+    //
+
     public synchronized void addItem(Item i) {
         items.addElement(i);
         needRecalc();
@@ -268,6 +421,7 @@ public abstract class ListScreen extends Screen {
      */
     public void selectItem() {
         Item selected = (Item) items.elementAt(highlightedIndex);
+        if (!selected.isSelectable()) return;
         selected.itemSelected();
         itemSelected(selected);
     }

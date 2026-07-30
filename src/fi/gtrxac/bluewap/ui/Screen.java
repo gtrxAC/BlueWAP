@@ -123,4 +123,19 @@ public abstract class Screen implements CommandListener {
      * Called when a key is pressed or repeated.
      */
     public void keyEvent(int keyCode, int gameAction) {}
+
+    /**
+     * Called when a touchscreen press is detected.
+     */
+    public void pointerPressed(int x, int y) {}
+
+    /**
+     * Called when a touch pointer is dragged.
+     */
+    public void pointerDragged(int x, int y) {}
+
+    /**
+     * Called when a touch pointer is released.
+     */
+    public void pointerReleased(int x, int y) {}
 }

@@ -36,6 +36,30 @@ public class AppCanvas extends Canvas {
         keyPressed(keyCode);
     }
 
+    protected void pointerPressed(int x, int y) {
+        Screen curr = AppBase.getCurrentScreen();
+        if (curr != null) {
+            curr.pointerPressed(x, y);
+            AppBase.repaint();
+        }
+    }
+
+    protected void pointerDragged(int x, int y) {
+        Screen curr = AppBase.getCurrentScreen();
+        if (curr != null) {
+            curr.pointerDragged(x, y);
+            AppBase.repaint();
+        }
+    }
+
+    protected void pointerReleased(int x, int y) {
+        Screen curr = AppBase.getCurrentScreen();
+        if (curr != null) {
+            curr.pointerReleased(x, y);
+            AppBase.repaint();
+        }
+    }
+
     void updateCommands() {
         Screen curr = AppBase.getCurrentScreen();
 
