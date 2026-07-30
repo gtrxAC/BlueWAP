@@ -64,6 +64,8 @@ public class History implements Runnable {
     }
 
     private static void addMenuUrlsItem(String url) {
+        if (url.startsWith("warnings://")) return;
+
         while (menuUrls.size() > 8) {
             menuUrls.removeElementAt(0);
         }
@@ -73,7 +75,7 @@ public class History implements Runnable {
 
     public static synchronized void visit(String url, boolean relative, Hashtable postfields, boolean isPost) {
         saveHighlightedItem();
-        
+
         String postData = null;
 
         if (postfields != null && (isPost || postfields.size() >= 1)) {
