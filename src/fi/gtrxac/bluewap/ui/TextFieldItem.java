@@ -5,6 +5,7 @@ import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.TextBox;
+import fi.gtrxac.bluewap.Util;
 
 /**
  * A ListScreen item that contains and handles text input from the user.
@@ -13,6 +14,7 @@ import javax.microedition.lcdui.TextBox;
 public class TextFieldItem extends Item implements CommandListener {
     private String title;
     private String value;
+    private String displayText;
     private int maxSize;
     private int constraints;
 
@@ -40,11 +42,14 @@ public class TextFieldItem extends Item implements CommandListener {
         int y = (height - Fonts.height)/2;
 
         g.setFont(Fonts.plain);
-        g.drawString(value, x, y, 0);
+        g.drawString(displayText, x, y, 0);
     }
 
     public void recalc(int width) {
         height = Math.max(Fonts.height*4/3, Fonts.height + 6);
+
+        int padding = Math.max(3, Fonts.height/6);
+        displayText = Util.stringToWidth(value, Fonts.plain, width - padding*2);
     }
 
     public void itemSelected() {
@@ -59,6 +64,7 @@ public class TextFieldItem extends Item implements CommandListener {
         if (c.getPriority() == 0) {
             TextBox t = (TextBox) d;
             value = t.getString();
+            needRecalc();
             valueChanged(value);
         }
         AppBase.disp.setCurrent(AppCanvas.instance);
