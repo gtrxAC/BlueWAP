@@ -12,6 +12,7 @@ public class History implements Runnable {
     public boolean loaded;
     public String contentType;
     public String postData;
+    public int highlightedItemIndex;
 
     private static Vector list = new Vector();
     public static Vector menuUrls = new Vector();
@@ -71,6 +72,8 @@ public class History implements Runnable {
     }
 
     public static synchronized void visit(String url, boolean relative, Hashtable postfields, boolean isPost) {
+        saveHighlightedItem();
+        
         String postData = null;
 
         if (postfields != null && (isPost || postfields.size() >= 1)) {
@@ -112,6 +115,7 @@ public class History implements Runnable {
 
     public static void back() {
         if (currentIndex <= 0) return;
+        saveHighlightedItem();
         currentIndex--;
         screenChanged();
     }
@@ -125,12 +129,13 @@ public class History implements Runnable {
     public void refresh() {
         this.wml = WmlTemplates.LOADING;
         this.loaded = false;
+        this.highlightedItemIndex = 0;
         screenChanged();
         new Thread(this).start();
     }
 
     public static synchronized History getCurrent() {
-        if (list.size() == 0) return null;
+        if (list.size() == 0 || currentIndex < 0) return null;
         return (History) list.elementAt(currentIndex);
     }
 
@@ -140,6 +145,14 @@ public class History implements Runnable {
         
         String card = (curr.loaded) ? curr.card : null;
         MainScreen.instance.displayWml(curr.wml, card, curr.contentType);
+        MainScreen.instance.setHighlightedItem(curr.highlightedItemIndex);
+    }
+
+    private static void saveHighlightedItem() {
+        History curr = getCurrent();
+        if (curr == null) return;
+
+        curr.highlightedItemIndex = MainScreen.instance.getHighlightedIndex();
     }
 
     public void run() {

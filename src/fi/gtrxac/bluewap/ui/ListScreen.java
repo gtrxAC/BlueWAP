@@ -290,4 +290,8 @@ public abstract class ListScreen extends Screen {
         makeSelectedItemVisible();
         AppBase.repaint();
     }
+
+    public int getHighlightedIndex() {
+        return highlightedIndex;
+    }
 }
