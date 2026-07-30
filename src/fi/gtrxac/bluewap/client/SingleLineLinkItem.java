@@ -4,7 +4,7 @@ import fi.gtrxac.bluewap.Util;
 import fi.gtrxac.bluewap.ui.*;
 
 public class SingleLineLinkItem extends LinkItem {
-    String fullText;
+    public String fullText;
 
     public SingleLineLinkItem(String text) {
         super(text);

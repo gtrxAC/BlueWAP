@@ -85,8 +85,8 @@ public class MenuScreen extends ListScreen implements CommandListener {
     }
 
     protected void itemSelected(Item i) {
-        if (i instanceof LinkItem) {
-            visit(((LinkItem) i).text);
+        if (i instanceof SingleLineLinkItem) {
+            visit(((SingleLineLinkItem) i).fullText);
         }
 //#ifndef NO_BLUETOOTH
         if (i == standardItem) {
