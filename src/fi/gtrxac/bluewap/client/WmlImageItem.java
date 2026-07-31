@@ -97,6 +97,10 @@ public class WmlImageItem extends StringItem implements Runnable {
         }
         catch (Exception e) {
             e.printStackTrace();
+
+            // uncomment for error reporting
+            // altText = e.toString();
+            // needRecalc();
         }
         finally {
             if (http != null) http.close();

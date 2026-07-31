@@ -87,8 +87,9 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
 
             StandardHTTP http = null;
             String resultUrl = request.url;
+            Hashtable responseHeaders = new Hashtable();
+            int responseCode;
             byte[] body = null;
-            int respCode;
 
             try {
                 http = new StandardHTTP(request.method, request.url);
@@ -101,9 +102,10 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
                     http.setData(request.data);
                 }
 
-                body = http.getResponseBytes();
-                respCode = http.getResponseCode();
                 resultUrl = http.getUrl();
+                responseHeaders = http.getResponseHeaders();
+                responseCode = http.getResponseCode();
+                body = http.getResponseBytes();
                 LogScreen.log("Response received");
             }
             catch (Exception e) {
@@ -131,7 +133,7 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
 
             try {
                 writeResponse(
-                    dos, respCode, new Hashtable(), resultUrl,
+                    dos, responseCode, responseHeaders, resultUrl,
                     body, request.version);
                     
                 LogScreen.log("Response sent");

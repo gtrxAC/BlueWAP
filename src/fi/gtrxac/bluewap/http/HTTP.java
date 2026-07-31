@@ -130,6 +130,11 @@ public abstract class HTTP {
 		return responseCode;
 	}
 
+	public Hashtable getResponseHeaders() throws Exception {
+		checkMakeRequest();
+		return responseHeaders;
+	}
+
 	/**
 	 * Get the value of a HTTP response header sent by the server.
 	 * Must be called before the other `getResponse*()` methods.

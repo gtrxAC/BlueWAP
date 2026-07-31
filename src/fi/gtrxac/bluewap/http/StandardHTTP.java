@@ -139,6 +139,19 @@ public class StandardHTTP extends HTTP {
 		queueItem.finished();
 	}
 
+	public Hashtable getResponseHeaders() throws Exception {
+		checkMakeRequest();
+		Hashtable result = new Hashtable();
+		
+		for (int i = 0; ; i++) {
+			String key = hc.getHeaderFieldKey(i);
+			String value = hc.getHeaderField(i);
+			if (key == null || value == null) break;
+			result.put(key, value);
+		}
+		return result;
+	}
+
 	/**
 	 * Get the value of a HTTP response header sent by the server.
 	 */
