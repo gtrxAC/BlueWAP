@@ -6,12 +6,6 @@
     "excludes": ["j.png"]
   },
   {
-    "name": "bluewap_client_nobt_debug",
-    "defines": ["BLUEWAP_CLIENT", "DEBUG", "NO_BLUETOOTH", "NO_HTTP_BLUETOOTH_SUPPORT"],
-    "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
-    "excludes": ["j.png"]
-  },
-  {
     "name": "bluewap_server_debug",
     "defines": ["BLUEWAP_SERVER", "DEBUG"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
@@ -20,6 +14,12 @@
   {
     "name": "bluewap_client",
     "defines": ["BLUEWAP_CLIENT"],
+    "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
+    "excludes": ["j.png"]
+  },
+  {
+    "name": "bluewap_client_samsung",
+    "defines": ["BLUEWAP_CLIENT", "SAMSUNG_LG_TOUCH_ATTRIBUTES", "NO_HTTP_SYMBIAN_ERROR_HANDLER"],
     "bootclasspath": ["sdk/lib/jsr82.jar", "sdk/lib/midp20.jar", "sdk/lib/cldc10.jar"],
     "excludes": ["j.png"]
   },
