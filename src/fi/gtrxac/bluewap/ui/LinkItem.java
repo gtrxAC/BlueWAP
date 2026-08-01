@@ -27,8 +27,6 @@ public class LinkItem extends Item {
             g.setColor(0x3355CC);
         }
 
-        if (textLines == null) recalc(width);
-        
         g.setFont(Fonts.underlined);
         int y = 0;
         for (int i = 0; i < textLines.length; i++) {

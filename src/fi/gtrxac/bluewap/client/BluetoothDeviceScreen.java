@@ -26,6 +26,13 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
         super(2, 2);
         addItem(searchButton);
         addItem(autoConnectButton);
+        addItem(new BlankItem(Fonts.height/5));
+
+        // addItem(new ListItem("Test Item 1"));
+        // addItem(new ListItem("Test Item 2"));
+        // addItem(new ListItem("Test Item 3"));
+        // addItem(new ListItem("Longer Test Item 4"));
+        // addItem(new ListItem("Even Longer Test Item 5"));
 
         initClient();
         RemoteDevice[] devices = client.getKnownDevices();
@@ -86,6 +93,7 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
         removeAllItems();
         addItem(searchButton);
         addItem(autoConnectButton);
+        addItem(new BlankItem(Fonts.height/5));
     }
 
     private void searchDevices(boolean autoConnect) {
@@ -101,7 +109,7 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
 
     private void addDeviceItem(String name, RemoteDevice device) {
         devices.addElement(device);
-        ButtonItem item = new ButtonItem(name);
+        ListItem item = new ListItem(name);
         deviceItems.addElement(item);
         addItem(item);
     }
