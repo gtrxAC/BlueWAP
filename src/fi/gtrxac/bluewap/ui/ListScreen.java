@@ -82,7 +82,7 @@ public abstract class ListScreen extends Screen implements Runnable {
 
         if (maxScroll > 0) {
             // if screen is scrollable, make space for the scrollbar
-            contentWidth -= Fonts.height/2;
+            contentWidth -= Fonts.height/2 - getMargin()*2/3;
             recalcItems(0, true);
         }
         makeSelectedItemVisible();
