@@ -28,7 +28,7 @@ public class MainScreen extends ListScreen implements CommandListener {
         new ButtonItem("Open in browser");
 
     public MainScreen() {
-        super(2, 2);
+        super();
         setCommandListener(this);
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
         addCommand(new Command("Select", Command.OK, CMD_SELECT));

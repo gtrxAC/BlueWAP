@@ -24,6 +24,10 @@ public abstract class ListScreen extends Screen implements Runnable {
         scroll = -itemPadding;
     }
 
+    public ListScreen() {
+        this(Math.max(2, Fonts.height/8), Math.max(2, Fonts.height/8));
+    }
+
     public void draw(Graphics g) {
         g.setColor(0xFFFFFF);
         g.fillRect(0, 0, getWidth(), getHeight());

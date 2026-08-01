@@ -19,7 +19,7 @@ public class LogScreen extends ListScreen implements CommandListener {
     public static final LogScreen instance = new LogScreen();
 
     public LogScreen() {
-        super(2, 2);
+        super();
 
         setCommandListener(this);
         addCommand(new Command("Quit", Command.EXIT, CMD_QUIT));

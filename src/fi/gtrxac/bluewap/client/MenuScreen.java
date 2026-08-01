@@ -34,7 +34,7 @@ public class MenuScreen extends ListScreen implements CommandListener {
 //#endif
 
     public MenuScreen() {
-        super(2, 2);
+        super();
 
         addItem("Address:");
         addItem(urlField);

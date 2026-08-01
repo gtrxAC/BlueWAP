@@ -18,13 +18,13 @@ public class ButtonItem extends Item {
 
     public ButtonItem(String text, int bgColor) {
         this(text, bgColor, bgColor, 0, 0);
-        textColor = Util.higherContrast(0x000000, 0xFFFFFF, bgColor);
+        textColor = Util.higherContrast(0x111111, 0xEEEEEE, bgColor);
         selectedTextColor = textColor;
     }
 
     public ButtonItem(String text, int bgColor, int selectedBgColor) {
         this(text, bgColor, selectedBgColor, 0, 0);
-        textColor = Util.higherContrast(0x000000, 0xFFFFFF, bgColor);
+        textColor = Util.higherContrast(0x111111, 0xEEEEEE, bgColor);
         selectedTextColor = Util.higherContrast(0x000000, 0xFFFFFF, selectedBgColor);
     }
 

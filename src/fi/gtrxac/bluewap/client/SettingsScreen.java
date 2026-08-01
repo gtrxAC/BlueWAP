@@ -21,7 +21,7 @@ public class SettingsScreen extends ListScreen implements CommandListener {
     TextFieldItem connLimitField = new TextFieldItem("Max. connections", "" + HTTPQueue.maxSlots, 3, TextField.NUMERIC);
 
     public SettingsScreen() {
-        super(2, 2);
+        super();
 
         addItem("Font size:");
         fontSizeGroup = new RadioButtonGroup();

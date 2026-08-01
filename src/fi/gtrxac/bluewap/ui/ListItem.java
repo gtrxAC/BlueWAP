@@ -11,8 +11,7 @@ public class ListItem extends Item {
     private String displayText;
 
     private static int imageSize;
-    private static Image unselectedArrowImage;
-    private static Image selectedArrowImage;
+    private static Image arrowImage;
 
     public ListItem(String text) {
         super(true);
@@ -21,20 +20,22 @@ public class ListItem extends Item {
 
     public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
         if (highlighted) {
-            g.setColor(0x5599FF);
-            g.fillRect(0, -2, width, height + 1);
+            g.setColor(0xAADDFF);
+            g.fillRect(0, -screen.itemPadding, width, height + screen.itemPadding - 1);
+            g.setColor(0x000000);
+        } else {
+            g.setColor(0x111111);
         }
 
-        g.setColor(0x888888);
-        g.drawLine(0, height - 1, width - 1, height - 1);
-        g.drawLine(0, -3, width - 1, -3);
-        
         g.setFont(Fonts.plain);
-        g.setColor(highlighted ? 0xFFFFFF : 0x000000);
         g.drawString(displayText, Fonts.height/4, Fonts.height/4, 0);
 
-        g.drawImage(highlighted ? selectedArrowImage : unselectedArrowImage,
-            width - Fonts.height/3, Fonts.height/4,
+        int prevItemLastPixel = -screen.itemPadding - 1;
+        g.setColor(0x888888);
+        g.drawLine(0, prevItemLastPixel, width - 1, prevItemLastPixel);
+        g.drawLine(0, height - 1, width - 1, height - 1);
+
+        g.drawImage(arrowImage, width - Fonts.height/3, Fonts.height/4,
             Graphics.TOP | Graphics.RIGHT);
     }
 
@@ -47,10 +48,8 @@ public class ListItem extends Item {
         int newImageSize = Fonts.height;
 
         if (imageSize != newImageSize) {
-            unselectedArrowImage = null;
-            selectedArrowImage = null;
-            unselectedArrowImage = createArrowImage(newImageSize, 0x555555);
-            selectedArrowImage = createArrowImage(newImageSize, 0xEEF8FF);
+            arrowImage = null;
+            arrowImage = createArrowImage(newImageSize, 0x444444);
             imageSize = newImageSize;
         }
     }
