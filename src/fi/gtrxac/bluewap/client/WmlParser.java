@@ -657,7 +657,7 @@ public class WmlParser extends KXmlParser {
                 }
             }
             else if (getEventType() == END_TAG) {
-                if ("go".equals(getName())) {
+                if (tagName.equals(getName())) {
                     break;
                 } else {
                     warnNotAllowed(tagName);
