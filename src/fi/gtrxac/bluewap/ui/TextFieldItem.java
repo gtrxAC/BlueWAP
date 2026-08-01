@@ -26,8 +26,8 @@ public class TextFieldItem extends Item implements CommandListener {
         this.constraints = constraints;
     }
 
-    public void draw(Graphics g, int width, boolean selected) {
-        if (selected) {
+    public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
+        if (highlighted) {
             g.setColor(0xEEF8FF);
             g.fillRect(0, 0, width, height);
             drawHighlight(g, width);

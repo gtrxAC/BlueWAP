@@ -43,7 +43,7 @@ public abstract class ListScreen extends Screen implements Runnable {
             if (g.getTranslateY() + item.height > 0) {
                 // g.setColor(0xFF0000);
                 // g.drawRect(0, 0, contentWidth, item.height);
-                item.draw(g, contentWidth, highlightedIndex == i);
+                item.draw(g, this, contentWidth, highlightedIndex == i);
             }
             g.translate(0, item.height + itemPadding);
 
@@ -117,9 +117,9 @@ public abstract class ListScreen extends Screen implements Runnable {
 
         switch (gameAction) {
             case Canvas.DOWN: {
-                Item selected = (Item) items.elementAt(highlightedIndex);
+                Item highlighted = (Item) items.elementAt(highlightedIndex);
 
-                if (selected.height > getHeight() && selected.y + selected.height - scroll > getHeight()) {
+                if (highlighted.height > getHeight() && highlighted.y + highlighted.height - scroll > getHeight()) {
                     // Item is taller than screen -> scroll down by two lines
                     scroll += Fonts.height*2;
                     if (scroll > maxScroll) scroll = maxScroll;
@@ -130,9 +130,9 @@ public abstract class ListScreen extends Screen implements Runnable {
                 break;
             }
             case Canvas.UP: {
-                Item selected = (Item) items.elementAt(highlightedIndex);
+                Item highlighted = (Item) items.elementAt(highlightedIndex);
 
-                if (selected.height > getHeight() && selected.y - scroll < 0) {
+                if (highlighted.height > getHeight() && highlighted.y - scroll < 0) {
                     // Item is taller than screen -> scroll up by two lines
                     scroll -= Fonts.height*2;
                     if (scroll < -itemPadding) scroll = -itemPadding;
@@ -163,11 +163,11 @@ public abstract class ListScreen extends Screen implements Runnable {
 
     private boolean itemIsSelectable(int index) {
         Item item = (Item) items.elementAt(index);
-        Item selected = (Item) items.elementAt(highlightedIndex);
+        Item highlighted = (Item) items.elementAt(highlightedIndex);
 
         // if gap between items is more than the screen height, don't allow jumping to
         // this item because then the contents of some in-between items might never be seen
-        if (Math.abs(item.y - selected.y) > getHeight()) return false;
+        if (Math.abs(item.y - highlighted.y) > getHeight()) return false;
 
         return (item.isSelectable() || item.height >= getHeight());
     }
@@ -198,13 +198,13 @@ public abstract class ListScreen extends Screen implements Runnable {
     private void makeSelectedItemVisible() {
         if (items.size() == 0) return;
 
-        Item selected = (Item) items.elementAt(highlightedIndex);
-        int itemPos = selected.y - scroll;
+        Item highlighted = (Item) items.elementAt(highlightedIndex);
+        int itemPos = highlighted.y - scroll;
 
-        if (selected.height > getHeight()) {
+        if (highlighted.height > getHeight()) {
             // For items taller than the screen, make sure one screenful of it is visible:
             // Check if item is above the visible area
-            if (itemPos + selected.height < 0) {
+            if (itemPos + highlighted.height < 0) {
                 scroll -= getHeight() + itemPadding;
             }
             // Check if below the visible area
@@ -218,8 +218,8 @@ public abstract class ListScreen extends Screen implements Runnable {
                 scroll += itemPos - itemPadding;
             }
             // Check if below the visible area
-            else if (itemPos + selected.height > getHeight()) {
-                scroll += (itemPos + selected.height) - getHeight() + itemPadding;
+            else if (itemPos + highlighted.height > getHeight()) {
+                scroll += (itemPos + highlighted.height) - getHeight() + itemPadding;
             }
         }
     }

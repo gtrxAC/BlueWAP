@@ -18,8 +18,8 @@ public class LinkItem extends Item {
         this.text = text;
     }
 
-    public void draw(Graphics g, int width, boolean selected) {
-        if (selected) {
+    public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
+        if (highlighted) {
             g.setColor(0xEEF8FF);
             g.fillRect(0, 0, maxStringWidth, height);
             g.setColor(0x2244AA);
@@ -34,7 +34,7 @@ public class LinkItem extends Item {
             y += Fonts.underlinedHeight;
         }
 
-        if (selected) {
+        if (highlighted) {
             drawHighlight(g, 0, 0, maxStringWidth, height);
         }
     }

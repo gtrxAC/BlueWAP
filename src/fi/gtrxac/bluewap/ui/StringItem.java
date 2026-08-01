@@ -24,7 +24,7 @@ public class StringItem extends Item {
         this.definedFont = font;
     }
 
-    public void draw(Graphics g, int width, boolean selected) {
+    public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
         g.setFont(font);
         g.setColor(0x111111);
         int y = 0;

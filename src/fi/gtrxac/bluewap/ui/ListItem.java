@@ -19,8 +19,8 @@ public class ListItem extends Item {
         this.text = text;
     }
 
-    public void draw(Graphics g, int width, boolean selected) {
-        if (selected) {
+    public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
+        if (highlighted) {
             g.setColor(0x5599FF);
             g.fillRect(0, -2, width, height + 1);
         }
@@ -30,10 +30,10 @@ public class ListItem extends Item {
         g.drawLine(0, -3, width - 1, -3);
         
         g.setFont(Fonts.plain);
-        g.setColor(selected ? 0xFFFFFF : 0x000000);
+        g.setColor(highlighted ? 0xFFFFFF : 0x000000);
         g.drawString(displayText, Fonts.height/4, Fonts.height/4, 0);
 
-        g.drawImage(selected ? selectedArrowImage : unselectedArrowImage,
+        g.drawImage(highlighted ? selectedArrowImage : unselectedArrowImage,
             width - Fonts.height/3, Fonts.height/4,
             Graphics.TOP | Graphics.RIGHT);
     }

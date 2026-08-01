@@ -21,8 +21,8 @@ public class RadioButtonItem extends Item {
         this.strItem = new StringItem(text);
     }
 
-    public void draw(Graphics g, int width, boolean selected) {
-        if (selected) {
+    public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
+        if (highlighted) {
             g.setColor(0xEEF8FF);
             g.fillRect(0, 0, width, height);
             g.setColor(0x000000);
@@ -35,10 +35,10 @@ public class RadioButtonItem extends Item {
 
         int strOffset = Fonts.height*6/5;
         g.translate(strOffset, 0);
-        strItem.draw(g, width - strOffset, false);
+        strItem.draw(g, screen, width - strOffset, false);
         g.translate(-strOffset, 0);
 
-        if (selected) {
+        if (highlighted) {
             drawHighlight(g, width);
         }
     }

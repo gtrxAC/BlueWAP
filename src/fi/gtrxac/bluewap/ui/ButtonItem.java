@@ -38,11 +38,11 @@ public class ButtonItem extends Item {
         this.selectedTextColor = selectedTextColor;
     }
 
-    public void draw(Graphics g, int width, boolean selected) {
-        g.setColor(selected ? selectedBgColor : bgColor);
+    public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
+        g.setColor(highlighted ? selectedBgColor : bgColor);
         g.fillRect(0, 0, width, height);
 
-        if (selected) {
+        if (highlighted) {
             drawHighlight(g, width);
         } else {
             g.setColor(darkerBgColor);
@@ -50,7 +50,7 @@ public class ButtonItem extends Item {
         }
         
         g.setFont(Fonts.bold);
-        g.setColor(selected ? selectedTextColor : textColor);
+        g.setColor(highlighted ? selectedTextColor : textColor);
         g.drawString(text, width/2, (height - Fonts.boldHeight)/2, Graphics.HCENTER | Graphics.TOP);
     }
 

@@ -12,7 +12,7 @@ public class BlankItem extends Item {
         definedHeight = height;
     }
 
-    public void draw(Graphics g, int width, boolean selected) {
+    public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
     }
 
     public void recalc(int width) {

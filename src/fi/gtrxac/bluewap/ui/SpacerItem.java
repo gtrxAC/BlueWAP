@@ -9,7 +9,7 @@ public class SpacerItem extends Item {
         super(false);
     }
 
-    public void draw(Graphics g, int width, boolean selected) {
+    public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
         g.setColor(0x888888);
         g.drawLine(0, height/2, width, height/2);
     }

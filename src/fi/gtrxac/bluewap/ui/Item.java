@@ -22,10 +22,11 @@ public abstract class Item {
      * Screen coordinates are automatically translated so (0, 0) is the top left of the item.
      * Do not use g.translate(), or if you do, undo your translations.
      * @param g Graphics context to draw on
+     * @param screen The screen where the item is being drawn
      * @param width Screen width in pixels
-     * @param selected Whether this item is currently selected
+     * @param highlighted Whether this item is currently highlighted
      */
-    public abstract void draw(Graphics g, int width, boolean selected);
+    public abstract void draw(Graphics g, ListScreen screen, int width, boolean highlighted);
 
     /**
      * Called before this item is first drawn, and when the width of the screen changes.

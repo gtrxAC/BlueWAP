@@ -33,7 +33,7 @@ public class WmlImageItem extends StringItem implements Runnable {
         this.altText = altText;
     }
 
-    public void draw(Graphics g, int width, boolean selected) {
+    public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
         if (image != null) {
             g.drawImage(image, 0, 0, 0);
             return;
@@ -42,7 +42,7 @@ public class WmlImageItem extends StringItem implements Runnable {
             new Thread(this).start();
             haveRequested = true;
         }
-        super.draw(g, width, selected);
+        super.draw(g, screen, width, highlighted);
     }
 
     public void recalc(int width) {
