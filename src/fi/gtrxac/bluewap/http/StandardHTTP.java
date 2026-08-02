@@ -117,10 +117,12 @@ public class StandardHTTP extends HTTP {
 		if (clientUa == null) {
 			clientUa = "";
 		}
-		else if (clientUa.length() != 0 && !clientUa.endsWith(" ")) {
-			clientUa += " ";
+		else if (clientUa.indexOf("BlueWAP") != -1) {
+			if (!clientUa.endsWith(" ")) {
+				clientUa += " ";
+			}
+			clientUa += "BlueWAPServer/" + AppBase.instance.getAppProperty("MIDlet-Version");
 		}
-		clientUa += "BlueWAPServer/" + AppBase.instance.getAppProperty("MIDlet-Version");
 		setHeader("User-Agent", clientUa);
 //#endif
 
