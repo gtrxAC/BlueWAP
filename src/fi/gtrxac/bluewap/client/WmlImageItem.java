@@ -15,6 +15,7 @@ import java.util.*;
 
 public class WmlImageItem extends StringItem implements Runnable {
     private URL url;
+    private String localsrc;
     private Image image;
     private boolean haveRequested;
     private String altText;
@@ -22,7 +23,7 @@ public class WmlImageItem extends StringItem implements Runnable {
     private static final int IMAGE_CACHE_SIZE = 10;
     private static Hashtable imageCache = new Hashtable();
     
-    public WmlImageItem(String url, String altText) {
+    public WmlImageItem(String url, String localsrc, String altText) {
         super(altText);
 
         try {
@@ -30,6 +31,7 @@ public class WmlImageItem extends StringItem implements Runnable {
         }
         catch (Exception e) {}
 
+        this.localsrc = localsrc;
         this.altText = altText;
     }
 
@@ -57,6 +59,12 @@ public class WmlImageItem extends StringItem implements Runnable {
     }
 
     private Image getOrFetchImage(URL url) {
+        try {
+            Image img = getLocalsrcImage(localsrc);
+            if (img != null) return scaleImage(img);
+        }
+        catch (Exception e) {}
+
         String urlStr = url.toString(false);
 
         CachedImage result = (CachedImage) imageCache.get(urlStr);
@@ -77,21 +85,7 @@ public class WmlImageItem extends StringItem implements Runnable {
                 img = Image.createImage(is);
             }
 
-            int screenWidth = AppCanvas.instance.getWidth();
-            int scaleMultiplier = Math.max(1, Math.min(Fonts.height/16, screenWidth/128));
-            int scaleWidth = img.getWidth()*scaleMultiplier;
-
-            // Upscale if possible (for high-res screens)
-            if (scaleMultiplier > 1 && scaleWidth < screenWidth) {
-                int scaleHeight = img.getHeight()*scaleMultiplier;
-                img = ImageUtils.resize(img, scaleWidth, scaleHeight, false, false);
-            }
-            // Downscale if image too big for the screen
-            else if (img.getWidth() > screenWidth) {
-                int scaleRatio = screenWidth*1000/img.getWidth();
-                img = ImageUtils.resize(img, screenWidth, img.getHeight()*scaleRatio/1000, true, true);
-            }
-
+            img = scaleImage(img);
             result = new CachedImage(img);
             Util.hashtablePutCachedImageWithLimit(imageCache, urlStr, result, IMAGE_CACHE_SIZE);
         }
@@ -108,6 +102,53 @@ public class WmlImageItem extends StringItem implements Runnable {
 
         if (result == null) return null;
         return result.getImage();
+    }
+
+	private Image getLocalsrcImage(String path) throws Exception {
+		if (!path.startsWith("pict:///")) {
+			throw new Exception();
+		}
+		path = path.substring("pict:///".length());
+		
+		// find this image's spritesheet position from the csv
+        HTTP h = HTTP.createRequest("jar://s.csv");
+        String csv = h.getResponseString();
+        String[] csvLines = fi.gtrxac.bluewap.Util.split(csv, "\n");
+
+        for (int i = 0; i < csvLines.length; i++) {
+            String[] columns = fi.gtrxac.bluewap.Util.split(csvLines[i], ",");
+            if (columns.length != 5) continue;  // empty or malformed line
+            if (!columns[0].equals(path)) continue;  // this line isn't the requested image
+
+			int x = Integer.parseInt(columns[1]);
+			int y = Integer.parseInt(columns[2]);
+			int width = Integer.parseInt(columns[3]);
+			int height = Integer.parseInt(columns[4]);
+
+			HTTP h2 = HTTP.createRequest("jar://s.png");
+			Image sheet = h2.getResponseImage();
+			return ImageUtils.crop(sheet, x, y, x + width, y + height);
+        }
+
+		throw new Exception();  // not found
+	}
+
+    private Image scaleImage(Image img) {
+        int screenWidth = AppCanvas.instance.getWidth();
+        int scaleMultiplier = Math.max(1, Math.min(Fonts.height/16, screenWidth/128));
+        int scaleWidth = img.getWidth()*scaleMultiplier;
+
+        // Upscale if possible (for high-res screens)
+        if (scaleMultiplier > 1 && scaleWidth < screenWidth) {
+            int scaleHeight = img.getHeight()*scaleMultiplier;
+            img = ImageUtils.resize(img, scaleWidth, scaleHeight, false, false);
+        }
+        // Downscale if image too big for the screen
+        else if (img.getWidth() > screenWidth) {
+            int scaleRatio = screenWidth*1000/img.getWidth();
+            img = ImageUtils.resize(img, screenWidth, img.getHeight()*scaleRatio/1000, true, true);
+        }
+        return img;
     }
 
     private Image parseWbmp(InputStream is) throws Exception {

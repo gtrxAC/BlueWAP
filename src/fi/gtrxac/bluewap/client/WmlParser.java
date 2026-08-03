@@ -100,7 +100,7 @@ public class WmlParser extends KXmlParser {
                 output.addItem(MainScreen.systemBrowserButton);
 
                 if (contentType != null && contentType.startsWith("image/")) {
-                    output.addItem(new WmlImageItem(History.getCurrent().url.toString(false), ""));
+                    output.addItem(new WmlImageItem(History.getCurrent().url.toString(false), null, ""));
                 } else {
                     addWarning("page does not begin with a tag, treating it as raw text");
                     output.addItem(wml);
@@ -526,9 +526,10 @@ public class WmlParser extends KXmlParser {
 
     public void parseImg() throws Exception {
         String src = getAttributeRequired("src");
+        String localsrc = getAttributeValue(null, "localsrc");
 
         if (src != null) {
-            output.addItem(new WmlImageItem(src, getImgAltText()));
+            output.addItem(new WmlImageItem(src, localsrc, getImgAltText()));
         } else {
             output.addItem(new WmlStringItem(getImgAltText()));
         }
