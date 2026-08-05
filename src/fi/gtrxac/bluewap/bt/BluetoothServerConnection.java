@@ -18,7 +18,11 @@ public class BluetoothServerConnection extends Thread {
         DataOutputStream dos = null;
         try {
             dis = sc.openDataInputStream();
-            dos = sc.openDataOutputStream();
+
+            OutputStream os = sc.openOutputStream();
+            ChunkedOutputStream cos = new ChunkedOutputStream(os);
+            dos = new DataOutputStream(cos);
+            
             listener.bluetoothConnected(sc, dis, dos);
         }
         catch (Exception e) {
