@@ -78,11 +78,10 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
         Vector ownedDiscordGateways = new Vector();
         
         while (true) {
-            RequestData request = null;
+            RequestData req = null;
 
             try {
-                request = readRequest(dis);
-                LogScreen.log(request.method + " " + request.url);
+                req = readRequest(dis);
             }
             catch (Exception e) {
                 // Error with BT connection - close connection
@@ -90,18 +89,23 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
             }
 
             ResponseData resp = null;
+            boolean isDiscordProtocol = req.url.startsWith("discord://");
+            boolean showLogs = !isDiscordProtocol;
 
             try {
-                if (request.url.startsWith("http://") || request.url.startsWith("https://")) {
-                    resp = handleHttpRequest(request);
+                if (showLogs) LogScreen.log(req.method + " " + req.url);
+
+                if (req.url.startsWith("http://") || req.url.startsWith("https://")) {
+                    resp = handleHttpRequest(req);
                 }
-                else if (request.url.startsWith("discord://")) {
-                    resp = handleDiscordRequest(request, ownedDiscordGateways);
+                else if (isDiscordProtocol) {
+                    resp = handleDiscordRequest(req, ownedDiscordGateways);
                 }
                 else {
                     throw new Exception("Unsupported protocol");
                 }
-                LogScreen.log("Response received");
+
+                if (showLogs) LogScreen.log("Response received");
             }
             catch (Exception e) {
                 // Error with HTTP request - send error over BT
@@ -113,7 +117,7 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
                         WmlTemplates.ERROR_END;
 
                     resp = new ResponseData(
-                        request.url, new Hashtable(), 500, Util.stringToBytes(errorWml));
+                        req.url, new Hashtable(), 500, Util.stringToBytes(errorWml));
                 }
                 catch (Exception ex) {
                     // Error with BT connection while sending error response - close connection
@@ -122,8 +126,8 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
             }
 
             try {
-                writeResponse(dos, resp, request.version);
-                LogScreen.log("Response sent");
+                writeResponse(dos, resp, req.version);
+                if (showLogs) LogScreen.log("Response sent");
             }
             catch (Exception e) {
                 // Error with BT connection - close connection

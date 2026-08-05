@@ -38,7 +38,7 @@ public class DiscordGateway implements Runnable {
     }
 
     public byte[] getReceivedData() throws Exception {
-        LogScreen.log("Get received: " + receiveBuffer.toByteArray().length);
+        // LogScreen.log("Get received: " + receiveBuffer.toByteArray().length);
         
         if (!running) throw new Exception("connection closed");
 
@@ -50,14 +50,14 @@ public class DiscordGateway implements Runnable {
     }
 
     public void handleMessage(String message) throws Exception {
-        LogScreen.log("Client: '" + message.substring(0, Math.min(message.length(), 200)) + "'");
+        // LogScreen.log("Client: '" + message.substring(0, Math.min(message.length(), 200)) + "'");
 
         JSONObject messageJson = JSON.getObject(message);
 
         if (messageJson.getInt("op", 0) == -1) {
             handleProxyMessage(messageJson);
         } else {
-            LogScreen.log("Sending to WS");
+            // LogScreen.log("Sending to WS");
             
             if (websocket == null) return;
 
@@ -123,7 +123,7 @@ public class DiscordGateway implements Runnable {
                 h.getResponseBytes();
             }
             catch (Exception e) {
-                LogScreen.log(e.toString());
+                LogScreen.log("Failed to send typing: " + e.toString());
             }
         }
         else if ("GATEWAY_CONNECT_REMOTEAUTH".equals(t)) {
@@ -132,7 +132,7 @@ public class DiscordGateway implements Runnable {
     }
 
     private void handleWebsocketMessage(String message) throws Exception {
-        LogScreen.log("WS: '" + message.substring(0, Math.min(message.length(), 200)) + "'");
+        // LogScreen.log("WS: '" + message.substring(0, Math.min(message.length(), 200)) + "'");
 
         JSONObject messageJson = JSON.getObject(message);
         String t = messageJson.getString("t");
@@ -220,7 +220,7 @@ public class DiscordGateway implements Runnable {
     }
 
     private void sendToClient(String message) throws Exception {
-        LogScreen.log("Send to client: '" + message.substring(0, Math.min(message.length(), 200)) + "'");
+        // LogScreen.log("Send to client: '" + message.substring(0, Math.min(message.length(), 200)) + "'");
 
         synchronized (receiveBuffer) {
             receiveBuffer.write(Util.stringToBytes(message));
@@ -234,7 +234,7 @@ public class DiscordGateway implements Runnable {
                 handleWebsocketMessage(msg);
             }
             catch (Exception e) {
-                LogScreen.log(e.toString());
+                LogScreen.log("WebSocket read error: " + e.toString());
                 disconnect();
             }
         }
