@@ -182,6 +182,7 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
             discordGateways.put(connectionId, new DiscordGateway());
             ownedGateways.addElement(connectionId);
 
+            LogScreen.log("Discord gateway connected");
             return new ResponseData("", new Hashtable(), 200, Util.stringToBytes(connectionId));
         }
 
