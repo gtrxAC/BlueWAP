@@ -18,6 +18,9 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
     public static Vector iStreams = new Vector();
     public static Vector oStreams = new Vector();
 
+    public static Hashtable discordGateways = new Hashtable();
+    private static int discordGatewayCounter = 0;
+
     public static final boolean supportsBluetooth = Util.checkClass("javax.bluetooth.RemoteDevice");
 
     public void init() {
@@ -72,6 +75,7 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
         connections.addElement(conn);
         iStreams.addElement(dis);
         oStreams.addElement(dos);
+        Vector ownedDiscordGateways = new Vector();
         
         while (true) {
             RequestData request = null;
@@ -85,27 +89,18 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
                 break;
             }
 
-            StandardHTTP http = null;
-            String resultUrl = request.url;
-            Hashtable responseHeaders = new Hashtable();
-            int responseCode;
-            byte[] body = null;
+            ResponseData resp = null;
 
             try {
-                http = new StandardHTTP(request.method, request.url);
-                for (Enumeration e = request.headers.keys(); e.hasMoreElements(); ) {
-                    String key = (String) e.nextElement();
-                    String value = (String) request.headers.get(key);
-                    http.setHeader(key, value);
+                if (request.url.startsWith("http://") || request.url.startsWith("https://")) {
+                    resp = handleHttpRequest(request);
                 }
-                if (request.data != null) {
-                    http.setData(request.data);
+                else if (request.url.startsWith("discord://")) {
+                    resp = handleDiscordRequest(request, ownedDiscordGateways);
                 }
-
-                resultUrl = http.getUrl();
-                responseHeaders = http.getResponseHeaders();
-                responseCode = http.getResponseCode();
-                body = http.getResponseBytes();
+                else {
+                    throw new Exception("Unsupported protocol");
+                }
                 LogScreen.log("Response received");
             }
             catch (Exception e) {
@@ -117,25 +112,17 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
                         Util.sanitizeWml(e.toString()) +
                         WmlTemplates.ERROR_END;
 
-                    writeResponse(
-                        dos, 500, new Hashtable(), resultUrl,
-                        Util.stringToBytes(errorWml), request.version);
+                    resp = new ResponseData(
+                        request.url, new Hashtable(), 500, Util.stringToBytes(errorWml));
                 }
                 catch (Exception ex) {
                     // Error with BT connection while sending error response - close connection
                     break;
                 }
-                continue;
-            }
-            finally {
-                try { http.close(); } catch (Exception e) {}
             }
 
             try {
-                writeResponse(
-                    dos, responseCode, responseHeaders, resultUrl,
-                    body, request.version);
-                    
+                writeResponse(dos, resp, request.version);
                 LogScreen.log("Response sent");
             }
             catch (Exception e) {
@@ -149,6 +136,72 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
         connections.removeElement(conn);
         iStreams.removeElement(dis);
         oStreams.removeElement(dos);
+
+        for (int i = 0; i < ownedDiscordGateways.size(); i++) {
+            String connectionId = (String) ownedDiscordGateways.elementAt(i);
+            DiscordGateway gateway = (DiscordGateway) discordGateways.get(connectionId);
+            if (gateway == null) continue;
+            gateway.disconnect();
+            discordGateways.remove(connectionId);
+        }
+    }
+
+    private ResponseData handleHttpRequest(RequestData req) throws Exception {
+        StandardHTTP http = null;
+        try {
+            http = new StandardHTTP(req.method, req.url);
+            for (Enumeration e = req.headers.keys(); e.hasMoreElements(); ) {
+                String key = (String) e.nextElement();
+                String value = (String) req.headers.get(key);
+                http.setHeader(key, value);
+            }
+            if (req.data != null) {
+                http.setData(req.data);
+            }
+
+            String resultUrl = http.getUrl();
+            Hashtable responseHeaders = http.getResponseHeaders();
+            int responseCode = http.getResponseCode();
+            byte[] responseBody = http.getResponseBytes();
+
+            return new ResponseData(resultUrl, responseHeaders, responseCode, responseBody);
+        }
+        finally {
+            try { http.close(); } catch (Exception e) {}
+        }
+    }
+
+    private ResponseData handleDiscordRequest(RequestData req, Vector ownedGateways) throws Exception {
+        if (req.url.equals("discord://connect")) {
+            String connectionId = Integer.toString(discordGatewayCounter);
+
+            discordGateways.put(connectionId, new DiscordGateway());
+            ownedGateways.addElement(connectionId);
+
+            return new ResponseData("", new Hashtable(), 200, Util.stringToBytes(connectionId));
+        }
+
+        String connectionId = req.url.substring("discord://".length());
+        DiscordGateway gateway = (DiscordGateway) discordGateways.get(connectionId);
+
+        if (gateway == null) {
+            throw new Exception("Invalid connection ID");
+        }
+
+        if (req.method.equals("GET")) {
+            byte[] data = gateway.getReceivedData();
+            return new ResponseData("", new Hashtable(), 200, data);
+        }
+        else if (req.method.equals("POST")) {
+            gateway.handleMessage(Util.bytesToString(req.data));
+            return new ResponseData("", new Hashtable(), 200, null);
+        }
+        else if (req.method.equals("DELETE")) {
+            gateway.disconnect();
+            return new ResponseData("", new Hashtable(), 200, null);
+        }
+        
+        throw new Exception("Invalid method '" + req.method + "'");
     }
 
     private RequestData readRequest(DataInputStream input) throws IOException {
@@ -157,13 +210,13 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
             throw new IOException("Unsupported Bluetooth protocol version: " + version);
         }
 
-        String method = readString(input);
-        String url = readString(input);
+        String method = input.readUTF();
+        String url = input.readUTF();
 
         int headerCount = input.readInt();
         Hashtable headers = new Hashtable();
         for (int i = 0; i < headerCount; i++) {
-            headers.put(readString(input), readString(input));
+            headers.put(input.readUTF(), input.readUTF());
         }
 
         int bodyLength = input.readInt();
@@ -172,34 +225,32 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
         return new RequestData(method, url, headers, body, version);
     }
 
-    private void writeResponse(DataOutputStream output, int responseCode, Hashtable headers, String resultUrl, byte[] body, byte version) throws IOException {
+    private void writeResponse(DataOutputStream output, ResponseData resp, byte version) throws IOException {
         output.writeByte(version);
-        output.writeInt(responseCode);
+        output.writeInt(resp.code);
 
-        int headerCount = 0;
-        if (headers != null) {
-            headerCount = headers.size();
-        }
-        output.writeInt(headerCount);
-        if (headers != null) {
-            for (Enumeration e = headers.keys(); e.hasMoreElements(); ) {
+        if (resp.headers == null) {
+            output.writeInt(0);
+        } else {
+            output.writeInt(resp.headers.size());
+
+            for (Enumeration e = resp.headers.keys(); e.hasMoreElements(); ) {
                 String key = (String) e.nextElement();
-                String value = (String) headers.get(key);
+                String value = (String) resp.headers.get(key);
                 writeString(output, key);
                 writeString(output, value);
             }
         }
 
         if (version >= PROTOCOL_ADDED_RESULT_URL) {
-            writeString(output, resultUrl);
+            writeString(output, resp.resultUrl);
         }
 
-        if (body == null) {
+        if (resp.body == null) {
             output.writeInt(0);
-        }
-        else {
-            output.writeInt(body.length);
-            output.write(body, 0, body.length);
+        } else {
+            output.writeInt(resp.body.length);
+            output.write(resp.body, 0, resp.body.length);
         }
         output.flush();
     }
@@ -207,29 +258,8 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
     private void writeString(DataOutputStream output, String value) throws IOException {
         if (value == null) {
             output.writeUTF("");
-        }
-        else {
+        } else {
             output.writeUTF(value);
-        }
-    }
-
-    private String readString(DataInputStream input) throws IOException {
-        return input.readUTF();
-    }
-
-    private static class RequestData {
-        public String method;
-        public String url;
-        public Hashtable headers;
-        public byte[] data;
-        public byte version;
-
-        public RequestData(String method, String url, Hashtable headers, byte[] data, byte version) {
-            this.method = method;
-            this.url = url;
-            this.headers = headers;
-            this.data = data;
-            this.version = version;
         }
     }
 }

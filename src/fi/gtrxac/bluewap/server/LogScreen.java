@@ -32,7 +32,7 @@ public class LogScreen extends ListScreen implements CommandListener {
 
     private void addLogItem(String item) {
         addItem(item);
-        while (getItemCount() > 50) {
+        while (getItemCount() > 200) {
             removeItem(0);
         }
         // scroll to bottom if we were near the bottom
