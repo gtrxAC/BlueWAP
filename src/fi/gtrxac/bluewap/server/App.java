@@ -199,8 +199,10 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
         }
 
         if (req.method.equals("GET")) {
-            byte[] data = gateway.getReceivedData();
-            return new ResponseData("", new Hashtable(), 200, data);
+            String data = gateway.getReceivedData();
+            Hashtable headers = new Hashtable();
+            if (gateway.hasMore()) headers.put("C", "1");
+            return new ResponseData("", headers, 200, Util.stringToBytes(data));
         }
         else if (req.method.equals("POST")) {
             gateway.handleMessage(Util.bytesToString(req.data));

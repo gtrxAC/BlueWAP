@@ -10,14 +10,14 @@ import tech.alicesworld.ModernConnector.WebSocketClient;
 
 public class DiscordGateway implements Runnable {
     private WebSocketClient websocket;
-    private ByteArrayOutputStream receiveBuffer;
+    private Vector receivedEvents;
     private Vector supportedEvents;
     private boolean showGuildEmoji;
     private String token;
     private boolean running;
 
     public DiscordGateway() throws Exception {
-        receiveBuffer = new ByteArrayOutputStream();
+        receivedEvents = new Vector();
         supportedEvents = new Vector();
         showGuildEmoji = false;
         running = true;
@@ -37,14 +37,25 @@ public class DiscordGateway implements Runnable {
         catch (Exception e) {}
     }
 
-    public byte[] getReceivedData() throws Exception {
-        // LogScreen.log("Get received: " + receiveBuffer.toByteArray().length);
-        
+    public String getReceivedData() throws Exception {
+        String result = getReceivedDataImpl();
+        LogScreen.log("Sending " + result.length() + " bytes to client");
+        return result;
+    }
+
+    public boolean hasMore() {
+        synchronized (receivedEvents) {
+            return receivedEvents.size() != 0;
+        }
+    }
+
+    private String getReceivedDataImpl() throws Exception {
         if (!running) throw new Exception("connection closed");
 
-        synchronized (receiveBuffer) {
-            byte[] result = receiveBuffer.toByteArray();
-            receiveBuffer.reset();
+        synchronized (receivedEvents) {
+            if (receivedEvents.size() == 0) return "";
+            String result = (String) receivedEvents.elementAt(0);
+            receivedEvents.removeElementAt(0);
             return result;
         }
     }
@@ -222,8 +233,8 @@ public class DiscordGateway implements Runnable {
     private void sendToClient(String message) throws Exception {
         // LogScreen.log("Send to client: '" + message.substring(0, Math.min(message.length(), 200)) + "'");
 
-        synchronized (receiveBuffer) {
-            receiveBuffer.write(Util.stringToBytes(message));
+        synchronized (receivedEvents) {
+            receivedEvents.addElement(message);
         }
     }
 
@@ -231,6 +242,7 @@ public class DiscordGateway implements Runnable {
         while (running) {
             try {
                 String msg = websocket.receiveMessageString();
+                if (msg == null || msg.trim().length() == 0) continue;
                 handleWebsocketMessage(msg);
             }
             catch (Exception e) {
