@@ -104,7 +104,7 @@ public class WmlParser extends KXmlParser {
             // else show the file as image or text
             else {
                 if (!isWmlHtmlContentType && !isContentType("text/plain")) {
-                output.addItem(MainScreen.systemBrowserButton);
+                    output.addItem(MainScreen.systemBrowserButton);
                 }
 
                 if (isContentType("image/")) {
@@ -791,6 +791,17 @@ public class WmlParser extends KXmlParser {
     // _________________________________________________________________________
     //
 
+    public String getName() {
+        String result = super.getName();
+        if (result == null) return null;
+        
+        String resultLower = result.toLowerCase();
+        if (!isHtml && !result.equals(resultLower)) {
+            addWarning("<" + result + "> should be in lowercase");
+        }
+        return resultLower;
+    }
+
     private String getAttributeRequired(String attributeName) {
         String result = getAttributeValue(null, attributeName);
         if (result == null) {
@@ -810,7 +821,15 @@ public class WmlParser extends KXmlParser {
 
     private void require(int type, String text) throws Exception {
         ignoreWhitespace();
-        require(type, null, text);
+
+        try {
+            require(type, null, text);
+        }
+        catch (XmlPullParserException e) {
+            require(type, null, null);
+            // allow case-insensitive match via getName
+            if (!getName().equals(text)) throw e;
+        }
     }
 
     private Item getLastItem() {
