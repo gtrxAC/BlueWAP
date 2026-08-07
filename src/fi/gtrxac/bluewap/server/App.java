@@ -165,8 +165,10 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
 
             String resultUrl = http.getUrl();
 
-            boolean includeRespHeaders = resultUrl.indexOf("://discord.com/") == -1 &&
-                resultUrl.indexOf("://cdn.discordapp.") == -1;
+            boolean includeRespHeaders =
+                resultUrl.indexOf("://discord.com/api/") == -1 &&
+                resultUrl.indexOf("://cdn.discordapp.") == -1 &&
+                resultUrl.indexOf("://media.discordapp.") == -1;
 
             Hashtable responseHeaders = includeRespHeaders ? http.getResponseHeaders() : new Hashtable();
 
