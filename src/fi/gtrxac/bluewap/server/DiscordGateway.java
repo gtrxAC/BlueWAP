@@ -39,7 +39,7 @@ public class DiscordGateway implements Runnable {
 
     public String getReceivedData() throws Exception {
         String result = getReceivedDataImpl();
-        LogScreen.log("Sending " + result.length() + " bytes to client");
+        // LogScreen.log("Sending " + result.length() + " bytes to client");
         return result;
     }
 
