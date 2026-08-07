@@ -182,7 +182,7 @@ public class App extends AppBase implements BluetoothServerListener, BluetoothHT
 
     private ResponseData handleDiscordRequest(RequestData req, Vector ownedGateways) throws Exception {
         if (req.url.equals("discord://connect")) {
-            String connectionId = Integer.toString(discordGatewayCounter);
+            String connectionId = Integer.toString(discordGatewayCounter++);
 
             discordGateways.put(connectionId, new DiscordGateway());
             ownedGateways.addElement(connectionId);
