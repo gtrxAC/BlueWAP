@@ -44,7 +44,7 @@ public class RadioButtonItem extends Item {
     }
 
     private Image createRadioButtonImage(int size, boolean ticked) {
-        int renderSize = (size*4 + 13)/14*14;
+        int renderSize = (size*5 + 13)/14*14;
         int blockSize = renderSize/14;
 
         Image result = Image.createImage(renderSize, renderSize);
