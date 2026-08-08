@@ -39,6 +39,26 @@ public class Util {
 		}
 	}
 
+	/**
+	 * Get the name of an (ASCII-compatible) encoding that is supported by the platform, preferring the encoding given as input.
+	 */
+    public static String getSupportedEncoding(String preferredEncoding) {
+        String[] testEncs = { preferredEncoding, "UTF-8", "ISO-8859-1", "US_ASCII" };
+		byte[] testBytes = "a".getBytes();
+
+        for (int i = 0; i < testEncs.length; i++) {
+            try {
+				new String(testBytes, testEncs[i]);
+                return testEncs[i];
+            }
+            catch (UnsupportedEncodingException e) {}
+        }
+        return "ASCII";  // last resort
+    }
+
+	/**
+	 * Get the character set/encoding specified in an HTTP Content-Type header.
+	 */
 	public static String getCharsetFromContentType(String contentType) {
 		if (contentType == null) return null;
 

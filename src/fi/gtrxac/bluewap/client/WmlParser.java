@@ -10,7 +10,8 @@ import org.xmlpull.v1.*;
 
 public class WmlParser extends KXmlParser {
     private ListScreen output;
-    private String wml;
+    private byte[] wml;
+    private String encoding;
     private String cardId;
     private String contentType;
     private boolean haveShownCard;
@@ -22,12 +23,12 @@ public class WmlParser extends KXmlParser {
 
     public static Vector commands = new Vector(5);
 
-    private WmlParser(ListScreen output, String wml, String cardId, String contentType) throws Exception {
+    private WmlParser(ListScreen output, byte[] wml, String cardId, String contentType) throws Exception {
         // If card name is empty, treat it as null -> always show the first card
         if ("".equals(cardId)) cardId = null;
 
         this.output = output;
-        this.wml = wml.trim();
+        this.wml = wml;
         this.cardId = cardId;
         this.contentType = contentType;
         this.haveShownCard = false;
@@ -39,19 +40,19 @@ public class WmlParser extends KXmlParser {
 
         commands.setSize(0);
 
-        String encoding = null;
+        encoding = null;
         if (contentType != null) {
             encoding = Util.getCharsetFromContentType(contentType);
         }
 
-        byte[] wmlBytes = Util.stringToBytes(this.wml, encoding);
-        ByteArrayInputStream is = new ByteArrayInputStream(wmlBytes);
+        ByteArrayInputStream is = new ByteArrayInputStream(wml);
         setInput(is, encoding);
+        encoding = getDetectedEncoding();
         defineEntityReplacementText("nbsp", " ");
         defineEntityReplacementText("copy", "©");
     }
 
-    public static void displayWml(ListScreen output, String wml, String cardId, String contentType) {
+    public static void displayWml(ListScreen output, byte[] wml, String cardId, String contentType) {
         synchronized (History.getCurrent()) {
             output.removeAllItems();
             WmlParser p = null;
@@ -96,8 +97,9 @@ public class WmlParser extends KXmlParser {
             // if it's html/wml but doesn't have the xml declaration crap,
             // then skip the first tag (e.g. doctype html) and hope for the best
             boolean isWmlHtmlContentType = isContentType("text/vnd.wap.wml") || isContentType("text/html");
+            String wmlStr = Util.bytesToString(wml, encoding);
 
-            if (isWmlHtmlContentType && wml.trim().startsWith("<")) {
+            if (isWmlHtmlContentType && wmlStr.startsWith("<")) {
                 addWarning("unrecognized header");
                 nextTag();
             }
@@ -111,7 +113,7 @@ public class WmlParser extends KXmlParser {
                     output.addItem(new WmlImageItem(History.getCurrent().url.toString(false), null, ""));
                 } else {
                     addWarning("page does not begin with a tag, treating it as raw text");
-                    output.addItem(wml);
+                    output.addItem(wmlStr);
                 }
                 return;
             }
@@ -920,7 +922,7 @@ public class WmlParser extends KXmlParser {
 
         warningsBuf.append(WmlTemplates.END);
 
-        MainScreen.warningsWml = warningsBuf.toString();
+        MainScreen.warningsWml = Util.stringToBytes(warningsBuf.toString());
     }
 }
 //#endif

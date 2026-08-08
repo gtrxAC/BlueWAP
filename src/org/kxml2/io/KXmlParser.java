@@ -27,6 +27,8 @@ import java.util.*;
 
 import org.xmlpull.v1.*;
 
+import fi.gtrxac.bluewap.Util;
+
 /** A simple, pull based XML parser. This classe replaces the kXML 1
     XmlParser class and the corresponding event classes. */
 
@@ -55,6 +57,7 @@ public class KXmlParser implements XmlPullParser {
 
     private Reader reader;
     private String encoding;
+    private String detectedEncoding;
     private char[] srcBuf;
 
     private int srcPos;
@@ -1079,6 +1082,9 @@ public class KXmlParser implements XmlPullParser {
             if (enc == null)
                 enc = "UTF-8";
 
+            enc = Util.getSupportedEncoding(enc);
+            detectedEncoding = enc;
+
             int sc = srcCount;
             setInput(new InputStreamReader(is, enc));
             encoding = _enc;
@@ -1103,6 +1109,10 @@ public class KXmlParser implements XmlPullParser {
 
     public String getInputEncoding() {
         return encoding;
+    }
+
+    public String getDetectedEncoding() {
+        return detectedEncoding;
     }
 
     public void defineEntityReplacementText(String entity, String value)

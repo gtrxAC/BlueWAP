@@ -21,7 +21,7 @@ public class MainScreen extends ListScreen implements CommandListener {
     public static final int CMD_SETTINGS = 6;
     public static final int CMD_QUIT = 7;
 
-    public static String warningsWml;
+    public static byte[] warningsWml;
     public static final MainScreen instance = new MainScreen();
 
     public static final ButtonItem systemBrowserButton =
@@ -40,7 +40,7 @@ public class MainScreen extends ListScreen implements CommandListener {
         addCommand(new Command("Quit", Command.EXIT, CMD_QUIT));
     }
 
-    public void displayWml(String wml, String card, String contentType) {
+    public void displayWml(byte[] wml, String card, String contentType) {
         for (int i = 0; i < WmlParser.commands.size(); i++) {
             WmlCommand c = (WmlCommand) WmlParser.commands.elementAt(i);
             removeCommand(c);

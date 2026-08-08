@@ -7,7 +7,7 @@ import java.util.*;
 
 public class History implements Runnable {
     public URL url;
-    public String wml;
+    public byte[] wml;
     public String card;
     public boolean loaded;
     public String contentType;
@@ -57,7 +57,7 @@ public class History implements Runnable {
             }
             catch (Exception ee) {}
 
-            this.wml = WmlTemplates.ERROR_BEGIN + e.toString() + WmlTemplates.ERROR_END;
+            this.wml = Util.stringToBytes(WmlTemplates.ERROR_BEGIN + e.toString() + WmlTemplates.ERROR_END);
             this.card = null;
             this.loaded = false;
         }
@@ -129,7 +129,7 @@ public class History implements Runnable {
     }
 
     public void refresh() {
-        this.wml = WmlTemplates.LOADING;
+        this.wml = Util.stringToBytes(WmlTemplates.LOADING);
         this.loaded = false;
         this.highlightedItemIndex = 0;
         screenChanged();
@@ -164,22 +164,22 @@ public class History implements Runnable {
         }
         catch (Exception e) {
             e.printStackTrace();
-            this.wml = WmlTemplates.ERROR_BEGIN + e.toString() + WmlTemplates.ERROR_END;
+            this.wml = Util.stringToBytes(WmlTemplates.ERROR_BEGIN + e.toString() + WmlTemplates.ERROR_END);
             this.loaded = false;
         }
         screenChanged();
     }
 
-    private String fetch(URL url) throws Exception {
+    private byte[] fetch(URL url) throws Exception {
         String urlStr = url.toString(false);
         return fetchHttp(urlStr);
     }
 
-    private String fetchHttp(String url) throws Exception {
+    private byte[] fetchHttp(String url) throws Exception {
         HTTP http = HTTP.createRequest((postData != null) ? "POST" : "GET", url);
         if (postData != null) http.setData(postData);
         contentType = http.getResponseHeader("Content-Type");
-        String result = http.getResponseString();
+        byte[] result = http.getResponseBytes();
         this.url = new URL(http.getUrl());
         return result;
     }
