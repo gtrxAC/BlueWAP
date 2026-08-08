@@ -127,7 +127,7 @@ public class WmlImageItem extends StringItem implements Runnable {
 
 			HTTP h2 = HTTP.createRequest("jar://s.png");
 			Image sheet = h2.getResponseImage();
-			return ImageUtils.crop(sheet, x, y, x + width, y + height);
+			return ImageUtils.crop(sheet, x, y, x + width - 1, y + height - 1);
         }
 
 		throw new Exception();  // not found
