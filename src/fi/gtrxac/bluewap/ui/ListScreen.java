@@ -440,7 +440,7 @@ public abstract class ListScreen extends Screen implements Runnable {
     }
 
     public void setHighlightedItem(int index) {
-        if (index < 0 || index > getItemCount()) {
+        if (index < 0 || index >= getItemCount()) {
             throw new ArrayIndexOutOfBoundsException();
         }
         highlightedIndex = index;
