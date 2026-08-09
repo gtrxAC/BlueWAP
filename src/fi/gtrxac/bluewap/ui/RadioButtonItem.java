@@ -68,11 +68,12 @@ public class RadioButtonItem extends Item {
         int[] rgb = new int[renderSize*renderSize];
         result.getRGB(rgb, 0, renderSize, 0, 0, renderSize, renderSize);
         result = null;
+        int topLeft = rgb[0];  // color of an unpainted pixel
 
         for (int i = 0; i < rgb.length; i++) {
-            // Make every unrendered (white) pixel transparent (0 alpha).
+            // Make every unpainted (white) pixel transparent (0 alpha).
             // Using the same color as the button's outline to avoid ugly outlines
-            if (rgb[i] == 0xFFFFFFFF) {
+            if (rgb[i] == topLeft) {
                 rgb[i] = 0x009A9A9A;
             }
         }
