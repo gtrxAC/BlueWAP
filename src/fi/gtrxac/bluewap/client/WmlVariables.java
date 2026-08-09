@@ -65,7 +65,7 @@ public class WmlVariables {
             // next char is also '$' -> escaped dollar sign
             if (text.charAt(varNameBeginIndex) == '$') {
                 result.append('$');
-                i += 2;
+                i = varNameBeginIndex + 1;
                 continue;
             }
             
@@ -80,11 +80,10 @@ public class WmlVariables {
             if (!isValidVariableNameChar(text.charAt(varNameBeginIndex), false)) {
                 if (isParentheses) {
                     result.append("$(");
-                    i += 2;
                 } else {
                     result.append('$');
-                    i++;
                 }
+                i = varNameBeginIndex;
                 continue;
             }
 
@@ -186,6 +185,23 @@ public class WmlVariables {
         testCase("decode$(a:unesc)", "decodevariable test two", true);
         testCase("decode$(a:UnEsC)", "decodevariable test two", true);
         testCase("decode$(a:U)", "decodevariable test two", true);
+
+        testCase("not$(notexist)exist", "notexist", false);
+        testCase("not$(notexist:e)exist", "notexist", false);
+        testCase("not$(notexist:n)exist", "notexist", false);
+        testCase("not$(notexist:u)exist", "notexist", false);
+        testCase("not$notexist exist", "not exist", false);
+
+        testCase("you have $$5.00", "you have $5.00", false);
+        testCase("you have $$", "you have $", false);
+        testCase("you have $$$$", "you have $$", false);
+        testCase("you have $$$$$example", "you have $$variable test", false);
+
+        // invalid variable use - no specific behavior seems to be required for these
+        // but they should be handled in some kind of reasonable way
+        testCase("not$10.00 exist", "not$10.00 exist", false);
+        testCase("not$(10.00) exist", "not$(10.00) exist", false);
+        testCase("not$(10.00) exist", "not$(10.00) exist", false);
 
         clear();
     }
