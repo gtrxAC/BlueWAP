@@ -53,8 +53,7 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
         }
         threadIsForKnownDevices = false;
 
-        StringItem loadingItem = new StringItem("Loading...");
-        addItem(loadingItem);
+        setBannerText("Loading...");
 
         // Wait for the screen to show up
         while (App.getCurrentScreen() != this) {
@@ -78,9 +77,10 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
                 }
                 catch (Exception e) {}
             }
-            removeItem(loadingItem);
             addDeviceItem(name, knownDevices[i]);
         }
+
+        setBannerText(null);
 
         // took too long -> don't fetch device names next time
         if (System.currentTimeMillis() > timeLimit) {
@@ -109,7 +109,7 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
             searchDevices(true);
         }
         else {
-            addItem("Connecting...");
+            setBannerText("Connecting...");
 
             int idx = deviceItems.indexOf(i);
             RemoteDevice dev = (RemoteDevice) devices.elementAt(idx);
@@ -141,7 +141,7 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
         if (client.isSearching()) return;
 
         clearAndRefresh();
-        addItem("Searching...");
+        setBannerText("Searching...");
 
         if (autoConnect) client.autoConnect();
         else client.search();
@@ -162,6 +162,8 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
     }
 
     public void bluetoothSearchCompleted() {
+        setBannerText(null);
+
         if (devices.size() == 0) {
             clearAndRefresh();
             addItem("No devices found. Make sure the server device is set to visible, then try again.");
@@ -171,6 +173,8 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
     }
 
     public void bluetoothSearchError(Exception e) {
+        setBannerText(null);
+        
         e.printStackTrace();
         addItem("An error occurred:");
         addItem(e.toString());
@@ -182,6 +186,8 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
     }
 
     public void bluetoothConnectError(Exception e) {
+        setBannerText(null);
+        
         e.printStackTrace();
         addItem("An error occurred:");
         addItem(e.toString());

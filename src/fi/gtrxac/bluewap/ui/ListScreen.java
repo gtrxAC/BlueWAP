@@ -49,11 +49,11 @@ public abstract class ListScreen extends Screen implements Runnable {
     }
 
     private void drawBanner(Graphics g) {
-        g.setColor(0xDDDDDD);
+        g.setColor(0xEEEEEE);
         g.fillRect(0, 0, getWidth(), bannerHeight);
 
         g.setColor(0xAAAAAA);
-        g.drawLine(0, bannerHeight, getWidth(), bannerHeight);
+        g.drawLine(0, bannerHeight - 1, getWidth(), bannerHeight - 1);
 
         g.setColor(0x000000);
         g.setFont(Fonts.plain);
