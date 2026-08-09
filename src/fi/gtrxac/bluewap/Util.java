@@ -507,4 +507,17 @@ public class Util {
 
 	public static final boolean isJ2MELoader =
 		"The Android Project".equals(System.getProperty("java.vendor"));
+
+	public static final int vectorRenderScale;
+
+	static {
+		String plat = System.getProperty("microedition.platform");
+		if (plat == null) plat = "";
+
+		// Rendering scale used for dynamically generated vector graphics for some UI elements
+		// Larger numbers will look nicer, but above 5 there isn't much of a noticeable difference
+		// Nokia 6600 will freeze when rendering onto too large images - to stay safe we use 1
+		// Other devices (even e.g. Nokia 3230, 6230) have been fine with 5
+		vectorRenderScale = plat.startsWith("Nokia6600/") ? 1 : 5;
+	}
 }
