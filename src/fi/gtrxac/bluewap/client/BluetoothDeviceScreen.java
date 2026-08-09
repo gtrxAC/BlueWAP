@@ -172,25 +172,23 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
         }
     }
 
-    public void bluetoothSearchError(Exception e) {
-        setBannerText(null);
-        
-        e.printStackTrace();
-        addItem("An error occurred:");
-        addItem(e.toString());
-    }
-
     public void bluetoothConnected(String url) {
         BluetoothHTTP.selectedConnectionUrl = url;
         App.popScreen();
     }
 
+    public void bluetoothSearchError(Exception e) {
+        bluetoothError("Device search", e);
+    }
+
     public void bluetoothConnectError(Exception e) {
-        setBannerText(null);
-        
+        bluetoothError("Connection", e);
+    }
+
+    private void bluetoothError(String heading, Exception e) {
         e.printStackTrace();
-        addItem("An error occurred:");
-        addItem(e.toString());
+        setBannerText(null);
+        App.pushScreen(new Dialog(heading + " failed:\n" + e.toString()));
     }
 }
 //#endif
