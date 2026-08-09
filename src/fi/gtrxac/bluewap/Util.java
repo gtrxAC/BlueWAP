@@ -7,6 +7,12 @@ import java.io.*;
 import java.util.*;
 
 public class Util {
+    // _________________________________________________________________________
+    //
+    //  Text encoding
+    // _________________________________________________________________________
+    //
+
 	public static byte[] stringToBytes(String str) {
 		return stringToBytes(str, null);
 	}
@@ -76,6 +82,12 @@ public class Util {
 		}
 		return charset;
 	}
+
+    // _________________________________________________________________________
+    //
+    //  String utilities
+    // _________________________________________________________________________
+    //
 
 	public static String replace(String str, String from, String to) {
 		int j = str.indexOf(from);
@@ -250,6 +262,89 @@ public class Util {
         return arr;
     }
 
+    public static String removeDuplicateWhitespace(String text) {
+        boolean atWhitespace = false;
+
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
+                if (atWhitespace) {
+                    text = text.substring(0, i) + text.substring(i + 1);
+                } else {
+                    text = text.substring(0, i) + " " + text.substring(i + 1);
+                    atWhitespace = true;
+                }
+            } else {
+                atWhitespace = false;
+            }
+        }
+        return text;
+    }
+
+    public static String trimLeft(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
+                continue;
+            }
+            return text.substring(i);
+        }
+        return "";
+    }
+
+    public static String trimRight(String text) {
+        for (int i = text.length() - 1; i >= 0; i--) {
+            char c = text.charAt(i);
+            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
+                continue;
+            }
+            return text.substring(0, i + 1);
+        }
+        return "";
+    }
+
+	public static String stringToWidth(String str, Font font, int area) {
+        if (font.stringWidth(str) < area) return str;
+
+        area -= font.stringWidth("...");
+        // Reduce string length until it fits in the area
+        while (font.stringWidth(str) >= area && str.length() > 0) {
+            str = str.substring(0, str.length() - 1);
+        }
+        return str + "...";
+	}
+
+    // _________________________________________________________________________
+    //
+    //  RMS
+    // _________________________________________________________________________
+    //
+
+	public static void setOrAddRecord(RecordStore rms, int index, String data) throws Exception {
+		setOrAddRecord(rms, index, stringToBytes(data));
+	}
+
+	public static void setOrAddRecord(RecordStore rms, int index, byte[] data) throws Exception {
+		if (rms.getNumRecords() >= index) {
+			rms.setRecord(index, data, 0, data.length);
+		} else {
+			rms.addRecord(data, 0, data.length);
+		}
+	}
+
+	public static void closeRecordStore(RecordStore rms) {
+		try {
+			rms.closeRecordStore();
+		}
+		catch (Exception e) {}
+	}
+
+    // _________________________________________________________________________
+    //
+    //  Misc
+    // _________________________________________________________________________
+    //
+
 	// https://github.com/gtrxAC/discord-j2me/pull/5/commits/193c63f6a00b8e24da7a3582e9d1a92522f9940e
 	public static byte[] readBytes(InputStream inputStream, int initialSize, int bufferSize, int expandSize) throws IOException {
 		if (initialSize <= 0) initialSize = bufferSize;
@@ -277,6 +372,19 @@ public class Util {
 	public static byte[] readBytes(InputStream inputStream) throws IOException {
 		return readBytes(inputStream, 0, 1024, 2048);
 	}
+
+	public static void sleep(int ms) {
+		try {
+			Thread.sleep(ms);
+		}
+		catch (Exception e) {}
+	}
+
+    // _________________________________________________________________________
+    //
+    //  Color utilities
+    // _________________________________________________________________________
+    //
 
 	/**
 	 * Split RGB color to its components.
@@ -327,6 +435,12 @@ public class Util {
 		if (contrast(b, compare) > contrast(a, compare)) return b;
 		return a;
 	}
+
+    // _________________________________________________________________________
+    //
+    //  URL encode/decode
+    // _________________________________________________________________________
+    //
 
 	// https://github.com/phd051199/MIDPlay/blob/main/src/Utils.java#L125
 
@@ -416,6 +530,12 @@ public class Util {
         }
         return -1;
     }
+
+    // _________________________________________________________________________
+    //
+    //  Platform/capability detection
+    // _________________________________________________________________________
+    //
 	
 	public static boolean checkClass(String s) {
 		try {
@@ -425,84 +545,6 @@ public class Util {
 		catch (Throwable e) {}
 
 		return false;
-	}
-
-    public static String removeDuplicateWhitespace(String text) {
-        boolean atWhitespace = false;
-
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
-                if (atWhitespace) {
-                    text = text.substring(0, i) + text.substring(i + 1);
-                } else {
-                    text = text.substring(0, i) + " " + text.substring(i + 1);
-                    atWhitespace = true;
-                }
-            } else {
-                atWhitespace = false;
-            }
-        }
-        return text;
-    }
-
-    public static String trimLeft(String text) {
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
-                continue;
-            }
-            return text.substring(i);
-        }
-        return "";
-    }
-
-    public static String trimRight(String text) {
-        for (int i = text.length() - 1; i >= 0; i--) {
-            char c = text.charAt(i);
-            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
-                continue;
-            }
-            return text.substring(0, i + 1);
-        }
-        return "";
-    }
-
-	public static String stringToWidth(String str, Font font, int area) {
-        if (font.stringWidth(str) < area) return str;
-
-        area -= font.stringWidth("...");
-        // Reduce string length until it fits in the area
-        while (font.stringWidth(str) >= area && str.length() > 0) {
-            str = str.substring(0, str.length() - 1);
-        }
-        return str + "...";
-	}
-
-	public static void setOrAddRecord(RecordStore rms, int index, String data) throws Exception {
-		setOrAddRecord(rms, index, stringToBytes(data));
-	}
-
-	public static void setOrAddRecord(RecordStore rms, int index, byte[] data) throws Exception {
-		if (rms.getNumRecords() >= index) {
-			rms.setRecord(index, data, 0, data.length);
-		} else {
-			rms.addRecord(data, 0, data.length);
-		}
-	}
-
-	public static void closeRecordStore(RecordStore rms) {
-		try {
-			rms.closeRecordStore();
-		}
-		catch (Exception e) {}
-	}
-
-	public static void sleep(int ms) {
-		try {
-			Thread.sleep(ms);
-		}
-		catch (Exception e) {}
 	}
 
 	public static final boolean isJ2MELoader =
