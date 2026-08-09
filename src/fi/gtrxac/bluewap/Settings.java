@@ -10,6 +10,7 @@ import com.gtrxac.discord.HTTPQueue;
 public class Settings {
     public static int fontSize = Font.SIZE_SMALL;
     public static Vector bookmarks;
+    public static boolean getPairedDeviceNames = true;
 
     private static void readData(DataInputStream dis) throws Exception {
         fontSize = dis.readUnsignedByte();
@@ -21,6 +22,8 @@ public class Settings {
         for (int i = 0; i < bookmarkCount; i++) {
             bookmarks.addElement(dis.readUTF());
         }
+
+        getPairedDeviceNames = dis.readBoolean();
     }
 
     private static void writeData(DataOutputStream dos) throws Exception {
@@ -31,6 +34,8 @@ public class Settings {
         for (int i = 0; i < bookmarks.size(); i++) {
             dos.writeUTF((String) bookmarks.elementAt(i));
         }
+
+        dos.writeBoolean(getPairedDeviceNames);
     }
 
     static {

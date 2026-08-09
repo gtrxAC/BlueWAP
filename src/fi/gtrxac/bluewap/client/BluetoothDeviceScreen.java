@@ -22,6 +22,9 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
     private Vector deviceItems = new Vector();
     private BluetoothClient client;
 
+    private RemoteDevice[] knownDevices;
+    private boolean threadIsForKnownDevices;
+
     public BluetoothDeviceScreen() {
         super();
         addItem(searchButton);
@@ -29,22 +32,61 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
         addItem(new BlankItem(Fonts.height/8));
 
         initClient();
-        RemoteDevice[] devices = client.getKnownDevices();
+        knownDevices = client.getKnownDevices();
 
-        for (int i = 0; i < devices.length; i++) {
-            String name = null;
-            try {
-                name = devices[i].getFriendlyName(false);
-            }
-            catch (Exception e) {
-                name = devices[i].getBluetoothAddress();
-            }
-            addDeviceItem(name, devices[i]);
+        // start getting device names
+        if (knownDevices.length > 0) {
+            threadIsForKnownDevices = true;
+            new Thread(this).start();
         }
 
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
         addCommand(new Command("Select", Command.SCREEN, CMD_SELECT));
         setCommandListener(this);
+    }
+
+    public void run() {
+        if (!threadIsForKnownDevices) {
+            // Thread is for kinetic scrolling
+            super.run();
+            return;
+        }
+        threadIsForKnownDevices = false;
+
+        StringItem loadingItem = new StringItem("Loading...");
+        addItem(loadingItem);
+
+        // Wait for the screen to show up
+        while (App.getCurrentScreen() != this) {
+            Util.sleep(10);
+        }
+
+        // Allow up to 2 seconds for the paired device names to be fetched
+        // (may take especially long on Samsung; 15 sec for every device that can't be reached)
+        long timeLimit = System.currentTimeMillis() + 2000;
+
+        for (int i = 0; i < knownDevices.length; i++) {
+            String name = knownDevices[i].getBluetoothAddress();
+
+            if (Settings.getPairedDeviceNames && System.currentTimeMillis() < timeLimit) {
+                try {
+                    String friendlyName = knownDevices[i].getFriendlyName(false);
+
+                    if (friendlyName != null && friendlyName.length() != 0) {
+                        name = friendlyName;
+                    }
+                }
+                catch (Exception e) {}
+            }
+            removeItem(loadingItem);
+            addDeviceItem(name, knownDevices[i]);
+        }
+
+        // took too long -> don't fetch device names next time
+        if (System.currentTimeMillis() > timeLimit) {
+            Settings.getPairedDeviceNames = false;
+            Settings.save();
+        }
     }
 
     public void commandAction(Command c, Displayable d) {
