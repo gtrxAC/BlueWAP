@@ -14,7 +14,9 @@ public abstract class ListScreen extends Screen implements Runnable {
     public int highlightedIndex;
     public int itemPadding;
     public Vector items;
+    private String bannerText;
 
+    private static int bannerHeight;
     private int scrollbarHandleHeight;
     
     public ListScreen(int margin, int itemPadding) {
@@ -28,11 +30,34 @@ public abstract class ListScreen extends Screen implements Runnable {
         this(Math.max(2, Fonts.height/8), Math.max(2, Fonts.height/8));
     }
 
+    public int getHeight() {
+        if (bannerText == null) return super.getHeight();
+        return super.getHeight() - bannerHeight;
+    }
+
     public void draw(Graphics g) {
         g.setColor(0xFFFFFF);
-        g.fillRect(0, 0, getWidth(), getHeight());
+        g.fillRect(0, 0, getWidth(), super.getHeight());
+
+        if (bannerText != null) {
+            drawBanner(g);
+            g.translate(0, bannerHeight);
+            g.setClip(0, 0, getWidth(), getHeight());
+        }
         drawScrollbar(g);
         drawItems(g);
+    }
+
+    private void drawBanner(Graphics g) {
+        g.setColor(0xDDDDDD);
+        g.fillRect(0, 0, getWidth(), bannerHeight);
+
+        g.setColor(0xAAAAAA);
+        g.drawLine(0, bannerHeight, getWidth(), bannerHeight);
+
+        g.setColor(0x000000);
+        g.setFont(Fonts.plain);
+        g.drawString(bannerText, getWidth()/2, Fonts.height/5, Graphics.TOP | Graphics.HCENTER);
     }
 
     private void drawItems(Graphics g) {
@@ -51,7 +76,7 @@ public abstract class ListScreen extends Screen implements Runnable {
             }
             g.translate(0, item.height + itemPadding);
 
-            if (g.getTranslateY() >= getHeight()) break;
+            if (g.getTranslateY() >= super.getHeight()) break;
         }
     }
 
@@ -78,6 +103,8 @@ public abstract class ListScreen extends Screen implements Runnable {
     }
 
     public void recalc() {
+        bannerHeight = Fonts.height + Fonts.height/5*2;
+
         recalcItems(0, true);
 
         if (maxScroll > 0) {
@@ -281,6 +308,8 @@ public abstract class ListScreen extends Screen implements Runnable {
     }
 
     public void pointerPressed(int x, int y) {
+        if (bannerText != null) y -= bannerHeight;
+
         // Use scrollbar if the content is tall enough to be scrollable and the user pressed on the right edge of the screen
         // Note: Scrollbar hitbox is wider than the actual rendered scrollbar
         usingScrollBar = isScrollable() && x > super.getWidth() - Fonts.height*4/3;
@@ -305,6 +334,8 @@ public abstract class ListScreen extends Screen implements Runnable {
     }
 
     public void pointerDragged(int x, int y) {
+        if (bannerText != null) y -= bannerHeight;
+
         // Scroll position fix on S40 touch (e.g. Asha 300)
         if (y > 65500) y = 0;
         
@@ -330,6 +361,8 @@ public abstract class ListScreen extends Screen implements Runnable {
     }
     
     public void pointerReleased(int x, int y) {
+        if (bannerText != null) y -= bannerHeight;
+
         if (usingScrollBar) {
             usingScrollBar = false;
             AppBase.repaint();
@@ -451,5 +484,21 @@ public abstract class ListScreen extends Screen implements Runnable {
 
     public int getHighlightedIndex() {
         return highlightedIndex;
+    }
+
+    /**
+     * Get the banner text that is currently being shown; null if none shown
+     */
+    public String getBannerText() {
+        return bannerText;
+    }
+
+    /**
+     * Set the banner text that will be shown on the top of the screen.
+     * Specify null to hide the banner text.
+     */
+    public void setBannerText(String newBannerText) {
+        bannerText = newBannerText;
+        needRecalc();
     }
 }
