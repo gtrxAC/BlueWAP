@@ -9,9 +9,12 @@ import javax.microedition.lcdui.Graphics;
  */
 public class LinkItem extends Item {
     public String text;
-
     private String[] textLines;
+    private int[] textLineWidths;
     private int maxStringWidth;
+
+    private static Font font;
+    private static int fontHeight;
 
     public LinkItem(String text) {
         super(true);
@@ -27,11 +30,16 @@ public class LinkItem extends Item {
             g.setColor(0x3355CC);
         }
 
-        g.setFont(Fonts.underlined);
+        g.setFont(font);
         int y = 0;
         for (int i = 0; i < textLines.length; i++) {
             g.drawString(textLines[i], 0, y, 0);
             y += Fonts.underlinedHeight;
+
+            if (!Util.useUnderlinedFont) {
+                // Draw the underline manually
+                g.drawLine(0, y - 1, textLineWidths[i], y - 1);
+            }
         }
 
         if (highlighted) {
@@ -40,14 +48,23 @@ public class LinkItem extends Item {
     }
 
     public void recalc(int width) {
-        textLines = Util.wordWrap(text, width, Fonts.underlined);
-        height = Fonts.underlinedHeight*textLines.length;
+        font = Util.useUnderlinedFont ? Fonts.underlined : Fonts.plain;
+        fontHeight = font.getHeight();
+        textLines = Util.wordWrap(text, width, font);
+        height = fontHeight*textLines.length;
+
+        if (!Util.useUnderlinedFont) {
+            textLineWidths = new int[textLines.length];
+        }
 
         maxStringWidth = 0;
 
         for (int i = 0; i < textLines.length; i++) {
-            int stringWidth = Fonts.underlined.stringWidth(textLines[i]);
+            int stringWidth = font.stringWidth(textLines[i]);
 
+            if (!Util.useUnderlinedFont) {
+                textLineWidths[i] = stringWidth;
+            }
             if (stringWidth > maxStringWidth) {
                 maxStringWidth = stringWidth;
             }

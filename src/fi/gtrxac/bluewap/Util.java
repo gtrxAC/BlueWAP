@@ -547,19 +547,27 @@ public class Util {
 		return false;
 	}
 
-	public static final boolean isJ2MELoader =
-		"The Android Project".equals(System.getProperty("java.vendor"));
-
+	public static final boolean isJ2MELoader;
 	public static final int vectorRenderScale;
+	public static final boolean useUnderlinedFont;
 
 	static {
 		String plat = System.getProperty("microedition.platform");
 		if (plat == null) plat = "";
+
+		isJ2MELoader = "The Android Project".equals(System.getProperty("java.vendor"));
 
 		// Rendering scale used for dynamically generated vector graphics for some UI elements
 		// Larger numbers will look nicer, but above 5 there isn't much of a noticeable difference
 		// Nokia 6600 will freeze when rendering onto too large images - to stay safe we use 1
 		// Other devices (even e.g. Nokia 3230, 6230) have been fine with 5
 		vectorRenderScale = plat.startsWith("Nokia6600/") ? 1 : 5;
+
+		// Underlined fonts do not render correctly on Samsung touchscreen phones
+		// (either all onscreen fonts show as underlined or none do)
+		// and they do not look different from the standard font on Motorola
+		// They seem to be safe to use on all Nokia, Sony Ericsson, BlackBerry phones
+		// Other devices need more testing
+		useUnderlinedFont = plat.startsWith("Nokia") || plat.startsWith("SonyEr") || plat.startsWith("BlackB");
 	}
 }
