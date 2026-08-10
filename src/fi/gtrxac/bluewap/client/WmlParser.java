@@ -9,7 +9,8 @@ import org.kxml2.io.*;
 import org.xmlpull.v1.*;
 
 public class WmlParser extends KXmlParser {
-    private ListScreen output;
+    public Vector output;
+    private ListScreen outputScreen;
     private byte[] wml;
     private String encoding;
     private String cardId;
@@ -23,11 +24,12 @@ public class WmlParser extends KXmlParser {
 
     public static Vector commands = new Vector(5);
 
-    private WmlParser(ListScreen output, byte[] wml, String cardId, String contentType) throws Exception {
+    private WmlParser(ListScreen outputScreen, byte[] wml, String cardId, String contentType) throws Exception {
         // If card name is empty, treat it as null -> always show the first card
         if ("".equals(cardId)) cardId = null;
 
-        this.output = output;
+        this.output = new Vector();
+        this.outputScreen = outputScreen;
         this.wml = wml;
         this.cardId = cardId;
         this.contentType = contentType;
@@ -52,29 +54,36 @@ public class WmlParser extends KXmlParser {
         defineEntityReplacementText("copy", "©");
     }
 
-    public static void displayWml(ListScreen output, byte[] wml, String cardId, String contentType) {
+    public static void displayWml(ListScreen outputScreen, byte[] wml, String cardId, String contentType) {
         synchronized (History.getCurrent()) {
-            output.removeAllItems();
+            outputScreen.removeAllItems();
+            outputScreen.addItem("Parsing...");
             WmlParser p = null;
 
             try {
-                p = new WmlParser(output, wml, cardId, contentType);
+                p = new WmlParser(outputScreen, wml, cardId, contentType);
                 p.setFeature("http://xmlpull.org/v1/doc/relaxedrelaxedrelaxed", true);
                 p.parseWml();
             }
             catch (Exception e) {
                 e.printStackTrace();
-                output.addItem("Failed to load page:");
-                output.addItem(e.toString());
+                outputScreen.removeAllItems();
+                outputScreen.addItem("Failed to load page:");
+                outputScreen.addItem(e.toString());
             }
 
-            // trailing whitespace in items may cause blank lines to appear, so trim them
-            for (int i = 0; i < output.items.size(); i++) {
-                Object item = output.items.elementAt(i);
-                if (!(item instanceof WmlStringItem)) continue;
+            if (p != null) {
+                // trailing whitespace in items may cause blank lines to appear, so trim them
+                for (int i = 0; i < p.output.size(); i++) {
+                    Object item = p.output.elementAt(i);
+                    if (!(item instanceof WmlStringItem)) continue;
 
-                WmlStringItem strItem = (WmlStringItem) item;
-                strItem.setRawText(Util.trimRight(strItem.getRawText()));
+                    WmlStringItem strItem = (WmlStringItem) item;
+                    strItem.setRawText(Util.trimRight(strItem.getRawText()));
+                }
+
+                outputScreen.removeAllItems();
+                outputScreen.addItems(p.output);
             }
 
             try {
@@ -106,14 +115,14 @@ public class WmlParser extends KXmlParser {
             // else show the file as image or text
             else {
                 if (!isWmlHtmlContentType && !isContentType("text/plain")) {
-                    output.addItem(MainScreen.systemBrowserButton);
+                    output.addElement(MainScreen.systemBrowserButton);
                 }
 
                 if (isContentType("image/")) {
-                    output.addItem(new WmlImageItem(History.getCurrent().url.toString(false), null, ""));
+                    output.addElement(new WmlImageItem(History.getCurrent().url.toString(false), null, ""));
                 } else {
                     addWarning("page does not begin with a tag, treating it as raw text");
-                    output.addItem(wmlStr);
+                    output.addElement(wmlStr);
                 }
                 return;
             }
@@ -525,7 +534,7 @@ public class WmlParser extends KXmlParser {
         if (text == null || text.trim().length() == 0) {
             text = "Link";
         }
-        output.addItem(new WmlAnchorItem(text.trim(), action, target, postfields, setvars, isPost));
+        output.addElement(new WmlAnchorItem(text.trim(), action, target, postfields, setvars, isPost));
     }
 
     public String parseImgInAnchor() throws Exception {
@@ -539,9 +548,9 @@ public class WmlParser extends KXmlParser {
         String localsrc = getAttributeValue(null, "localsrc");
 
         if (src != null) {
-            output.addItem(new WmlImageItem(src, localsrc, getImgAltText()));
+            output.addElement(new WmlImageItem(src, localsrc, getImgAltText()));
         } else {
-            output.addItem(new WmlStringItem(getImgAltText()));
+            output.addElement(new WmlStringItem(getImgAltText()));
         }
         skipSubTree();
     }
@@ -562,7 +571,7 @@ public class WmlParser extends KXmlParser {
         
         if (value == null) value = "";
         
-        output.addItem(new WmlInputItem(name, value));
+        output.addElement(new WmlInputItem(name, value));
         skipSubTree();
     }
 
@@ -630,7 +639,7 @@ public class WmlParser extends KXmlParser {
         int prio = commands.size() + 100;
         WmlCommand cmd = new WmlCommand(text, prio, action, target, postfields, setvars, isPost);
         commands.addElement(cmd);
-        output.addCommand(cmd);
+        outputScreen.addCommand(cmd);
     }
 
     public String getGoTarget() {
@@ -711,7 +720,7 @@ public class WmlParser extends KXmlParser {
             }
             else if (getEventType() == START_TAG) {
                 if ("tr".equals(getName())) {
-                    output.addItem(new SpacerItem());
+                    output.addElement(new SpacerItem());
                 }
                 else if ("td".equals(getName()) || (isHtml && "th".equals(getName()))) {
                     lastItemTerminated = true;
@@ -724,7 +733,7 @@ public class WmlParser extends KXmlParser {
             }
             else if (getEventType() == END_TAG) {
                 if ("table".equals(getName())) {
-                    output.addItem(new SpacerItem());
+                    output.addElement(new SpacerItem());
                     break;
                 }
                 else if ("tr".equals(getName())) {
@@ -835,16 +844,16 @@ public class WmlParser extends KXmlParser {
     }
 
     private Item getLastItem() {
-        return (Item) output.items.lastElement();
+        return (Item) output.lastElement();
     }
 
     private void appendToLastItem(String text) {
         text = Util.removeDuplicateWhitespace(text);
         if (
-            lastItemTerminated || output.items.size() == 0 ||
+            lastItemTerminated || output.size() == 0 ||
             !(getLastItem() instanceof WmlStringItem)
         ) {
-            output.addItem(new WmlStringItem(Util.trimLeft(text)));
+            output.addElement(new WmlStringItem(Util.trimLeft(text)));
             lastItemTerminated = false;
         } else {
             WmlStringItem item = (WmlStringItem) getLastItem();
@@ -853,7 +862,7 @@ public class WmlParser extends KXmlParser {
     }
 
     private void appendLine(String text) {
-        output.addItem(new WmlStringItem(text));
+        output.addElement(new WmlStringItem(text));
         lastItemTerminated = true;
     }
 

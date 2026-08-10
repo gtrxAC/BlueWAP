@@ -431,6 +431,13 @@ public abstract class ListScreen extends Screen implements Runnable {
         removeItem(index);
     }
 
+    public synchronized void addItems(Vector newItems) {
+        for (int i = 0; i < newItems.size(); i++) {
+            items.addElement(newItems.elementAt(i));
+        }
+        needRecalc();
+    }
+
     /**
      * Remove all items from this screen.
      */
