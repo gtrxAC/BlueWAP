@@ -180,7 +180,12 @@ public abstract class HTTP {
 	 * Get server response as an image.
 	 */
 	public Image getResponseImage() throws Exception {
+//#ifndef MIDP1
 		Image result = Image.createImage(getResponseStream());
+//#else
+		byte[] data = getResponseBytes();
+		Image result = Image.createImage(data, 0, data.length);
+//#endif
 		close();
 		return result;
 	}

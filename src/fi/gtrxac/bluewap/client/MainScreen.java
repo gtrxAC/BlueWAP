@@ -24,8 +24,10 @@ public class MainScreen extends ListScreen implements CommandListener {
     public static byte[] warningsWml;
     public static final MainScreen instance = new MainScreen();
 
+//#ifndef MIDP1
     public static final ButtonItem systemBrowserButton =
         new ButtonItem("Open in browser");
+//#endif
 
     public MainScreen() {
         super();
@@ -91,6 +93,7 @@ public class MainScreen extends ListScreen implements CommandListener {
     }
 
     protected void itemSelected(Item i) {
+//#ifndef MIDP1
         if (i == systemBrowserButton) {
             try {
                 if (App.instance.platformRequest(History.getCurrent().url.toString(false))) {
@@ -101,6 +104,7 @@ public class MainScreen extends ListScreen implements CommandListener {
                 addItem(e.toString());
             }
         }
+//#endif
         if (i instanceof WmlAnchorItem) {
             WmlAnchorItem anchor = (WmlAnchorItem) i;
             WmlAnchorItem.activate(anchor.action, anchor.target, anchor.postfields, anchor.setvars, anchor.isPost);

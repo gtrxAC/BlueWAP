@@ -46,6 +46,16 @@ public abstract class ListScreen extends Screen implements Runnable {
         }
         drawScrollbar(g);
         drawItems(g);
+
+        // debug - draw memory usage:
+        Runtime r = Runtime.getRuntime();
+        long total = r.totalMemory();
+        long used = (total - r.freeMemory())/1000;
+        String memStr = used + "/" + (total/1000) + "K";
+        g.translate(-g.getTranslateX(), -g.getTranslateY());
+        g.setFont(Fonts.plain);
+        g.setColor(0xFF0000);
+        g.drawString(memStr, getWidth(), 0, Graphics.TOP | Graphics.RIGHT);
     }
 
     private void drawBanner(Graphics g) {
@@ -70,8 +80,10 @@ public abstract class ListScreen extends Screen implements Runnable {
                 recalcItems(i, false);
             }
             if (g.getTranslateY() + item.height > 0) {
+                // debug - draw item borders:
                 // g.setColor(0xFF0000);
                 // g.drawRect(0, 0, contentWidth, item.height);
+
                 item.draw(g, this, contentWidth, highlightedIndex == i);
             }
             g.translate(0, item.height + itemPadding);

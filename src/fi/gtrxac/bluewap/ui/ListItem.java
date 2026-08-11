@@ -3,15 +3,20 @@ package fi.gtrxac.bluewap.ui;
 import fi.gtrxac.bluewap.*;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
+
+//#ifndef MIDP1
 import javax.microedition.lcdui.Image;
 import tube42.lib.imagelib.ImageUtils;
+//#endif
 
 public class ListItem extends Item {
     public String text;
     private String displayText;
 
+//#ifndef MIDP1
     private static int imageSize;
     private static Image arrowImage;
+//#endif
 
     public ListItem(String text) {
         super(true);
@@ -35,8 +40,10 @@ public class ListItem extends Item {
         g.drawLine(0, prevItemLastPixel, width - 1, prevItemLastPixel);
         g.drawLine(0, height - 1, width - 1, height - 1);
 
+//#ifndef MIDP1
         g.drawImage(arrowImage, width - Fonts.height/3, Fonts.height/4,
             Graphics.TOP | Graphics.RIGHT);
+//#endif
     }
 
     public void recalc(int width) {
@@ -45,6 +52,7 @@ public class ListItem extends Item {
         int textWidth = width - Fonts.height/4 - Fonts.height - Fonts.height/3;
         displayText = Util.stringToWidth(text, Fonts.plain, textWidth);
 
+//#ifndef MIDP1
         int newImageSize = Fonts.height;
 
         if (imageSize != newImageSize) {
@@ -52,8 +60,10 @@ public class ListItem extends Item {
             arrowImage = createArrowImage(newImageSize, 0x444444);
             imageSize = newImageSize;
         }
+//#endif
     }
 
+//#ifndef MIDP1
     private Image createArrowImage(int size, int color) {
         int renderSize = (size*Util.vectorRenderScale + 13)/14*14;
         int blockSize = renderSize/14;
@@ -106,4 +116,5 @@ public class ListItem extends Item {
 
         return ImageUtils.resize(result, size, size, true, true);
     }
+//#endif
 }

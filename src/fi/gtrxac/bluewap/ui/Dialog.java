@@ -5,17 +5,20 @@ import javax.microedition.lcdui.*;
 import fi.gtrxac.bluewap.Util;
 
 public class Dialog extends Screen implements CommandListener {
-    private static Image overlay;
     private static final Command DISMISS_COMMAND = new Command("OK", Command.BACK, 0);
 
     private String text;
     private String[] textLines;
     private Screen lastScreen;
     private Screen nextScreen;
-    private Screen behindScreen;
 
     private int commandCount;
     private CommandListener listener;
+
+//#ifndef MIDP1
+    private static Image overlay;
+    private Screen behindScreen;
+//#endif
 
     public Dialog(String text) {
         this(text, null);
@@ -23,8 +26,11 @@ public class Dialog extends Screen implements CommandListener {
 
     public Dialog(String text, Screen nextScreen) {
         super(0);
-        checkInitOverlay();
         super.setCommandListener(this);
+
+//#ifndef MIDP1
+        checkInitOverlay();
+//#endif
 
         lastScreen = AppBase.getCurrentScreen();
         this.nextScreen = nextScreen;
@@ -34,14 +40,17 @@ public class Dialog extends Screen implements CommandListener {
 
         setText(text);
 
+//#ifndef MIDP1
         // Get the screen that should be drawn behind this one
         // If this Dialog is stacked above another Dialog, get the last non-Dialog screen
         behindScreen = lastScreen;
         while (behindScreen instanceof Dialog) {
             behindScreen = ((Dialog) behindScreen).lastScreen;
         }
+//#endif
     }
 
+//#ifndef MIDP1
     private static void checkInitOverlay() {
         if (overlay == null && AppBase.disp.numAlphaLevels() > 2) {
             try {
@@ -50,6 +59,7 @@ public class Dialog extends Screen implements CommandListener {
             catch (Exception e) {}
         }
     }
+//#endif
 
     public int getContentWidth() {
         return Math.min(getWidth(), Fonts.height*20);
@@ -85,6 +95,7 @@ public class Dialog extends Screen implements CommandListener {
     public void draw(Graphics g) {
         int themeBg = 0xFFFFFF;
 
+//#ifndef MIDP1
         // If possible, draw last screen behind a darkened overlay
         if (overlay != null && behindScreen instanceof Screen) {
             g.setColor(themeBg);
@@ -104,7 +115,9 @@ public class Dialog extends Screen implements CommandListener {
                     g.drawImage(overlay, x, y, Graphics.TOP | Graphics.LEFT);
                 }
             }
-        } else {
+        } else
+//#endif
+        {
             // Not possible to draw the next screen, or display doesn't support alpha blending:
             // fill background with darkened version of theme background color
             int background =

@@ -1,5 +1,9 @@
 //#ifdef BLUEWAP_CLIENT
+//#ifndef MIDP1
 MIDlet-1: BlueWAP, /i.png, fi.gtrxac.bluewap.client.App
+//#else
+MIDlet-1: BlueWAP, /k.png, fi.gtrxac.bluewap.client.App
+//#endif
 MIDlet-Name: BlueWAP
 //#endif
 //#ifdef BLUEWAP_SERVER
@@ -9,7 +13,6 @@ MIDlet-Name: BW Server
 MIDlet-Vendor: gtrxAC
 MIDlet-Version: 1.4.2
 MicroEdition-Configuration: CLDC-1.0
-MicroEdition-Profile: MIDP-2.0
 Nokia-MIDlet-On-Screen-Keypad: no
 Nokia-MIDlet-S60-Selection-Key-Compatibility: true
 LGE-MIDlet-Display-Nav-Keypad: no
@@ -21,4 +24,9 @@ MIDlet-ScreenMode: ROTATE
 MIDlet-Landscape-Support: TRUE
 MIDlet-FixedVKP-Support: TRUE
 MIDlet-Screen-Mode: Both
+//#endif
+//#ifndef MIDP1
+MicroEdition-Profile: MIDP-2.0
+//#else
+MicroEdition-Profile: MIDP-1.0
 //#endif

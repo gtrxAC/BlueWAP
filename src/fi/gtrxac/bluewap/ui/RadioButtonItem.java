@@ -1,18 +1,24 @@
 package fi.gtrxac.bluewap.ui;
 
 import fi.gtrxac.bluewap.*;
-import tube42.lib.imagelib.ImageUtils;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
+
+//#ifndef MIDP1
+import tube42.lib.imagelib.ImageUtils;
+//#endif
 
 public class RadioButtonItem extends Item {
     private RadioButtonGroup group;
     private StringItem strItem;
     public boolean ticked;
-
-    private static int imageSize;
+    
     private static Image tickedImage;
     private static Image untickedImage;
+
+//#ifndef MIDP1
+    private static int imageSize;
+//#endif
     
     public RadioButtonItem(RadioButtonGroup group, String text) {
         super(true);
@@ -30,8 +36,13 @@ public class RadioButtonItem extends Item {
             g.setColor(0x111111);
         }
 
+//#ifndef MIDP1
         int pad = Fonts.height/10;
         g.drawImage(ticked ? tickedImage : untickedImage, pad, pad, 0);
+//#else
+        g.drawImage(ticked ? tickedImage : untickedImage, Fonts.height/2, Fonts.height/2,
+            Graphics.HCENTER | Graphics.VCENTER);
+//#endif
 
         int strOffset = Fonts.height*6/5;
         g.translate(strOffset, 0);
@@ -43,6 +54,7 @@ public class RadioButtonItem extends Item {
         }
     }
 
+//#ifndef MIDP1
     private Image createRadioButtonImage(int size, boolean ticked) {
         int renderSize = (size*Util.vectorRenderScale + 13)/14*14;
         int blockSize = renderSize/14;
@@ -82,8 +94,10 @@ public class RadioButtonItem extends Item {
 
         return ImageUtils.resize(result, size, size, true, true);
     }
+//#endif
 
     public void recalc(int width) {
+//#ifndef MIDP1
         int newImageSize = Fonts.height - Fonts.height/10*2;
 
         if (imageSize != newImageSize) {
@@ -93,6 +107,19 @@ public class RadioButtonItem extends Item {
             tickedImage = createRadioButtonImage(newImageSize, true);
             imageSize = newImageSize;
         }
+//#else
+        if (tickedImage == null) {
+            try {
+                tickedImage = Image.createImage("/t.png");
+            }
+            catch (Exception e) {}
+
+            try {
+                untickedImage = Image.createImage("/u.png");
+            }
+            catch (Exception e) {}
+        }
+//#endif
 
         strItem.recalc(width - Fonts.height*5/4);
         height = strItem.height;

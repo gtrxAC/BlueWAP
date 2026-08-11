@@ -1,3 +1,4 @@
+//#ifndef MIDP1
 /*
  * This file is a part of the TUBE42 imagelib, released under the LGPL license.
  *
@@ -259,3 +260,4 @@ public final class ImageFxUtils
 
     
 }
+//#endif

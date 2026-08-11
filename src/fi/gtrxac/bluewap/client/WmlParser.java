@@ -114,9 +114,11 @@ public class WmlParser extends KXmlParser {
             }
             // else show the file as image or text
             else {
+//#ifndef MIDP1
                 if (!isWmlHtmlContentType && !isContentType("text/plain")) {
                     output.addElement(MainScreen.systemBrowserButton);
                 }
+//#endif
 
                 if (isContentType("image/")) {
                     output.addElement(new WmlImageItem(History.getCurrent().url.toString(false), null, ""));
