@@ -84,7 +84,7 @@ public class MainScreen extends ListScreen implements CommandListener {
                 break;
             }
             case CMD_QUIT: {
-                App.instance.notifyDestroyed();
+                App.askQuit();
                 break;
             }
         }

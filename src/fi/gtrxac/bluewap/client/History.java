@@ -116,7 +116,10 @@ public class History implements Runnable {
     }
 
     public static void back() {
-        if (currentIndex <= 0) return;
+        if (currentIndex <= 0) {
+            App.askQuit();
+            return;
+        }
         saveHighlightedItem();
         currentIndex--;
         screenChanged();
