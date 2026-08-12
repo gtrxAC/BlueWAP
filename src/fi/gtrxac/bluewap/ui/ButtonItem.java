@@ -55,6 +55,6 @@ public class ButtonItem extends Item {
     }
 
     public void recalc(int width) {
-        height = Fonts.boldHeight*3/2;
+        height = Math.max(Fonts.height*3/2, Fonts.height + 6);
     }
 }

@@ -46,7 +46,7 @@ public class TextFieldItem extends Item implements CommandListener {
     }
 
     public void recalc(int width) {
-        height = Math.max(Fonts.height*4/3, Fonts.height + 6);
+        height = Math.max(Fonts.height*3/2, Fonts.height + 6);
 
         int padding = Math.max(3, Fonts.height/6);
         displayText = Util.stringToWidth(value, Fonts.plain, width - padding*2);

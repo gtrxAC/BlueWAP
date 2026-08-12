@@ -27,7 +27,7 @@ public abstract class ListScreen extends Screen implements Runnable {
     }
 
     public ListScreen() {
-        this(Math.max(2, Fonts.height/8), Math.max(2, Fonts.height/8));
+        this(Math.max(2, Fonts.height/6), Math.max(2, Fonts.height/7));
     }
 
     public int getHeight() {
