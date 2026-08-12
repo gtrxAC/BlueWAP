@@ -433,7 +433,11 @@ public abstract class ListScreen extends Screen implements Runnable {
 
     public synchronized void addItems(Vector newItems) {
         for (int i = 0; i < newItems.size(); i++) {
-            items.addElement(newItems.elementAt(i));
+            Object item = newItems.elementAt(i);
+            if (item instanceof String) {
+                item = new StringItem((String) item);
+            }
+            items.addElement(item);
         }
         needRecalc();
     }
