@@ -568,10 +568,24 @@ public class WmlParser extends KXmlParser {
     public void parseInput() throws Exception {
         String name = getAttributeRequired("name");
         String value = getAttributeValue(null, "value");
+        String maxlengthStr = getAttributeValue(null, "maxlength");
         
         if (value == null) value = "";
+
+        int maxlength = 2000;
+
+        if (maxlengthStr != null) {
+            try {
+                maxlength = Integer.parseInt(maxlengthStr);
+                if (maxlength < 1) throw new Exception();
+            }
+            catch (Exception e) {
+                addWarning("'maxlength' should be a positive integer");
+                maxlength = 2000;
+            }
+        }
         
-        output.addElement(new WmlInputItem(name, value));
+        output.addElement(new WmlInputItem(name, value, maxlength));
         skipSubTree();
     }
 

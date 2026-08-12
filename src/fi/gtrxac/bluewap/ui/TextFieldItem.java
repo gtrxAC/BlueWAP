@@ -22,7 +22,7 @@ public class TextFieldItem extends Item implements CommandListener {
         super(true);
         this.title = title;
         this.value = (value != null) ? value : "";
-        this.maxSize = maxSize;
+        this.maxSize = Math.max(maxSize, value.length());
         this.constraints = constraints;
     }
 

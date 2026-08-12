@@ -5,8 +5,8 @@ import fi.gtrxac.bluewap.ui.TextFieldItem;
 public class WmlInputItem extends TextFieldItem {
     String varName;
 
-    public WmlInputItem(String varName, String content) {
-        super("Input text", "", 2000, 0);
+    public WmlInputItem(String varName, String content, int maxlength) {
+        super("Input text", WmlVariables.parse(content, false), maxlength, 0);
         this.varName = varName;
     }
 
