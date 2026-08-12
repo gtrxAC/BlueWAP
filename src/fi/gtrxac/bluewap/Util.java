@@ -550,6 +550,7 @@ public class Util {
 	public static final boolean isJ2MELoader;
 	public static final int vectorRenderScale;
 	public static final boolean useUnderlinedFont;
+	public static final boolean hideSelectCommand;
 
 	static {
 		String plat = System.getProperty("microedition.platform");
@@ -569,5 +570,11 @@ public class Util {
 		// They seem to be safe to use on all Nokia, Sony Ericsson, BlackBerry phones
 		// Other devices need more testing
 		useUnderlinedFont = plat.startsWith("Nokia") || plat.startsWith("SonyEr") || plat.startsWith("BlackB");
+
+		// Hide the "Select" softkey on full-touch phones where you would instead tap on the item you want to select
+		// This check could be expanded to other devices
+		// (ideally by checking APIs or OS-related plat strings rather than listing individual phone models)
+		// but for now we only check for Symbian S60v5 and up
+		hideSelectCommand = plat.indexOf("sw_platform_version=5.") != -1;
 	}
 }

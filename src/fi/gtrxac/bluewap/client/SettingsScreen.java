@@ -39,7 +39,10 @@ public class SettingsScreen extends ListScreen implements CommandListener {
 
         setCommandListener(this);
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
-        addCommand(new Command("Select", Command.OK, CMD_SELECT));
+        
+        if (!Util.hideSelectCommand) {
+            addCommand(new Command("Select", Command.OK, CMD_SELECT));
+        }
     }
 
     public void commandAction(Command c, Displayable d) {

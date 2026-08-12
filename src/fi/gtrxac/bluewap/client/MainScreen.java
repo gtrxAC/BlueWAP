@@ -31,13 +31,16 @@ public class MainScreen extends ListScreen implements CommandListener {
         super();
         setCommandListener(this);
         addCommand(new Command("Back", Command.BACK, CMD_BACK));
-        addCommand(new Command("Select", Command.OK, CMD_SELECT));
         addCommand(new Command("Menu", Command.SCREEN, CMD_MENU));
         addCommand(new Command("Forward", Command.SCREEN, CMD_FORWARD));
         addCommand(new Command("Refresh", Command.SCREEN, CMD_REFRESH));
         addCommand(new Command("Warnings", Command.SCREEN, CMD_WARNINGS));
         addCommand(new Command("Settings", Command.SCREEN, CMD_SETTINGS));
         addCommand(new Command("Quit", Command.EXIT, CMD_QUIT));
+
+        if (!Util.hideSelectCommand) {
+            addCommand(new Command("Select", Command.OK, CMD_SELECT));
+        }
     }
 
     public void displayWml(byte[] wml, String card, String contentType) {
