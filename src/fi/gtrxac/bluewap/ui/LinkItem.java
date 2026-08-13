@@ -59,10 +59,7 @@ public class LinkItem extends Item {
     }
 
     protected int getLineX(int lineWidth) {
-        return
-            ((align & Graphics.LEFT) != 0) ? x :
-            ((align & Graphics.HCENTER) != 0) ? x - lineWidth/2 :
-            x - lineWidth;
+        return x - getAlignedX(align, lineWidth);
     }
 
     public void recalc(int width) {
@@ -71,25 +68,20 @@ public class LinkItem extends Item {
         textLines = Util.wordWrap(text, width, font);
         height = fontHeight*textLines.length;
 
-        if (!Util.useUnderlinedFont) {
-            textLineWidths = new int[textLines.length];
-        }
+        textLineWidths = new int[textLines.length];
 
         maxStringWidth = 0;
 
         for (int i = 0; i < textLines.length; i++) {
             int stringWidth = font.stringWidth(textLines[i]);
 
-            if (!Util.useUnderlinedFont) {
-                textLineWidths[i] = stringWidth;
-            }
+            textLineWidths[i] = stringWidth;
+
             if (stringWidth > maxStringWidth) {
                 maxStringWidth = stringWidth;
             }
         }
 
-        x = ((align & Graphics.LEFT) != 0) ? 0 :
-            ((align & Graphics.HCENTER) != 0) ? width/2 :
-            width;
+        x = getAlignedX(align, width);
     }
 }

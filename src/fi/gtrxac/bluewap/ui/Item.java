@@ -44,6 +44,11 @@ public abstract class Item {
         return selectable;
     }
 
+    public void needRecalc() {
+        needsRecalc = true;
+        AppBase.repaint();
+    }
+
     /**
      * Light blue highlight which can be drawn by items to indicate that they are selected.
      * Note: Graphics current color is overwritten and not restored
@@ -64,8 +69,10 @@ public abstract class Item {
         drawHighlight(g, 0, 0, width, height);
     }
 
-    public void needRecalc() {
-        needsRecalc = true;
-        AppBase.repaint();
+    protected int getAlignedX(int align, int width) {
+        return
+            ((align & Graphics.LEFT) != 0) ? 0 :
+            ((align & Graphics.HCENTER) != 0) ? width/2 :
+            width;
     }
 }

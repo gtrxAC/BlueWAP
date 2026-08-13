@@ -50,9 +50,7 @@ public class StringItem extends Item {
         textLines = Util.wordWrap(text, width, font);
         height = font.getHeight()*textLines.length;
 
-        x = ((align & Graphics.LEFT) != 0) ? 0 :
-            ((align & Graphics.HCENTER) != 0) ? width/2 :
-            width;
+        x = getAlignedX(align, width);
     }
 
     public String getText() {
