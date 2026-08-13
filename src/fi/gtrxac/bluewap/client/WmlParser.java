@@ -7,6 +7,7 @@ import java.util.*;
 import java.io.*;
 import org.kxml2.io.*;
 import org.xmlpull.v1.*;
+import javax.microedition.lcdui.Graphics;
 
 public class WmlParser extends KXmlParser {
     public Vector output;
@@ -18,6 +19,8 @@ public class WmlParser extends KXmlParser {
     private boolean haveShownCard;
     private boolean lastItemTerminated;
     private boolean isHtml;
+
+    private int currentAlign;
 
     private Vector warnings;
     private Vector warningLocations;
@@ -36,6 +39,8 @@ public class WmlParser extends KXmlParser {
         this.haveShownCard = false;
         this.lastItemTerminated = false;
         this.isHtml = false;
+
+        this.currentAlign = Graphics.TOP | Graphics.LEFT;
 
         this.warnings = new Vector(5);
         this.warningLocations = new Vector(5);
@@ -119,7 +124,7 @@ public class WmlParser extends KXmlParser {
                 }
 
                 if (isContentType("image/")) {
-                    output.addElement(new WmlImageItem(History.getCurrent().url.toString(false), null, ""));
+                    output.addElement(new WmlImageItem(History.getCurrent().url.toString(false), null, "", currentAlign));
                 } else {
                     addWarning("page does not begin with a tag, treating it as raw text");
                     output.addElement(wmlStr);
@@ -261,6 +266,22 @@ public class WmlParser extends KXmlParser {
     }
 
     private void parseP(String tagName) throws Exception {
+        String align = getAttributeValue(null, "align");
+
+        if (align == null || "left".equals(align)) {
+            currentAlign = Graphics.TOP | Graphics.LEFT;
+        }
+        else if ("center".equals(align)) {
+            currentAlign = Graphics.TOP | Graphics.HCENTER;
+        }
+        else if ("right".equals(align)) {
+            currentAlign = Graphics.TOP | Graphics.RIGHT;
+        }
+        else {
+            addWarning("'align' should be 'left', 'center', or 'right'");
+            currentAlign = Graphics.TOP | Graphics.LEFT;
+        }
+
         nextItem();
 
         while (true) {
@@ -534,7 +555,7 @@ public class WmlParser extends KXmlParser {
         if (text == null || text.trim().length() == 0) {
             text = "Link";
         }
-        output.addElement(new WmlAnchorItem(text.trim(), action, target, postfields, setvars, isPost));
+        output.addElement(new WmlAnchorItem(text.trim(), currentAlign, action, target, postfields, setvars, isPost));
     }
 
     public String parseImgInAnchor() throws Exception {
@@ -548,9 +569,9 @@ public class WmlParser extends KXmlParser {
         String localsrc = getAttributeValue(null, "localsrc");
 
         if (src != null) {
-            output.addElement(new WmlImageItem(src, localsrc, getImgAltText()));
+            output.addElement(new WmlImageItem(src, localsrc, getImgAltText(), currentAlign));
         } else {
-            output.addElement(new WmlStringItem(getImgAltText()));
+            output.addElement(new WmlStringItem(getImgAltText(), currentAlign));
         }
         skipSubTree();
     }
@@ -867,7 +888,7 @@ public class WmlParser extends KXmlParser {
             lastItemTerminated || output.size() == 0 ||
             !(getLastItem() instanceof WmlStringItem)
         ) {
-            output.addElement(new WmlStringItem(Util.trimLeft(text)));
+            output.addElement(new WmlStringItem(Util.trimLeft(text), currentAlign));
             lastItemTerminated = false;
         } else {
             WmlStringItem item = (WmlStringItem) getLastItem();
@@ -876,7 +897,7 @@ public class WmlParser extends KXmlParser {
     }
 
     private void appendLine(String text) {
-        output.addElement(new WmlStringItem(text));
+        output.addElement(new WmlStringItem(text, currentAlign));
         lastItemTerminated = true;
     }
 

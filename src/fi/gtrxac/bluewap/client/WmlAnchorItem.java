@@ -17,8 +17,8 @@ public class WmlAnchorItem extends LinkItem {
     Hashtable setvars;
     boolean isPost;
 
-    public WmlAnchorItem(String text, int action, String target, Hashtable postfields, Hashtable setvars, boolean isPost) {
-        super(text);
+    public WmlAnchorItem(String text, int align, int action, String target, Hashtable postfields, Hashtable setvars, boolean isPost) {
+        super(text, align);
         this.rawText = text;
         this.action = action;
         this.target = target;

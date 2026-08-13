@@ -12,19 +12,28 @@ public class LinkItem extends Item {
     private String[] textLines;
     private int[] textLineWidths;
     private int maxStringWidth;
+    private int align;
+    private int x;
 
     private static Font font;
     private static int fontHeight;
 
     public LinkItem(String text) {
+        this(text, Graphics.TOP | Graphics.LEFT);
+    }
+
+    public LinkItem(String text, int align) {
         super(true);
         this.text = text;
+        this.align = align;
     }
 
     public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
+        int beginX = getLineX(maxStringWidth);
+
         if (highlighted) {
             g.setColor(0xEEF8FF);
-            g.fillRect(0, 0, maxStringWidth, height);
+            g.fillRect(beginX, 0, maxStringWidth, height);
             g.setColor(0x2244AA);
         } else {
             g.setColor(0x3355CC);
@@ -33,18 +42,27 @@ public class LinkItem extends Item {
         g.setFont(font);
         int y = 0;
         for (int i = 0; i < textLines.length; i++) {
-            g.drawString(textLines[i], 0, y, 0);
+            // calculate text alignment manually as it's also needed for the highlight (and underline on some devices)
+            int lineX = getLineX(textLineWidths[i]);
+            g.drawString(textLines[i], lineX, y, 0);
             y += Fonts.underlinedHeight;
 
             if (!Util.useUnderlinedFont) {
                 // Draw the underline manually
-                g.drawLine(0, y - 1, textLineWidths[i], y - 1);
+                g.drawLine(lineX, y - 1, lineX + textLineWidths[i], y - 1);
             }
         }
 
         if (highlighted) {
-            drawHighlight(g, 0, 0, maxStringWidth, height);
+            drawHighlight(g, beginX, 0, maxStringWidth, height);
         }
+    }
+
+    protected int getLineX(int lineWidth) {
+        return
+            ((align & Graphics.LEFT) != 0) ? x :
+            ((align & Graphics.HCENTER) != 0) ? x - lineWidth/2 :
+            x - lineWidth;
     }
 
     public void recalc(int width) {
@@ -69,5 +87,9 @@ public class LinkItem extends Item {
                 maxStringWidth = stringWidth;
             }
         }
+
+        x = ((align & Graphics.LEFT) != 0) ? 0 :
+            ((align & Graphics.HCENTER) != 0) ? width/2 :
+            width;
     }
 }

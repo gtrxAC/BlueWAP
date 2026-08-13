@@ -5,8 +5,8 @@ import fi.gtrxac.bluewap.ui.*;
 public class WmlStringItem extends StringItem {
     private String rawText;
 
-    public WmlStringItem(String text) {
-        super(text);
+    public WmlStringItem(String text, int align) {
+        super(text, null, align);
         rawText = text;
     }
     

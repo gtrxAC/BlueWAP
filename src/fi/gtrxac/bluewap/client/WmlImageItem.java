@@ -23,8 +23,8 @@ public class WmlImageItem extends StringItem implements Runnable {
     private static final int IMAGE_CACHE_SIZE = 10;
     private static Hashtable imageCache = new Hashtable();
     
-    public WmlImageItem(String url, String localsrc, String altText) {
-        super(altText);
+    public WmlImageItem(String url, String localsrc, String altText, int align) {
+        super(altText, null, align);
 
         try {
             this.url = new URL(url, History.getCurrent().url);
@@ -37,7 +37,7 @@ public class WmlImageItem extends StringItem implements Runnable {
 
     public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
         if (image != null) {
-            g.drawImage(image, 0, 0, 0);
+            g.drawImage(image, getX(), 0, getAlign());
             return;
         }
         if (!haveRequested && this.url != null) {
