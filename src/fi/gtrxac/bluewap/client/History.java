@@ -41,7 +41,7 @@ public class History implements Runnable {
             } else {
                 this.url = new URL(url);
             }
-            if (curr != null && this.url.isSamePage(curr.url)) {
+            if (curr != null && this.url.isSamePage(curr.url) && postData == null) {
                 this.wml = curr.wml;
                 this.card = this.url.card;
                 this.loaded = true;

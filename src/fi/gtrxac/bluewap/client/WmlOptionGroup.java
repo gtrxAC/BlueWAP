@@ -15,15 +15,12 @@ public class WmlOptionGroup extends RadioButtonGroup {
         super.setTicked(i);
 
         if (variableName != null) {
-            WmlVariables.set(variableName, ((WmlOptionItem) i).value);
-
-            // System.out.println("SET '" + variableName + "' TO '" + ((WmlOptionItem) i).value + "'");
+            String value = WmlVariables.parse(((WmlOptionItem) i).value, false);
+            WmlVariables.set(variableName, value);
         }
         if (indexVariableName != null) {
             String indexStr = Integer.toString(getTickedIndex());
             WmlVariables.set(indexVariableName, indexStr);
-
-            // System.out.println("SET '" + indexVariableName + "' TO '" + indexStr + "'");
         }
     }
 
