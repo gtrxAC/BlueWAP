@@ -738,9 +738,94 @@ public class WmlParser extends KXmlParser {
     }
 
     public void parseSelect() throws Exception {
-        addWarning("<timer> is not supported yet");
-        appendLine("[SELECT]");
-        skipSubTree();
+        String name = getAttributeRequired("name");
+        String iname = getAttributeValue(null, "iname");
+        String value = getAttributeValue(null, "value");
+
+        WmlOptionGroup group = new WmlOptionGroup(name, iname);
+        int optgroups = 0;
+
+        nextItem();
+
+        while (true) {
+            if (getEventType() == TEXT) {
+                warnNotAllowed("select");
+            }
+            else if (getEventType() == START_TAG) {
+                if ("option".equals(getName())) {
+                    parseOption(group);
+                }
+                else if ("optgroup".equals(getName())) {
+                    optgroups++;
+                }
+                else {
+                    warnNotAllowed("select");
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if ("select".equals(getName())) {
+                    break;
+                }
+                else if ("optgroup".equals(getName())) {
+                    if (optgroups <= 0) {
+                        addWarning("malformed <optgroup> tags");
+                    }
+                    optgroups--;
+                }
+                else {
+                    warnNotAllowed("select");
+                }
+            }
+            else if (getEventType() == END_DOCUMENT) {
+                addWarning("unexpected end of file");
+                break;
+            }
+            nextItem();
+        }
+
+        if (optgroups != 0) {
+            addWarning("unbalanced <optgroup> tags");
+        }
+        if (value != null) {
+            group.setTickedValue(value);
+        }
+    }
+
+    public void parseOption(WmlOptionGroup group) throws Exception {
+        String text = "";
+
+        String value = getAttributeValue(null, "value");
+        if (value == null) value = "";
+
+        nextItem();
+
+        while (true) {
+            if (getEventType() == TEXT) {
+                text += getText();
+            }
+            else if (getEventType() == START_TAG) {
+                if ("onevent".equals(getName())) {
+                    parseOnevent();
+                }
+                else {
+                    warnNotAllowed("option");
+                }
+            }
+            else if (getEventType() == END_TAG) {
+                if ("option".equals(getName())) {
+                    output.addElement(new WmlOptionItem(group, text, value));
+                    break;
+                }
+                else {
+                    warnNotAllowed("option");
+                }
+            }
+            else if (getEventType() == END_DOCUMENT) {
+                addWarning("unexpected end of file");
+                break;
+            }
+            nextItem();
+        }
     }
 
     public void parseTable() throws Exception {

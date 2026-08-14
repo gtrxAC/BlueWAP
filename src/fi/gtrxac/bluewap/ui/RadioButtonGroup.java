@@ -3,7 +3,7 @@ package fi.gtrxac.bluewap.ui;
 import java.util.Vector;
 
 public class RadioButtonGroup {
-    private Vector buttons;
+    protected Vector buttons;
     private int tickedIndex = -1;
 
     public RadioButtonGroup() {
