@@ -135,7 +135,7 @@ public class WmlImageItem extends StringItem implements Runnable {
 
     private Image scaleImage(Image img) {
         int screenWidth = AppCanvas.instance.getWidth();
-        int scaleMultiplier = Math.max(1, Math.min(Fonts.height/16, screenWidth/128));
+        int scaleMultiplier = Math.max(1, Math.min(Fonts.height/15, screenWidth/128));
         int scaleWidth = img.getWidth()*scaleMultiplier;
 
         // Upscale if possible (for high-res screens)
