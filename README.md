@@ -11,7 +11,7 @@ The client can also be used as a standalone WAP browser if your device has an in
 BlueWAP currently supports most of the basic features of WML (Wireless Markup Language). As some WML and HTML elements are the same, this also allows for crude viewing of some HTML pages.
 
 ### Working
-* Basic text paragraphs
+* Basic text paragraphs with alignment
 * Hyperlinks
 * Images
 * Input fields and forms
@@ -19,7 +19,6 @@ BlueWAP currently supports most of the basic features of WML (Wireless Markup La
 
 ### Not implemented
 * `<access>`
-* `<select>`
 * `<template>`
 * Events (`onenterforward`/`backward`, timers)
 * Text formatting
