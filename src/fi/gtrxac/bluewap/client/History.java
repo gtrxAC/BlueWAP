@@ -47,7 +47,7 @@ public class History implements Runnable {
                 this.loaded = true;
             } else {
                 this.card = this.url.card;
-                refresh();
+                showLoading();
             }
         }
         catch (Exception e) {
@@ -113,6 +113,10 @@ public class History implements Runnable {
         list.addElement(hist);
         addMenuUrlsItem(hist.url.toString(false));
         forward();
+
+        if (!hist.loaded) {
+            new Thread(hist).start();
+        }
     }
 
     public static void back() {
@@ -122,20 +126,27 @@ public class History implements Runnable {
         }
         saveHighlightedItem();
         currentIndex--;
-        screenChanged();
+        screenChanged(true);
     }
 
     public static void forward() {
         if (currentIndex >= list.size() - 1) return;
         currentIndex++;
-        screenChanged();
+
+        History curr = getCurrent();
+        boolean keepInputs = (curr != null && curr.loaded);
+        screenChanged(keepInputs);
     }
 
-    public void refresh() {
+    private void showLoading() {
         this.wml = Util.stringToBytes(WmlTemplates.LOADING);
         this.loaded = false;
         this.highlightedItemIndex = 0;
-        screenChanged();
+    }
+
+    public void refresh() {
+        showLoading();
+        screenChanged(false);
         new Thread(this).start();
     }
 
@@ -144,12 +155,12 @@ public class History implements Runnable {
         return (History) list.elementAt(currentIndex);
     }
 
-    private static void screenChanged() {
+    private static void screenChanged(boolean keepInputs) {
         History curr = getCurrent();
         if (curr == null) return;
         
         String card = (curr.loaded) ? curr.card : null;
-        MainScreen.instance.displayWml(curr.wml, card, curr.contentType);
+        MainScreen.instance.displayWml(curr.wml, card, curr.contentType, keepInputs);
         MainScreen.instance.setHighlightedItem(curr.highlightedItemIndex);
     }
 
@@ -170,7 +181,7 @@ public class History implements Runnable {
             this.wml = Util.stringToBytes(WmlTemplates.ERROR_BEGIN + e.toString() + WmlTemplates.ERROR_END);
             this.loaded = false;
         }
-        screenChanged();
+        screenChanged(false);
     }
 
     private byte[] fetch(URL url) throws Exception {

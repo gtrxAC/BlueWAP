@@ -11,11 +11,12 @@ public class WmlOptionGroup extends RadioButtonGroup {
         indexVariableName = iVarName;
     }
 
-    public void setTicked(RadioButtonItem i) {
-        super.setTicked(i);
+    public void setTickedIndex(int index) {
+        super.setTickedIndex(index);
 
         if (variableName != null) {
-            String value = WmlVariables.parse(((WmlOptionItem) i).value, false);
+            WmlOptionItem ticked = (WmlOptionItem) getTicked();
+            String value = WmlVariables.parse(ticked.value, false);
             WmlVariables.set(variableName, value);
         }
         if (indexVariableName != null) {

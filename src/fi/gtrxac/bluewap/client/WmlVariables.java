@@ -23,6 +23,10 @@ public class WmlVariables {
         if (escapeMode == 'u') return Util.urlDecode(result);
         return result;
     }
+
+    public static boolean has(String key) {
+        return variables.containsKey(key);
+    }
     
     public static void clear() {
         variables = new Hashtable();

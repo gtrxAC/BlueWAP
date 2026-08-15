@@ -16,10 +16,11 @@ public class WmlParser extends KXmlParser {
     private String encoding;
     private String cardId;
     private String contentType;
+    private boolean keepInputs;
+
     private boolean haveShownCard;
     private boolean lastItemTerminated;
     private boolean isHtml;
-
     private int currentAlign;
 
     private Vector warnings;
@@ -27,7 +28,7 @@ public class WmlParser extends KXmlParser {
 
     public static Vector commands = new Vector(5);
 
-    private WmlParser(ListScreen outputScreen, byte[] wml, String cardId, String contentType) throws Exception {
+    private WmlParser(ListScreen outputScreen, byte[] wml, String cardId, String contentType, boolean keepInputs) throws Exception {
         // If card name is empty, treat it as null -> always show the first card
         if ("".equals(cardId)) cardId = null;
 
@@ -36,10 +37,11 @@ public class WmlParser extends KXmlParser {
         this.wml = wml;
         this.cardId = cardId;
         this.contentType = contentType;
+        this.keepInputs = keepInputs;
+
         this.haveShownCard = false;
         this.lastItemTerminated = false;
         this.isHtml = false;
-
         this.currentAlign = Graphics.TOP | Graphics.LEFT;
 
         this.warnings = new Vector(5);
@@ -59,14 +61,16 @@ public class WmlParser extends KXmlParser {
         defineEntityReplacementText("copy", "©");
     }
 
-    public static void displayWml(ListScreen outputScreen, byte[] wml, String cardId, String contentType) {
+    public static void displayWml(ListScreen outputScreen, byte[] wml, String cardId, String contentType, boolean keepInputs) {
         synchronized (History.getCurrent()) {
-            outputScreen.removeAllItems();
-            outputScreen.addItem("Parsing...");
+            if (!keepInputs) {
+                outputScreen.removeAllItems();
+                outputScreen.addItem("Parsing...");
+            }
             WmlParser p = null;
 
             try {
-                p = new WmlParser(outputScreen, wml, cardId, contentType);
+                p = new WmlParser(outputScreen, wml, cardId, contentType, keepInputs);
                 p.setFeature("http://xmlpull.org/v1/doc/relaxedrelaxedrelaxed", true);
                 p.parseWml();
             }
@@ -588,10 +592,8 @@ public class WmlParser extends KXmlParser {
 
     public void parseInput() throws Exception {
         String name = getAttributeRequired("name");
-        String value = getAttributeValue(null, "value");
         String maxlengthStr = getAttributeValue(null, "maxlength");
-        
-        if (value == null) value = "";
+        String value = getInputOrSelectValue(name);
 
         int maxlength = 2000;
 
@@ -608,6 +610,19 @@ public class WmlParser extends KXmlParser {
         
         output.addElement(new WmlInputItem(name, value, maxlength));
         skipSubTree();
+
+        if (name != null) {
+            WmlVariables.set(name, value);
+        }
+    }
+
+    private String getInputOrSelectValue(String name) {
+        if (keepInputs && name != null && WmlVariables.has(name)) {
+            return WmlVariables.get(name);
+        }
+        String result = getAttributeValue(null, "value");
+        if (result == null) return "";
+        return result;
     }
 
     public void parseDo() throws Exception {
@@ -740,7 +755,7 @@ public class WmlParser extends KXmlParser {
     public void parseSelect() throws Exception {
         String name = getAttributeRequired("name");
         String iname = getAttributeValue(null, "iname");
-        String value = getAttributeValue(null, "value");
+        String value = getInputOrSelectValue(name);
 
         WmlOptionGroup group = new WmlOptionGroup(name, iname);
         int optgroups = 0;
@@ -786,8 +801,12 @@ public class WmlParser extends KXmlParser {
         if (optgroups != 0) {
             addWarning("unbalanced <optgroup> tags");
         }
-        if (value != null) {
+
+        if (name != null && WmlVariables.has(name)) {
             group.setTickedValue(value);
+        }
+        else {
+            group.setTickedIndex(0);
         }
     }
 
@@ -801,7 +820,7 @@ public class WmlParser extends KXmlParser {
 
         while (true) {
             if (getEventType() == TEXT) {
-                text += getText();
+                text += getText().trim();
             }
             else if (getEventType() == START_TAG) {
                 if ("onevent".equals(getName())) {
