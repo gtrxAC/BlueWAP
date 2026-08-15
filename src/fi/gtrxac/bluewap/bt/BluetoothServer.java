@@ -101,6 +101,12 @@ public class BluetoothServer implements Runnable {
             throw new IOException("cannot get local device, make sure Bluetooth is supported and enabled");
         }
         localName = localDevice.getFriendlyName();
+        setVisible();
+    }
+
+    public static void setVisible() throws IOException {
+        setupLocalDevice();
+        localDevice = LocalDevice.getLocalDevice();
         localDevice.setDiscoverable(DiscoveryAgent.GIAC);
     }
 

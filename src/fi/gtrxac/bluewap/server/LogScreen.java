@@ -2,6 +2,7 @@
 package fi.gtrxac.bluewap.server;
 
 import fi.gtrxac.bluewap.*;
+import fi.gtrxac.bluewap.bt.*;
 import fi.gtrxac.bluewap.ui.*;
 import java.io.*;
 import java.util.Vector;
@@ -14,7 +15,8 @@ import org.xmlpull.v1.*;
 
 public class LogScreen extends ListScreen implements CommandListener {
     public static final int CMD_QUIT = 0;
-    public static final int CMD_DISCONNECT = 1;
+    public static final int CMD_VISIBLE = 1;
+    public static final int CMD_DISCONNECT = 2;
 
     public static final LogScreen instance = new LogScreen();
 
@@ -23,7 +25,8 @@ public class LogScreen extends ListScreen implements CommandListener {
 
         setCommandListener(this);
         addCommand(new Command("Quit", Command.EXIT, CMD_QUIT));
-        addCommand(new Command("Disconnect", Command.BACK, CMD_DISCONNECT));
+        addCommand(new Command("Visible", Command.SCREEN, CMD_VISIBLE));
+        addCommand(new Command("Disconnect", Command.SCREEN, CMD_DISCONNECT));
     }
 
     public static void log(String item) {
@@ -45,6 +48,15 @@ public class LogScreen extends ListScreen implements CommandListener {
         switch (c.getPriority()) {
             case CMD_QUIT: {
                 App.instance.notifyDestroyed();
+                break;
+            }
+            case CMD_VISIBLE: {
+                try {
+                    BluetoothServer.setVisible();
+                }
+                catch (Exception e) {
+                    log(e.toString());
+                }
                 break;
             }
             case CMD_DISCONNECT: {
