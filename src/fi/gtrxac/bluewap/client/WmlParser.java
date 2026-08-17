@@ -372,7 +372,7 @@ public class WmlParser extends KXmlParser {
     private Font formattingTagToFont(String tagName) {
         if (tagName.equals("b")) return Fonts.bold;
         if (tagName.equals("big")) return Fonts.bold;
-        // if (tagName.equals("i")) return Fonts.italic;
+        if (tagName.equals("i")) return Fonts.italic;
         if (tagName.equals("strong")) return Fonts.bold;
         if (tagName.equals("u")) return Fonts.underlined;
         return Fonts.plain;
