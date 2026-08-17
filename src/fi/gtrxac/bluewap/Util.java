@@ -262,12 +262,16 @@ public class Util {
         return arr;
     }
 
+	public static boolean charIsWhitespace(char c) {
+		return c == ' ' || c == '\r' || c == '\n' || c == '\t';
+	}
+
     public static String removeDuplicateWhitespace(String text) {
         boolean atWhitespace = false;
 
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
+            if (charIsWhitespace(c)) {
                 if (atWhitespace) {
                     text = text.substring(0, i) + text.substring(i + 1);
                 } else {
@@ -284,9 +288,7 @@ public class Util {
     public static String trimLeft(String text) {
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
-                continue;
-            }
+            if (charIsWhitespace(c)) continue;
             return text.substring(i);
         }
         return "";
@@ -295,9 +297,7 @@ public class Util {
     public static String trimRight(String text) {
         for (int i = text.length() - 1; i >= 0; i--) {
             char c = text.charAt(i);
-            if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
-                continue;
-            }
+            if (charIsWhitespace(c)) continue;
             return text.substring(0, i + 1);
         }
         return "";

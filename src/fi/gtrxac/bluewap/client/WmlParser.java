@@ -8,6 +8,7 @@ import java.io.*;
 import org.kxml2.io.*;
 import org.xmlpull.v1.*;
 import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.Font;
 
 public class WmlParser extends KXmlParser {
     public Vector output;
@@ -217,7 +218,7 @@ public class WmlParser extends KXmlParser {
         while (true) {
             if (getEventType() == TEXT) {
                 warnNotAllowed("card");
-                appendToLastItem(getText());
+                appendToLastItem(getText(), Fonts.plain);
             }
             if (getEventType() == START_TAG) {
                 if ("p".equals(getName())) {
@@ -290,7 +291,7 @@ public class WmlParser extends KXmlParser {
 
         while (true) {
             if (getEventType() == TEXT) {
-                appendToLastItem(getText());
+                appendToLastItem(getText(), Fonts.plain);
             }
             if (getEventType() == START_TAG) {
                 if (parseTagInP()) {
@@ -368,17 +369,27 @@ public class WmlParser extends KXmlParser {
         return false;
     }
 
+    private Font formattingTagToFont(String tagName) {
+        if (tagName.equals("b")) return Fonts.bold;
+        if (tagName.equals("big")) return Fonts.bold;
+        // if (tagName.equals("i")) return Fonts.italic;
+        if (tagName.equals("strong")) return Fonts.bold;
+        if (tagName.equals("u")) return Fonts.underlined;
+        return Fonts.plain;
+    }
+
     private void parseFormattingTag() throws Exception {
-        int depth = 1;
+        String tagName = getName();
+        Font font = formattingTagToFont(tagName);
         nextItem();
 
         while (true) {
             if (getEventType() == TEXT) {
-                appendToLastItem(getText());
+                appendToLastItem(getText(), font);
             }
             else if (getEventType() == START_TAG) {
                 if (isFormattingTag()) {
-                    depth++;
+                    parseFormattingTag();
                 }
                 else if ("a".equals(getName())) {
                     parseA();
@@ -396,15 +407,15 @@ public class WmlParser extends KXmlParser {
                     parseTable();
                 }
                 else {
-                    warnNotAllowed("formatting tag");
+                    warnNotAllowed(tagName);
                 }
             }
             else if (getEventType() == END_TAG) {
-                if (isFormattingTag()) {
-                    depth--;
-                    if (depth == 0) break;
-                } else {
-                    warnNotAllowed("formatting tag");
+                if (tagName.equals(getName())) {
+                    break;
+                }
+                else {
+                    warnNotAllowed(tagName);
                 }
             }
             else if (getEventType() == END_DOCUMENT) {
@@ -898,7 +909,7 @@ public class WmlParser extends KXmlParser {
 
         while (true) {
             if (getEventType() == TEXT) {
-                appendToLastItem(getText());
+                appendToLastItem(getText(), Fonts.plain);
             }
             else if (getEventType() == START_TAG) {
                 if (isFormattingTag()) {
@@ -923,7 +934,8 @@ public class WmlParser extends KXmlParser {
             else if (getEventType() == END_TAG) {
                 if (tagName.equals(getName())) {
                     break;
-                } else {
+                }
+                else {
                     warnNotAllowed("td");
                 }
             }
@@ -986,22 +998,24 @@ public class WmlParser extends KXmlParser {
         return (Item) output.lastElement();
     }
 
-    private void appendToLastItem(String text) {
+    private void appendToLastItem(String text, Font font) {
         text = Util.removeDuplicateWhitespace(text);
-        if (
-            lastItemTerminated || output.size() == 0 ||
-            !(getLastItem() instanceof WmlStringItem)
-        ) {
-            output.addElement(new WmlStringItem(Util.trimLeft(text), currentAlign));
+        RichTextItem item;
+
+        if (lastItemTerminated || output.size() == 0 || !(getLastItem() instanceof RichTextItem)) {
+            item = new RichTextItem();
+            output.addElement(item);
             lastItemTerminated = false;
         } else {
-            WmlStringItem item = (WmlStringItem) getLastItem();
-            item.setRawText(item.getRawText() + text);
+            item = (RichTextItem) getLastItem();
         }
+        item.addStringPart(Util.trimLeft(text), font);
     }
 
     private void appendLine(String text) {
-        output.addElement(new WmlStringItem(text, currentAlign));
+        RichTextItem item = new RichTextItem();
+        item.addStringPart(text, Fonts.plain);
+        output.addElement(item);
         lastItemTerminated = true;
     }
 
