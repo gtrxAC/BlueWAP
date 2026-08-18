@@ -89,7 +89,7 @@ public class WmlParser extends KXmlParser {
                     if (!(item instanceof WmlStringItem)) continue;
 
                     WmlStringItem strItem = (WmlStringItem) item;
-                    strItem.setRawText(Util.trimRight(strItem.getRawText()));
+                    strItem.trimLastPart();
                 }
 
                 outputScreen.removeAllItems();
@@ -287,6 +287,7 @@ public class WmlParser extends KXmlParser {
             currentAlign = Graphics.TOP | Graphics.LEFT;
         }
 
+        lastItemTerminated = true;
         nextItem();
 
         while (true) {
@@ -370,11 +371,17 @@ public class WmlParser extends KXmlParser {
     }
 
     private Font formattingTagToFont(String tagName) {
+        if (tagName.equals("p")) return Fonts.plain;
         if (tagName.equals("b")) return Fonts.bold;
         if (tagName.equals("big")) return Fonts.bold;
         if (tagName.equals("i")) return Fonts.italic;
         if (tagName.equals("strong")) return Fonts.bold;
         if (tagName.equals("u")) return Fonts.underlined;
+
+        if (isHtml && ",h1,h2,h3,h4,h5,h6,".indexOf("," + getName() + ",") != -1) {
+            return Fonts.bold;
+        }
+
         return Fonts.plain;
     }
 
@@ -586,7 +593,7 @@ public class WmlParser extends KXmlParser {
         if (src != null) {
             output.addElement(new WmlImageItem(src, localsrc, getImgAltText(), currentAlign));
         } else {
-            output.addElement(new WmlStringItem(getImgAltText(), currentAlign));
+            appendToLastItem(getImgAltText(), Fonts.plain);
         }
         skipSubTree();
     }
@@ -1000,20 +1007,21 @@ public class WmlParser extends KXmlParser {
 
     private void appendToLastItem(String text, Font font) {
         text = Util.removeDuplicateWhitespace(text);
-        RichTextItem item;
+        WmlStringItem item;
 
-        if (lastItemTerminated || output.size() == 0 || !(getLastItem() instanceof RichTextItem)) {
-            item = new RichTextItem();
+        if (lastItemTerminated || output.size() == 0 || !(getLastItem() instanceof WmlStringItem)) {
+            item = new WmlStringItem(currentAlign);
             output.addElement(item);
             lastItemTerminated = false;
+            text = Util.trimLeft(text);
         } else {
-            item = (RichTextItem) getLastItem();
+            item = (WmlStringItem) getLastItem();
         }
-        item.addStringPart(Util.trimLeft(text), font);
+        item.addStringPart(text, font);
     }
 
     private void appendLine(String text) {
-        RichTextItem item = new RichTextItem();
+        WmlStringItem item = new WmlStringItem(currentAlign);
         item.addStringPart(text, Fonts.plain);
         output.addElement(item);
         lastItemTerminated = true;

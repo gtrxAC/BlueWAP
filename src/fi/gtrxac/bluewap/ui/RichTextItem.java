@@ -39,7 +39,6 @@ public class RichTextItem extends Item {
 
         for (int i = 0; i < parts.size(); i++) {
             RichTextPart part = (RichTextPart) parts.elementAt(i);
-                System.out.println("'"+((RichTextStringPart)part).text+"' '" + width + "'");
 
             // 1. part is too wide to fit the screen -> split it into lines, add them, done
             if (part.width > width) {
@@ -90,7 +89,7 @@ public class RichTextItem extends Item {
     public void addPart(RichTextPart part) {
         if (part instanceof RichTextStringPart) {
             RichTextStringPart strPart = (RichTextStringPart) part;
-            addStringPart(strPart.text, strPart.font);
+            addStringPart(strPart.getText(), strPart.getFont());
         } else {
             parts.addElement(part);
             needRecalc();
@@ -98,6 +97,8 @@ public class RichTextItem extends Item {
     }
 
     public void addStringPart(String text, Font font) {
+        if (text == null || text.length() == 0) return;
+        
         String remainingText = text;
         boolean prevCharWhitespace;
         boolean thisCharWhitespace = Util.charIsWhitespace(remainingText.charAt(0));

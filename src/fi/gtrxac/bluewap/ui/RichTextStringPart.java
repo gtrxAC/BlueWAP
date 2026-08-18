@@ -5,8 +5,8 @@ import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Font;
 
 public class RichTextStringPart extends RichTextPart {
-    public String text;
-    public Font font;
+    private String text;
+    private Font font;
 
     public RichTextStringPart(String text, Font font) {
         this.text = text;
@@ -49,6 +49,25 @@ public class RichTextStringPart extends RichTextPart {
     public boolean isWhitespace() {
         return "".equals(text.trim());
     }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String newText) {
+        text = newText;
+        needRecalc();
+    }
+
+    public Font getFont() {
+        return font;
+    }
+
+    public void setFont(Font newFont) {
+        font = newFont;
+        needRecalc();
+    }
+
 
     // public abstract boolean canMerge(RichTextPart other);
 }
