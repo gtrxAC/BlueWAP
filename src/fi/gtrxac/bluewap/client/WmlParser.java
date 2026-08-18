@@ -23,9 +23,16 @@ public class WmlParser extends KXmlParser {
     private boolean lastItemTerminated;
     private boolean isHtml;
     private int currentAlign;
+    private Font currentFont;
 
     private Vector warnings;
     private Vector warningLocations;
+
+    private int boldCount = 0;
+    private int bigCount = 0;
+    private int italicCount = 0;
+    private int smallCount = 0;
+    private int underlinedCount = 0;
 
     public static Vector commands = new Vector(5);
 
@@ -44,6 +51,7 @@ public class WmlParser extends KXmlParser {
         this.lastItemTerminated = false;
         this.isHtml = false;
         this.currentAlign = Graphics.TOP | Graphics.LEFT;
+        this.currentFont = Fonts.plain;
 
         this.warnings = new Vector(5);
         this.warningLocations = new Vector(5);
@@ -218,7 +226,7 @@ public class WmlParser extends KXmlParser {
         while (true) {
             if (getEventType() == TEXT) {
                 warnNotAllowed("card");
-                appendToLastItem(getText(), Fonts.plain);
+                appendToLastItem(getText());
             }
             if (getEventType() == START_TAG) {
                 if ("p".equals(getName())) {
@@ -287,12 +295,13 @@ public class WmlParser extends KXmlParser {
             currentAlign = Graphics.TOP | Graphics.LEFT;
         }
 
+        updateCurrentFont(tagName, 0);
         lastItemTerminated = true;
         nextItem();
 
         while (true) {
             if (getEventType() == TEXT) {
-                appendToLastItem(getText(), Fonts.plain);
+                appendToLastItem(getText());
             }
             if (getEventType() == START_TAG) {
                 if (parseTagInP()) {
@@ -306,15 +315,13 @@ public class WmlParser extends KXmlParser {
                 if (tagName.equals(getName())) {
                     break;
                 }
-                else if (isFormattingTag()) {
-                    // ignore
-                }
                 else {
                     warnNotAllowed(tagName);
                 }
             }
             nextItem();
         }
+        updateCurrentFont(tagName, 0);
         lastItemTerminated = true;
     }
 
@@ -370,29 +377,51 @@ public class WmlParser extends KXmlParser {
         return false;
     }
 
-    private Font formattingTagToFont(String tagName) {
-        if (tagName.equals("p")) return Fonts.plain;
-        if (tagName.equals("b")) return Fonts.bold;
-        if (tagName.equals("big")) return Fonts.bold;
-        if (tagName.equals("i")) return Fonts.italic;
-        if (tagName.equals("strong")) return Fonts.bold;
-        if (tagName.equals("u")) return Fonts.underlined;
+    private Font getCurrentFont(String tagName) {
+        if (isHtml) {
+            if ("h1".equals(tagName) || "h2".equals(tagName) || "h3".equals(tagName)) {
+                // larger html heading -> larger bold font
+                return Fonts.get(1, true, (italicCount != 0), (underlinedCount != 0));
+            }
+            if ("h4".equals(tagName) || "h5".equals(tagName) || "h6".equals(tagName)) {
+                // smaller html heading -> normal bold font
+                return Fonts.get(0, true, (italicCount != 0), (underlinedCount != 0));
+            }
+        }
+        return Fonts.get(
+            (bigCount != 0) ? 1 : (smallCount != 0) ? -1 : 0,
+            (boldCount != 0), (italicCount != 0), (underlinedCount != 0));
+    }
 
-        if (isHtml && ",h1,h2,h3,h4,h5,h6,".indexOf("," + getName() + ",") != -1) {
-            return Fonts.bold;
+    private void updateCurrentFont(String tagName, int direction) {
+        if ("b".equals(tagName) || "strong".equals(tagName) || "em".equals(tagName)) {
+            boldCount += direction;
+        }
+        else if ("big".equals(tagName)) {
+            bigCount += direction;
+        }
+        else if ("i".equals(tagName)) {
+            italicCount += direction;
+        }
+        else if ("small".equals(tagName)) {
+            smallCount += direction;
+        }
+        else if ("u".equals(tagName)) {
+            underlinedCount += direction;
         }
 
-        return Fonts.plain;
+        currentFont = getCurrentFont(tagName);
     }
 
     private void parseFormattingTag() throws Exception {
         String tagName = getName();
-        Font font = formattingTagToFont(tagName);
+        updateCurrentFont(tagName, 1);
+
         nextItem();
 
         while (true) {
             if (getEventType() == TEXT) {
-                appendToLastItem(getText(), font);
+                appendToLastItem(getText());
             }
             else if (getEventType() == START_TAG) {
                 if (isFormattingTag()) {
@@ -431,6 +460,8 @@ public class WmlParser extends KXmlParser {
             }
             nextItem();
         }
+        
+        updateCurrentFont(tagName, -1);
     }
 
     public void parseA() throws Exception {
@@ -593,7 +624,7 @@ public class WmlParser extends KXmlParser {
         if (src != null) {
             output.addElement(new WmlImageItem(src, localsrc, getImgAltText(), currentAlign));
         } else {
-            appendToLastItem(getImgAltText(), Fonts.plain);
+            appendToLastItem(getImgAltText());
         }
         skipSubTree();
     }
@@ -916,7 +947,7 @@ public class WmlParser extends KXmlParser {
 
         while (true) {
             if (getEventType() == TEXT) {
-                appendToLastItem(getText(), Fonts.plain);
+                appendToLastItem(getText());
             }
             else if (getEventType() == START_TAG) {
                 if (isFormattingTag()) {
@@ -1005,7 +1036,7 @@ public class WmlParser extends KXmlParser {
         return (Item) output.lastElement();
     }
 
-    private void appendToLastItem(String text, Font font) {
+    private void appendToLastItem(String text) {
         text = Util.removeDuplicateWhitespace(text);
         WmlStringItem item;
 
@@ -1017,12 +1048,12 @@ public class WmlParser extends KXmlParser {
         } else {
             item = (WmlStringItem) getLastItem();
         }
-        item.addStringPart(text, font);
+        item.addStringPart(text, currentFont);
     }
 
     private void appendLine(String text) {
         WmlStringItem item = new WmlStringItem(currentAlign);
-        item.addStringPart(text, Fonts.plain);
+        item.addStringPart(text, currentFont);
         output.addElement(item);
         lastItemTerminated = true;
     }
