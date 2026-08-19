@@ -50,6 +50,23 @@ public class RichTextStringPart extends RichTextPart {
         return "".equals(text.trim());
     }
 
+    public RichTextPart merge(RichTextPart other) {
+        // can we merge?
+        if (!(other instanceof RichTextStringPart)) return null;
+
+        RichTextStringPart otherStrPart = (RichTextStringPart) other;
+
+        // can merge if same font or if the fonts are different objects but are actually identical
+        // .equals() didn't seem to help here
+        if (font != otherStrPart.font) {
+            if (font.getStyle() != otherStrPart.font.getStyle()) return null;
+            if (font.getSize() != otherStrPart.font.getSize()) return null;
+            // if (font.getFace() != otherStrPart.font.getFace()) return null;  // we don't use different font faces
+        }
+
+        return new RichTextStringPart(text + otherStrPart.text, font);
+    }
+
     public String getText() {
         return text;
     }
@@ -67,7 +84,4 @@ public class RichTextStringPart extends RichTextPart {
         font = newFont;
         needRecalc();
     }
-
-
-    // public abstract boolean canMerge(RichTextPart other);
 }

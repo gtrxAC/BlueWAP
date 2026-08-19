@@ -24,6 +24,11 @@ public class RichTextItem extends Item {
                 needRecalc();
             }
             else {
+                // debug - draw part borders:
+                // g.setColor(0xFF0000);
+                // g.drawRect(calculatedParts[i].x, calculatedParts[i].y, calculatedParts[i].width, calculatedParts[i].height);
+                // g.setColor(0x111111);
+
                 calculatedParts[i].draw(g, highlighted);
             }
         }
@@ -88,6 +93,39 @@ public class RichTextItem extends Item {
             calculatedPartsVec.addElement(part);
             currLineHeight = Math.max(currLineHeight, part.height);
             x += part.width;
+        }
+
+        // merge parts
+        for (int i = 0; i < calculatedPartsVec.size() - 1; ) {
+            RichTextPart currPart = (RichTextPart) calculatedPartsVec.elementAt(i);
+            RichTextPart nextPart = (RichTextPart) calculatedPartsVec.elementAt(i + 1);
+            if (currPart.y != nextPart.y) {
+                i++;
+                continue;
+            }
+
+            RichTextPart merged = currPart.merge(nextPart);
+            if (merged == null) {
+                i++;
+                continue;
+            }
+
+            merged.x = currPart.x;
+            merged.y = currPart.y;
+            calculatedPartsVec.setElementAt(merged, i);
+            calculatedPartsVec.removeElementAt(i + 1);
+        }
+
+        // discard parts that are only whitespace
+        for (int i = 0; i < calculatedPartsVec.size() - 1; ) {
+            RichTextPart part = (RichTextPart) calculatedPartsVec.elementAt(i);
+
+            if (part.isWhitespace()) {
+                calculatedPartsVec.removeElementAt(i);
+            }
+            else {
+                i++;
+            }
         }
 
         calculatedParts = new RichTextPart[calculatedPartsVec.size()];
