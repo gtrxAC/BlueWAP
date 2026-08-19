@@ -275,7 +275,8 @@ public class WmlParser extends KXmlParser {
     }
 
     private boolean isFormattingTag() {
-        return ",b,big,em,i,small,strong,u,".indexOf("," + getName() + ",") != -1;
+        return ",b,big,em,i,small,strong,u,".indexOf("," + getName() + ",") != -1 ||
+            (isHtml && "span".equals(getName()));
     }
 
     private void parseP(String tagName) throws Exception {

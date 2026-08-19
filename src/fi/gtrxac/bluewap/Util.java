@@ -269,7 +269,7 @@ public class Util {
     public static String removeDuplicateWhitespace(String text) {
         boolean atWhitespace = false;
 
-        for (int i = 0; i < text.length(); i++) {
+        for (int i = 0; i < text.length(); ) {
             char c = text.charAt(i);
             if (charIsWhitespace(c)) {
                 if (atWhitespace) {
@@ -277,9 +277,11 @@ public class Util {
                 } else {
                     text = text.substring(0, i) + " " + text.substring(i + 1);
                     atWhitespace = true;
+					i++;
                 }
             } else {
                 atWhitespace = false;
+				i++;
             }
         }
         return text;
