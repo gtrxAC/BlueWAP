@@ -69,7 +69,7 @@ public abstract class Item {
         drawHighlight(g, 0, 0, width, height);
     }
 
-    protected int getAlignedX(int align, int width) {
+    public static int getAlignedX(int align, int width) {
         return
             ((align & Graphics.LEFT) != 0) ? 0 :
             ((align & Graphics.HCENTER) != 0) ? width/2 :

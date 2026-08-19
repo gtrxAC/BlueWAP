@@ -17,7 +17,7 @@ public class WmlStringItem extends Item {
     public WmlStringItem(int align) {
         super(false);
         this.rawParts = new Vector();
-        this.align = align;  // unused
+        this.align = align;
     }
 
     public void draw(Graphics g, ListScreen screen, int width, boolean highlighted) {
@@ -25,7 +25,7 @@ public class WmlStringItem extends Item {
     }
     
     public void recalc(int width) {
-        richText = new RichTextItem();
+        richText = new RichTextItem(align);
 
         for (int i = 0; i < rawParts.size(); i++) {
             RichTextStringPart part = (RichTextStringPart) rawParts.elementAt(i);
