@@ -1,7 +1,7 @@
 package fi.gtrxac.bluewap;
 
 import java.io.*;
-import java.util.Vector;
+import java.util.*;
 import javax.microedition.io.*;
 import javax.microedition.rms.*;
 import javax.microedition.lcdui.*;
@@ -11,6 +11,7 @@ public class Settings {
     public static int fontSize = Font.SIZE_SMALL;
     public static Vector bookmarks;
     public static boolean getPairedDeviceNames = true;
+    public static Hashtable deviceNameCache;
 
     private static void readData(DataInputStream dis) throws Exception {
         fontSize = dis.readUnsignedByte();
@@ -24,11 +25,19 @@ public class Settings {
         }
 
         getPairedDeviceNames = dis.readBoolean();
+
+        int deviceNameCount = dis.readInt();
+        deviceNameCache = new Hashtable(deviceNameCount);
+
+        for (int i = 0; i < deviceNameCount; i++) {
+            deviceNameCache.put(dis.readUTF(), dis.readUTF());
+        }
     }
 
     private static void writeData(DataOutputStream dos) throws Exception {
         dos.writeByte(fontSize);
         dos.writeByte(HTTPQueue.maxSlots);
+
         dos.writeInt(bookmarks.size());
 
         for (int i = 0; i < bookmarks.size(); i++) {
@@ -36,6 +45,15 @@ public class Settings {
         }
 
         dos.writeBoolean(getPairedDeviceNames);
+
+        dos.writeInt(deviceNameCache.size());
+
+        for (Enumeration e = deviceNameCache.keys(); e.hasMoreElements(); ) {
+            String key = (String) e.nextElement();
+            String value = (String) deviceNameCache.get(key);
+            dos.writeUTF(key);
+            dos.writeUTF(value);
+        }
     }
 
     static {
@@ -45,6 +63,9 @@ public class Settings {
         bookmarks.addElement("http://wap.15pmm01.com");
         bookmarks.addElement("http://wap.ad");
         bookmarks.addElement("http://wap.hutch3g.eu");
+
+        // same for device names
+        deviceNameCache = new Hashtable();
 
         load();
     }

@@ -70,7 +70,10 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
         for (int i = 0; i < knownDevices.length; i++) {
             String name = knownDevices[i].getBluetoothAddress();
 
-            if (Settings.getPairedDeviceNames && System.currentTimeMillis() < timeLimit) {
+            if (Settings.deviceNameCache.containsKey(name)) {
+                name = (String) Settings.deviceNameCache.get(name);
+            }
+            else if (Settings.getPairedDeviceNames && System.currentTimeMillis() < timeLimit) {
                 try {
                     String friendlyName = knownDevices[i].getFriendlyName(false);
 
@@ -160,6 +163,12 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
     public void bluetoothDeviceFound(String name, RemoteDevice device, DeviceClass cod) {
         if (devices.size() == 0) {
             clearAndRefresh();
+        }
+        String addr = device.getBluetoothAddress();
+
+        // if device name is not directly known, try to get it from the cache
+        if (addr.equals(name) && Settings.deviceNameCache.containsKey(addr)) {
+            name = (String) Settings.deviceNameCache.get(addr);
         }
         addDeviceItem(name, device);
     }

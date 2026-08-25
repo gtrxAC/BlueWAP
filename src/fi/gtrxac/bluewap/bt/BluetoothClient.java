@@ -179,7 +179,7 @@ public class BluetoothClient implements DiscoveryListener, Runnable {
         }
         catch (Exception e) {}
 
-        if (friendlyName != null && friendlyName.length() != 0) {
+        if (friendlyName != null && friendlyName.trim().length() != 0) {
             name = friendlyName;
         }
         listener.bluetoothDeviceFound(name, device, cod);

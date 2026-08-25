@@ -5,6 +5,7 @@ import fi.gtrxac.bluewap.*;
 import java.io.*;
 import java.util.*;
 import javax.microedition.io.*;
+import javax.bluetooth.*;
 
 public class BluetoothHTTP extends HTTP implements BluetoothHTTPProtocol {
 	private static final Object CONNECTION_LOCK = new Object();
@@ -48,6 +49,16 @@ public class BluetoothHTTP extends HTTP implements BluetoothHTTPProtocol {
 					bc = new BluetoothConnection(sc);
 					dis = null;
 					dos = null;
+
+					// after connecting, the BT device name is probably known if it wasn't already known, so save it in cache
+					RemoteDevice dev = RemoteDevice.getRemoteDevice(sc);
+					String devName = dev.getFriendlyName(false);
+
+					if (devName != null && devName.trim().length() > 0) {
+						String devAddr = dev.getBluetoothAddress();
+						Settings.deviceNameCache.put(devAddr, devName);
+						Settings.save();
+					}
 				}
 				catch (Exception e) {
 					clearConnections();
