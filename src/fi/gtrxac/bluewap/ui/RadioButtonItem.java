@@ -25,6 +25,7 @@ public class RadioButtonItem extends Item {
         if (highlighted) {
             g.setColor(0xEEF8FF);
             g.fillRect(0, 0, width, height);
+            drawHighlight(g, width);
             g.setColor(0x000000);
         } else {
             g.setColor(0x111111);
@@ -37,10 +38,6 @@ public class RadioButtonItem extends Item {
         g.translate(strOffset, 0);
         strItem.draw(g, screen, width - strOffset, false);
         g.translate(-strOffset, 0);
-
-        if (highlighted) {
-            drawHighlight(g, width);
-        }
     }
 
     private Image createRadioButtonImage(int size, boolean ticked) {

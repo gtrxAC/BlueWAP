@@ -34,6 +34,7 @@ public class LinkItem extends Item {
         if (highlighted) {
             g.setColor(0xEEF8FF);
             g.fillRect(beginX, 0, maxStringWidth, height);
+            drawHighlight(g, beginX, 0, maxStringWidth, height);
             g.setColor(0x2244AA);
         } else {
             g.setColor(0x3355CC);
@@ -51,10 +52,6 @@ public class LinkItem extends Item {
                 // Draw the underline manually
                 g.drawLine(lineX, y - 1, lineX + textLineWidths[i], y - 1);
             }
-        }
-
-        if (highlighted) {
-            drawHighlight(g, beginX, 0, maxStringWidth, height);
         }
     }
 
