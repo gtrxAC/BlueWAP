@@ -1,5 +1,6 @@
 package fi.gtrxac.bluewap.ui;
 
+import fi.gtrxac.bluewap.*;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 
@@ -11,6 +12,8 @@ public abstract class Item {
     public int y;
     private boolean selectable;
     public boolean needsRecalc;
+
+    private static final int roundRectSizeOffset = Util.hasRoundRectSizeBug ? 1 : 0;
 
     protected Item(boolean selectable) {
         this.selectable = selectable;
@@ -56,7 +59,7 @@ public abstract class Item {
     public void drawHighlight(Graphics g, int x, int y, int width, int height) {
         // int lastColor = g.getColor();
         g.setColor(0x5599FF);
-        g.drawRoundRect(x - 1, y - 1, width + 1, height + 1, 2, 2);
+        g.drawRoundRect(x - 1, y - 1, width + 1 - roundRectSizeOffset, height + 1 - roundRectSizeOffset, 2, 2);
         g.drawRect(x, y, width - 1, height - 1);
         // g.setColor(lastColor);
     }

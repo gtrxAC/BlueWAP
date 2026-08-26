@@ -1,7 +1,7 @@
 package fi.gtrxac.bluewap;
 
 import javax.microedition.io.*;
-import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.*;
 import javax.microedition.rms.*;
 import java.io.*;
 import java.util.*;
@@ -553,6 +553,7 @@ public class Util {
 	public static final int vectorRenderScale;
 	public static final boolean useUnderlinedFont;
 	public static final boolean hideSelectCommand;
+	public static final boolean hasRoundRectSizeBug;
 
 	static {
 		String plat = System.getProperty("microedition.platform");
@@ -578,5 +579,15 @@ public class Util {
 		// (ideally by checking APIs or OS-related plat strings rather than listing individual phone models)
 		// but for now we only check for Symbian S60v5 and up
 		hideSelectCommand = plat.indexOf("sw_platform_version=5.") != -1;
+
+		// On some Motorola phones (seemingly those with only one font size, like the V3 and L6)
+		// drawRoundRect() will draw with a width and height one pixel larger than specified
+		Image img = Image.createImage(5, 5);
+		Graphics g = img.getGraphics();
+		g.setColor(0x000000);
+		g.drawRoundRect(0, 0, 3, 3, 2, 2);
+		int[] pixel = new int[1];
+		img.getRGB(pixel, 0, 5, 4, 1, 1, 1);
+		hasRoundRectSizeBug = ((pixel[0] & 0x00FFFFFF) == 0x000000);
 	}
 }
