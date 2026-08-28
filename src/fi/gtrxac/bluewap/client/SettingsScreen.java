@@ -50,10 +50,13 @@ public class SettingsScreen extends ListScreen implements CommandListener {
             case CMD_BACK: {
                 int[] fontSizes = { Font.SIZE_SMALL, Font.SIZE_MEDIUM, Font.SIZE_LARGE };
                 Settings.fontSize = fontSizes[fontSizeGroup.getTickedIndex()];
+
                 HTTPQueue.maxSlots = Integer.parseInt(connLimitField.getValue());
                 if (HTTPQueue.maxSlots < 1) HTTPQueue.maxSlots = 1;
+                
                 Settings.save();
                 Fonts.loadFonts(Settings.fontSize);
+                History.onFontSizeChange();
 
                 App.popScreen();
                 break;

@@ -138,6 +138,12 @@ public class History implements Runnable {
         screenChanged(keepInputs);
     }
 
+    public static void onFontSizeChange() {
+        // re-parse the current page to make sure all fonts are recalculated
+        saveHighlightedItem();
+        screenChanged(true);
+    }
+
     private void showLoading() {
         this.wml = Util.stringToBytes(WmlTemplates.LOADING);
         this.loaded = false;
