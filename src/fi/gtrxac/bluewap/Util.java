@@ -449,32 +449,32 @@ public class Util {
   	private static final String HEX_DIGITS = "0123456789ABCDEF";
 
 	public static String urlEncode(String text) {
-		if (text == null) {
-		return "";
-		}
+		if (text == null) return "";
 
 		try {
-		byte[] bytes = text.getBytes("UTF-8");
-		StringBuffer result = new StringBuffer(bytes.length + (bytes.length >> 1));
+			byte[] bytes = text.getBytes("UTF-8");
+			StringBuffer result = new StringBuffer(bytes.length + (bytes.length >> 1));
 
-		for (int i = 0; i < bytes.length; i++) {
-			int b = bytes[i] & 0xFF;
-			char c = (char) b;
+			for (int i = 0; i < bytes.length; i++) {
+				int b = bytes[i] & 0xFF;
+				char c = (char) b;
 
-			if (c == ' ') {
-			result.append('+');
-			} else if (isUrlSafeCharacter(c)) {
-			result.append(c);
-			} else {
-			result
-				.append('%')
-				.append(HEX_DIGITS.charAt((b >> 4) & 0xF))
-				.append(HEX_DIGITS.charAt(b & 0xF));
+				if (c == ' ') {
+					result.append('+');
+				}
+				else if (isUrlSafeCharacter(c)) {
+					result.append(c);
+				}
+				else {
+					result.append('%')
+						.append(HEX_DIGITS.charAt((b >> 4) & 0xF))
+						.append(HEX_DIGITS.charAt(b & 0xF));
+				}
 			}
+			return result.toString();
 		}
-		return result.toString();
-		} catch (UnsupportedEncodingException e) {
-		return "";
+		catch (UnsupportedEncodingException e) {
+			return "";
 		}
 	}
 
@@ -489,35 +489,34 @@ public class Util {
 	}
 
     public static String urlDecode(String value) {
-        if (value == null) {
-            return "";
-        }
+        if (value == null) return "";
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
+
             if (c == '+') {
                 bytes.write(32);
             }
 			else if (c == '%' && i + 2 < value.length()) {
                 int hi = hexDigit(value.charAt(i + 1));
                 int lo = hexDigit(value.charAt(i + 2));
+
                 if (hi >= 0 && lo >= 0) {
                     bytes.write((hi << 4) | lo);
                     i += 2;
-                } else {
+                }
+				else {
                     bytes.write((byte) c);
                 }
-            } else {
+            }
+			else {
                 bytes.write((byte) c);
             }
         }
 
-        try {
-            return new String(bytes.toByteArray(), "UTF-8");
-        } catch (Exception e) {
-            return new String(bytes.toByteArray());
-        }
+		return bytesToString(bytes.toByteArray());
     }
 
     private static int hexDigit(char c) {

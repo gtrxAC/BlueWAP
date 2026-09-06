@@ -201,11 +201,13 @@ public class WmlVariables {
         testCase("you have $$$$", "you have $$", false);
         testCase("you have $$$$$example", "you have $$variable test", false);
 
-        // invalid variable use - no specific behavior seems to be required for these
-        // but they should be handled in some kind of reasonable way
+        // invalid variable name starting with digit - no specific behavior
+        // seems to be required for these but they should be handled in
+        // some kind of reasonable way - I chose to keep the text as-is
         testCase("not$10.00 exist", "not$10.00 exist", false);
         testCase("not$(10.00) exist", "not$(10.00) exist", false);
         testCase("not$(10.00) exist", "not$(10.00) exist", false);
+        testCase("not$ exist", "not$ exist", false);
 
         clear();
     }
