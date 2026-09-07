@@ -431,6 +431,11 @@ public abstract class ListScreen extends Screen implements Runnable {
         removeItem(index);
     }
 
+    /**
+     * Add multiple items at the same time.
+     * Adding items in bulk may be beneficial to avoid unnecessary recalcs,
+     * especially when multiple items are added by another thread.
+     */
     public synchronized void addItems(Vector newItems) {
         for (int i = 0; i < newItems.size(); i++) {
             Object item = newItems.elementAt(i);
