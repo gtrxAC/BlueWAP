@@ -28,7 +28,7 @@ public class TabbedListScreen extends Screen {
     }
 
     public void draw(Graphics g) {
-        g.setColor(0xCCCCCC);
+        g.setColor(0xBBBBBB);
         g.fillRect(0, 0, getWidth(), tabBarHeight);
 
         drawTabs(g);
@@ -134,18 +134,32 @@ public class TabbedListScreen extends Screen {
         }
     }
 
+    private boolean tappedOnBar;
+
     public void pointerPressed(int x, int y) {
+        tappedOnBar = (y < tabBarHeight);
+        if (tappedOnBar) return;
         ListView tab = getCurrentTab();
         if (tab != null) tab.pointerPressed(x, y);
     }
 
     public void pointerDragged(int x, int y) {
+        if (tappedOnBar) return;
         ListView tab = getCurrentTab();
         if (tab != null) tab.pointerDragged(x, y);
     }
     
     public void pointerReleased(int x, int y) {
-        ListView tab = getCurrentTab();
-        if (tab != null) tab.pointerReleased(x, y);
+        if (tappedOnBar) {
+            // handle tab selection
+            activeTabIndex = (x - tabMargin)/tabWidth;
+
+            if (activeTabIndex < 0) activeTabIndex = 0;
+            else if (activeTabIndex >= tabs.size()) activeTabIndex = tabs.size() - 1;
+        }
+        else {
+            ListView tab = getCurrentTab();
+            if (tab != null) tab.pointerReleased(x, y);
+        }
     }
 }
