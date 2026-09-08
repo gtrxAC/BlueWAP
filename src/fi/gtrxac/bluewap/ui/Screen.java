@@ -23,8 +23,8 @@ public abstract class Screen implements CommandListener {
 
     protected void recalcIfNeeded() {
         if (needsRecalc) {
-            width = AppCanvas.instance.getWidth();
-            height = AppCanvas.instance.getHeight();
+            width = getContainerWidth();
+            height = getContainerHeight();
             contentWidth = width - margin*2;
             recalc();
             needsRecalc = false;
@@ -34,6 +34,14 @@ public abstract class Screen implements CommandListener {
     public void prepareAndDraw(Graphics g) {
         recalcIfNeeded();
         draw(g);
+    }
+
+    public int getContainerWidth() {
+        return AppCanvas.instance.getWidth();
+    }
+
+    public int getContainerHeight() {
+        return AppCanvas.instance.getHeight();
     }
 
     // _________________________________________________________________________

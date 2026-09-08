@@ -8,7 +8,7 @@ import fi.gtrxac.bluewap.Util;
 /**
  * A list that can display a vertical scrollable list of Items.
  */
-public abstract class ListScreen extends Screen implements Runnable {
+public class ListScreen extends Screen implements Runnable {
     public int scroll;
     public int maxScroll;
     public int highlightedIndex;
@@ -30,14 +30,18 @@ public abstract class ListScreen extends Screen implements Runnable {
         this(Math.max(2, Fonts.height/6), Math.max(2, Fonts.height/7));
     }
 
+    public int getFullHeight() {
+        return super.getHeight();
+    }
+
     public int getHeight() {
-        if (bannerText == null) return super.getHeight();
-        return super.getHeight() - bannerHeight;
+        if (bannerText == null) return getFullHeight();
+        return getFullHeight() - bannerHeight;
     }
 
     public void draw(Graphics g) {
         g.setColor(0xFFFFFF);
-        g.fillRect(0, 0, getWidth(), super.getHeight());
+        g.fillRect(0, 0, getWidth(), getFullHeight());
 
         if (bannerText != null) {
             drawBanner(g);
@@ -76,7 +80,7 @@ public abstract class ListScreen extends Screen implements Runnable {
             }
             g.translate(0, item.height + itemPadding);
 
-            if (g.getTranslateY() >= super.getHeight()) break;
+            if (g.getTranslateY() >= AppCanvas.instance.getHeight()) break;
         }
     }
 
@@ -312,7 +316,7 @@ public abstract class ListScreen extends Screen implements Runnable {
 
         // Use scrollbar if the content is tall enough to be scrollable and the user pressed on the right edge of the screen
         // Note: Scrollbar hitbox is wider than the actual rendered scrollbar
-        usingScrollBar = isScrollable() && x > super.getWidth() - Fonts.height*4/3;
+        usingScrollBar = isScrollable() && x > getWidth() - Fonts.height*4/3;
 
         if (usingScrollBar) {
             velocity = 0;  // stop any kinetic scrolling
