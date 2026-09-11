@@ -53,8 +53,7 @@ public class MainScreen extends ListScreen implements CommandListener {
 
     public void commandAction(Command c, Displayable d) {
         if (c instanceof WmlCommand) {
-            WmlCommand wc = (WmlCommand) c;
-            WmlAnchorItem.activate(wc.action, wc.target, wc.postfields, wc.setvars, wc.isPost);
+            ((WmlCommand) c).action.activate();
             return;
         }
         switch (c.getPriority()) {
@@ -105,8 +104,7 @@ public class MainScreen extends ListScreen implements CommandListener {
             }
         }
         if (i instanceof WmlAnchorItem) {
-            WmlAnchorItem anchor = (WmlAnchorItem) i;
-            WmlAnchorItem.activate(anchor.action, anchor.target, anchor.postfields, anchor.setvars, anchor.isPost);
+            ((WmlAnchorItem) i).action.activate();
         }
     }
 }

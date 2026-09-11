@@ -500,12 +500,12 @@ public class WmlParser extends KXmlParser {
             }
             nextItem();
         }
-        addAnchorItem(text, WmlAnchorItem.ACTION_GO, target, null, null, false);
+        addAnchorItem(text, WmlAction.ACTION_GO, target, null, null, false);
     }
 
     public void parseAnchor() throws Exception {
         String text = "";
-        int action = WmlAnchorItem.ACTION_NONE;
+        int action = WmlAction.ACTION_NONE;
         String target = null;
         Hashtable postfields = new Hashtable(3);
         Hashtable setvars = new Hashtable(3);
@@ -522,7 +522,7 @@ public class WmlParser extends KXmlParser {
                     text += "\n";
                 }
                 else if ("go".equals(getName())) {
-                    action = WmlAnchorItem.ACTION_GO;
+                    action = WmlAction.ACTION_GO;
                     target = getGoTarget();
                     isPost = getGoMethod();
                     text += parseGo(postfields, setvars);
@@ -531,11 +531,11 @@ public class WmlParser extends KXmlParser {
                     text += parseImgInAnchor();
                 }
                 else if ("prev".equals(getName())) {
-                    action = WmlAnchorItem.ACTION_PREV;
+                    action = WmlAction.ACTION_PREV;
                     skipSubTree();  // setvar not supported
                 }
                 else if ("refresh".equals(getName())) {
-                    action = WmlAnchorItem.ACTION_REFRESH;
+                    action = WmlAction.ACTION_REFRESH;
                     skipSubTree();  // setvar not supported
                 }
                 else {
@@ -682,7 +682,7 @@ public class WmlParser extends KXmlParser {
         String type = getAttributeRequired("type");
         if (type == null) type = "unknown";
 
-        int action = WmlAnchorItem.ACTION_NONE;
+        int action = WmlAction.ACTION_NONE;
         String target = null;
         Hashtable postfields = new Hashtable(3);
         Hashtable setvars = new Hashtable(3);
@@ -697,21 +697,21 @@ public class WmlParser extends KXmlParser {
             }
             else if (getEventType() == START_TAG) {
                 if ("go".equals(getName())) {
-                    action = WmlAnchorItem.ACTION_GO;
+                    action = WmlAction.ACTION_GO;
                     target = getGoTarget();
                     isPost = getGoMethod();
                     text += parseGo(postfields, setvars);
                 }
                 else if ("noop".equals(getName())) {
-                    action = WmlAnchorItem.ACTION_NONE;
+                    action = WmlAction.ACTION_NONE;
                     skipSubTree();
                 }
                 else if ("prev".equals(getName())) {
-                    action = WmlAnchorItem.ACTION_PREV;
+                    action = WmlAction.ACTION_PREV;
                     text += parsePrevOrRefresh(setvars);
                 }
                 else if ("refresh".equals(getName())) {
-                    action = WmlAnchorItem.ACTION_REFRESH;
+                    action = WmlAction.ACTION_REFRESH;
                     text += parsePrevOrRefresh(setvars);
                 }
                 else {

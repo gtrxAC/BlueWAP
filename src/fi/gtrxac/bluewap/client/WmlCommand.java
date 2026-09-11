@@ -1,22 +1,15 @@
+//#ifdef BLUEWAP_CLIENT
 package fi.gtrxac.bluewap.client;
 
 import java.util.Hashtable;
-
 import javax.microedition.lcdui.*;
 
 public class WmlCommand extends Command {
-    int action;
-    String target;
-    Hashtable postfields;
-    Hashtable setvars;
-    boolean isPost;
+    WmlAction action;
 
-    public WmlCommand(String label, int prio, int action, String target, Hashtable postfields, Hashtable setvars, boolean isPost) {
+    public WmlCommand(String label, int prio, int actionType, String target, Hashtable postfields, Hashtable setvars, boolean isPost) {
         super(label, Command.SCREEN, prio);
-        this.action = action;
-        this.target = target;
-        this.postfields = postfields;
-        this.setvars = setvars;
-        this.isPost = isPost;
+        this.action = new WmlAction(actionType, target, postfields, setvars, isPost);
     }
 }
+//#endif
