@@ -40,7 +40,7 @@ public class AppCanvas extends Canvas {
         g.setColor(0xEEEEEE);
         g.fillRect(0, 0, getWidth(), barHeight);
 
-        int margin = Math.max(2, Fonts.boldHeight/7);
+        int margin = Math.max(3, Fonts.boldHeight/7);
         int softkeyWidth = (getWidth() - margin*3)/2;
         int softkeyHeight = barHeight - margin*2;
         int textY = barHeight/2 - Fonts.boldHeight/2;
