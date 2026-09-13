@@ -6,7 +6,18 @@ import javax.microedition.rms.*;
 import java.io.*;
 import java.util.*;
 
-public class Util {
+public class Util extends Canvas {
+    // _________________________________________________________________________
+    //
+    //  Dummy canvas
+    // _________________________________________________________________________
+    //
+	public Util() {
+		super();
+	}
+
+	protected void paint(Graphics g) {}
+
     // _________________________________________________________________________
     //
     //  Text encoding
@@ -551,8 +562,9 @@ public class Util {
 	public static final boolean isJ2MELoader;
 	public static final int vectorRenderScale;
 	public static final boolean useUnderlinedFont;
-	public static final boolean hideSelectCommand;
 	public static final boolean hasRoundRectSizeBug;
+	public static final boolean useCustomSoftkeys;
+	public static final boolean hideSelectCommand;
 
 	static {
 		String plat = System.getProperty("microedition.platform");
@@ -573,12 +585,6 @@ public class Util {
 		// Other devices need more testing
 		useUnderlinedFont = plat.startsWith("Nokia") || plat.startsWith("SonyEr") || plat.startsWith("BlackB");
 
-		// Hide the "Select" softkey on full-touch phones where you would instead tap on the item you want to select
-		// This check could be expanded to other devices
-		// (ideally by checking APIs or OS-related plat strings rather than listing individual phone models)
-		// but for now we only check for Symbian S60v5 and up
-		hideSelectCommand = plat.indexOf("sw_platform_version=5.") != -1;
-
 		// On some Motorola phones (seemingly those with only one font size, like the V3 and L6)
 		// drawRoundRect() will draw with a width and height one pixel larger than specified
 		Image img = Image.createImage(5, 5);
@@ -588,5 +594,40 @@ public class Util {
 		int[] pixel = new int[1];
 		img.getRGB(pixel, 0, 5, 4, 1, 1, 1);
 		hasRoundRectSizeBug = ((pixel[0] & 0x00FFFFFF) == 0x000000);
+
+		// Use custom drawn softkeys, custom 'Options' menu, and fullscreen mode
+		// on platforms that have bad softkeys by default (Samsung, J2ME Loader).
+		useCustomSoftkeys = isJ2MELoader || isSamsungTouch(plat);
+
+		// Hide the "Select" softkey on full-touch phones where you would instead tap on the item you want to select
+		// This check could be expanded to other devices
+		// (ideally by checking APIs or OS-related plat strings rather than listing individual phone models)
+		// but for now we only check for Symbian S60v5 and up, and platforms that use custom softkeys,
+		// as the custom softkey impl is made for touchscreens
+		hideSelectCommand = plat.indexOf("sw_platform_version=5.") != -1 || useCustomSoftkeys;
+	}
+
+	// Samsung platform strings are inconsistent but one fairly effective way to
+	// check for them is to look for a firmware version number
+	// (platform string ends with 4 uppercase letters and 1 digit).
+	// Not a perfect check (sometimes plat string is just "j2me") but it's
+	// good enough for the touchscreen-era models
+	private static boolean isSamsung(String plat) {
+		if (plat.indexOf("Samsung") != -1 || plat.indexOf("GT-") != -1) return true;
+		if (plat.length() < 5) return false;
+
+		for (int i = 2; i < 6; i++) {
+			char c = plat.charAt(plat.length() - i);
+			if (!Character.isUpperCase(c)) return false;
+		}
+
+		char last = plat.charAt(plat.length() - 1);
+		return Character.isDigit(last);
+	}
+
+	private static boolean isSamsungTouch(String plat) {
+		return isSamsung(plat) && (new Util()).hasPointerEvents() &&
+			// On these two phones, hasPointerEvents() returns true even though they are not touchscreen phones
+			plat.indexOf("S7220") == -1 && plat.indexOf("S7350") == -1;
 	}
 }

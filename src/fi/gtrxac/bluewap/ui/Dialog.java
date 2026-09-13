@@ -5,14 +5,12 @@ import javax.microedition.lcdui.*;
 import fi.gtrxac.bluewap.Util;
 
 public class Dialog extends Screen implements CommandListener {
-    private static Image overlay;
     private static final Command DISMISS_COMMAND = new Command("OK", Command.BACK, 0);
 
     private String text;
     private String[] textLines;
     private Screen lastScreen;
     private Screen nextScreen;
-    private Screen behindScreen;
 
     private int commandCount;
     private CommandListener listener;
@@ -23,7 +21,6 @@ public class Dialog extends Screen implements CommandListener {
 
     public Dialog(String text, Screen nextScreen) {
         super(0);
-        checkInitOverlay();
         super.setCommandListener(this);
 
         lastScreen = AppBase.getCurrentScreen();
@@ -33,22 +30,6 @@ public class Dialog extends Screen implements CommandListener {
         super.addCommand(DISMISS_COMMAND);
 
         setText(text);
-
-        // Get the screen that should be drawn behind this one
-        // If this Dialog is stacked above another Dialog, get the last non-Dialog screen
-        behindScreen = lastScreen;
-        while (behindScreen instanceof Dialog) {
-            behindScreen = ((Dialog) behindScreen).lastScreen;
-        }
-    }
-
-    private static void checkInitOverlay() {
-        if (overlay == null && AppBase.disp.numAlphaLevels() > 2) {
-            try {
-                overlay = Image.createImage("/o.png");
-            }
-            catch (Exception e) {}
-        }
     }
 
     public int getContentWidth() {
@@ -85,36 +66,7 @@ public class Dialog extends Screen implements CommandListener {
     public void draw(Graphics g) {
         int themeBg = 0xFFFFFF;
 
-        // If possible, draw last screen behind a darkened overlay
-        if (overlay != null && behindScreen instanceof Screen) {
-            g.setColor(themeBg);
-            g.fillRect(0, 0, getWidth(), getHeight());
-
-            try {
-                ((Screen) behindScreen).draw(g);
-            }
-            catch (Exception e) {}
-
-            g.translate(-g.getTranslateX(), -g.getTranslateY());
-            g.setClip(0, 0, getWidth(), getHeight());
-    
-            // Draw overlay (grid of 64×64 black square images with 70% opacity)
-            for (int y = 0; y < getHeight(); y += 64) {
-                for (int x = 0; x < getWidth(); x += 64) {
-                    g.drawImage(overlay, x, y, Graphics.TOP | Graphics.LEFT);
-                }
-            }
-        } else {
-            // Not possible to draw the next screen, or display doesn't support alpha blending:
-            // fill background with darkened version of theme background color
-            int background =
-                (themeBg & 0xFF0000) >> 18 << 16
-                | (themeBg & 0xFF00) >> 10 << 8
-                | (themeBg & 0xFF) >> 2;
-
-            g.setColor(background);
-            g.fillRect(0, 0, getWidth(), getHeight());
-        }
+        drawPreviousScreenDimmed(g);
 
         // Centered card with actual theme background color
         int baseX = (getWidth() - getContentWidth())/2;

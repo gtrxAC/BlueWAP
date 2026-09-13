@@ -21,19 +21,17 @@ public abstract class Screen implements CommandListener {
         needRecalc();
     }
 
-    protected void recalcIfNeeded() {
-        if (needsRecalc) {
-            width = getContainerWidth();
-            height = getContainerHeight();
-            contentWidth = width - margin*2;
-            recalc();
-            needsRecalc = false;
-        }
+    public void prepareAndDraw(Graphics g) {
+        if (needsRecalc) fullRecalc();
+        draw(g);
     }
 
-    public void prepareAndDraw(Graphics g) {
-        recalcIfNeeded();
-        draw(g);
+    public void fullRecalc() {
+        width = getContainerWidth();
+        height = getContainerHeight();
+        contentWidth = width - margin*2;
+        recalc();
+        needsRecalc = false;
     }
 
     public int getContainerWidth() {
@@ -146,4 +144,67 @@ public abstract class Screen implements CommandListener {
      * Called when a touch pointer is released.
      */
     public void pointerReleased(int x, int y) {}
+
+    // _________________________________________________________________________
+    //
+    //  Drawing utilities
+    // _________________________________________________________________________
+    //
+
+    private static Image overlay;
+    private static boolean drawingDimmed = false;
+
+    private static void checkInitOverlay() {
+        if (overlay == null && AppBase.disp.numAlphaLevels() > 2) {
+            try {
+                overlay = Image.createImage("/o.png");
+            }
+            catch (Exception e) {}
+        }
+    }
+
+    public void drawPreviousScreenDimmed(Graphics g) {
+        // only allow this function to be called once per draw, to avoid dimming being stacked
+        if (drawingDimmed) return;
+        drawingDimmed = true;
+
+        int themeBg = 0xFFFFFF;
+        
+        checkInitOverlay();
+
+        Screen behindScreen = AppBase.getPreviousScreen();
+
+        // If possible, draw last screen behind a darkened overlay
+        if (overlay != null && behindScreen != null) {
+            g.setColor(themeBg);
+            g.fillRect(0, 0, getWidth(), getHeight());
+
+            try {
+                behindScreen.draw(g);
+            }
+            catch (Exception e) {}
+
+            g.translate(-g.getTranslateX(), -g.getTranslateY());
+            g.setClip(0, 0, getWidth(), getHeight());
+    
+            // Draw overlay (grid of 64×64 black square images with 70% opacity)
+            for (int y = 0; y < getHeight(); y += 64) {
+                for (int x = 0; x < getWidth(); x += 64) {
+                    g.drawImage(overlay, x, y, Graphics.TOP | Graphics.LEFT);
+                }
+            }
+        } else {
+            // Not possible to draw the next screen, or display doesn't support alpha blending:
+            // fill background with darkened version of theme background color
+            int background =
+                (themeBg & 0xFF0000) >> 18 << 16
+                | (themeBg & 0xFF00) >> 10 << 8
+                | (themeBg & 0xFF) >> 2;
+
+            g.setColor(background);
+            g.fillRect(0, 0, getWidth(), getHeight());
+        }
+
+        drawingDimmed = false;
+    }
 }

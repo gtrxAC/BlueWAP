@@ -17,6 +17,7 @@ public class ListView extends ListScreen {
     private int viewY;
     private int width;
     private int height;
+    private ListViewItemListener listener;
 
     public ListView(int margin, int itemPadding) {
         super(margin, itemPadding);
@@ -24,6 +25,10 @@ public class ListView extends ListScreen {
 
     public ListView() {
         super();
+    }
+
+    public void setItemListener(ListViewItemListener l) {
+        listener = l;
     }
 
     public int getContainerWidth() {
@@ -46,6 +51,15 @@ public class ListView extends ListScreen {
         g.translate(viewX, viewY);
         g.setClip(0, 0, width, height);
         super.draw(g);
+    }
+
+    /**
+     * Called when an item in this screen is selected.
+     */
+    protected void itemSelected(Item i) {
+        if (listener != null) {
+            listener.itemSelected(i);
+        }
     }
 
     public void pointerPressed(int x, int y) {
