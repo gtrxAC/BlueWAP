@@ -22,6 +22,7 @@ public class SettingsScreen extends ListScreen implements CommandListener {
 
     public SettingsScreen() {
         super();
+        setTitle("Settings");
 
         addItem("Font size:");
         fontSizeGroup = new RadioButtonGroup();

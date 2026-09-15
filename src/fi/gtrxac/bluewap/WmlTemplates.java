@@ -14,7 +14,7 @@ public class WmlTemplates {
 
     public static final String LOADING =
         BEGIN +
-        "<card title=\"Loading\">" +
+        "<card>" +
         "<p>Loading...</p>" +
         END;
 

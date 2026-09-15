@@ -71,7 +71,13 @@ public class WmlParser extends KXmlParser {
     }
 
     public static void displayWml(ListScreen outputScreen, byte[] wml, String cardId, String contentType, boolean keepInputs) {
-        synchronized (History.getCurrent()) {
+        History curr = History.getCurrent();
+
+        synchronized (curr) {
+            if (curr.loaded) {
+                outputScreen.setTitle(curr.url.domain);
+            }
+
             if (!keepInputs) {
                 outputScreen.removeAllItems();
                 outputScreen.addItem("Parsing...");
@@ -219,6 +225,11 @@ public class WmlParser extends KXmlParser {
             // skip this card
             skipSubTree();
             return;
+        }
+
+        if (History.getCurrent().loaded) {
+            String cardTitle = getAttributeValue(null, "title");
+            outputScreen.setTitle(cardTitle);
         }
 
         nextItem();

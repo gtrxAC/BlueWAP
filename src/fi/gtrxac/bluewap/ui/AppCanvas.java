@@ -307,7 +307,7 @@ public class AppCanvas extends Canvas {
     }
 
     public void updateTitle() {
-        int availableWidth = getWidth() - Fonts.boldHeight/4*3 - Fonts.plain.stringWidth("88:88");
+        int availableWidth = getWidth() - Fonts.boldHeight/4*2 - Fonts.plain.stringWidth("88:88");
 
         String title = AppBase.getCurrentScreen().getTitle();
         currentTitle = Util.stringToWidth(title, Fonts.bold, availableWidth);

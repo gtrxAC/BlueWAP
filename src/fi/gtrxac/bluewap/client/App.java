@@ -22,6 +22,7 @@ public class App extends AppBase implements CommandListener {
 
     public static void askQuit() {
         Dialog d = new Dialog("Are you sure you want to quit BlueWAP?");
+        d.setTitle("Quit");
         d.addCommand(new Command("Yes", Command.OK, CMD_YES));
         d.addCommand(new Command("No", Command.BACK, CMD_NO));
         d.setCommandListener((App) instance);

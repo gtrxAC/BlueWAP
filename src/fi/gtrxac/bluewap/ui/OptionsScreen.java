@@ -16,6 +16,8 @@ public class OptionsScreen extends Screen implements CommandListener, ListViewIt
 
     public OptionsScreen(Vector commands) {
         super(0);
+        setTitle(AppBase.getCurrentScreen().getTitle());
+
         listView = new ListView(Fonts.height/6, Fonts.height/6);
         listView.setItemListener(this);
 

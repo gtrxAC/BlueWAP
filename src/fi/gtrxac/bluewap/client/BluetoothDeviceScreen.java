@@ -27,6 +27,8 @@ public class BluetoothDeviceScreen extends ListScreen implements BluetoothClient
 
     public BluetoothDeviceScreen() {
         super();
+        setTitle("Select device");
+
         addItem(searchButton);
         addItem(autoConnectButton);
         addItem(new BlankItem(Fonts.height/8));
