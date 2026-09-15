@@ -1,6 +1,6 @@
 package fi.gtrxac.bluewap.ui;
 
-import java.util.Vector;
+import java.util.*;
 import javax.microedition.lcdui.*;
 import fi.gtrxac.bluewap.Util;
 
@@ -20,11 +20,17 @@ public class AppCanvas extends Canvas {
     private boolean rightSoftkeyPressed;
     private boolean optionsCommandShown;
 
+    private String currentClock;
     private String currentTitle;
 
     private AppCanvas() {
         super();
-        setFullScreenMode(Util.useCustomSoftkeys);
+
+        if (Util.useCustomSoftkeys) {
+            setFullScreenMode(true);
+            new ClockThread().start();
+            updateClock();
+        }
     }
 
     protected void paint(Graphics g) {
@@ -68,7 +74,7 @@ public class AppCanvas extends Canvas {
 
         g.setFont(Fonts.plain);
         g.drawString(
-            "12:34",
+            currentClock,
             getWidth() - Fonts.boldHeight/4,
             (barHeight - Fonts.height)/2,
             Graphics.TOP | Graphics.RIGHT);
@@ -306,5 +312,14 @@ public class AppCanvas extends Canvas {
         String title = AppBase.getCurrentScreen().getTitle();
         currentTitle = Util.stringToWidth(title, Fonts.bold, availableWidth);
         setTitle(currentTitle);
+    }
+
+    public void updateClock() {
+        Calendar now = Calendar.getInstance();
+        currentClock = now.get(Calendar.HOUR_OF_DAY) + ":" + now.get(Calendar.MINUTE);
+
+        if (AppCanvas.instance != null) {
+            AppBase.repaint();
+        }
     }
 }

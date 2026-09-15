@@ -31,6 +31,6 @@ public abstract class RichTextPart {
 
     public void needRecalc() {
         needsRecalc = true;
-        AppBase.instance.repaint();
+        AppBase.repaint();
     }
 }
