@@ -41,6 +41,12 @@ public abstract class AppBase extends MIDlet {
     //
     private static Stack screens = new Stack();
 
+    private static void screenChanged() {
+        AppCanvas.instance.updateCommands();
+        AppCanvas.instance.updateTitle();
+        repaint();
+    }
+
     // _________________________________________________________________________
     //
     //  Public API
@@ -57,8 +63,7 @@ public abstract class AppBase extends MIDlet {
      */
     public static void pushScreen(Screen s) {
         screens.push(s);
-        AppCanvas.instance.updateCommands();
-        repaint();
+        screenChanged();
     }
 
     /**
@@ -66,8 +71,7 @@ public abstract class AppBase extends MIDlet {
      */
     public static void popScreen() {
         screens.pop();
-        AppCanvas.instance.updateCommands();
-        repaint();
+        screenChanged();
     }
 
     /**

@@ -13,6 +13,7 @@ public abstract class Screen implements CommandListener {
     private int margin;
     private boolean needsRecalc;
 
+    private String title;
     private final Vector commands = new Vector();
     private CommandListener commandListener;
     
@@ -40,6 +41,24 @@ public abstract class Screen implements CommandListener {
 
     public int getContainerHeight() {
         return AppCanvas.instance.getHeight();
+    }
+
+    // _________________________________________________________________________
+    //
+    //  Title management
+    // _________________________________________________________________________
+    //
+
+    public void setTitle(String newTitle) {
+        title = newTitle;
+        AppCanvas.instance.updateTitle();
+    }
+
+    public String getTitle() {
+        if (title == null) {
+            return AppBase.instance.getAppProperty("MIDlet-Name");
+        }
+        return title;
     }
 
     // _________________________________________________________________________

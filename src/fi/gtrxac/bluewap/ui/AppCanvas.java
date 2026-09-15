@@ -20,6 +20,8 @@ public class AppCanvas extends Canvas {
     private boolean rightSoftkeyPressed;
     private boolean optionsCommandShown;
 
+    private String currentTitle;
+
     private AppCanvas() {
         super();
         setFullScreenMode(Util.useCustomSoftkeys);
@@ -48,7 +50,28 @@ public class AppCanvas extends Canvas {
     }
 
     private void drawStatusBar(Graphics g) {
+        int barHeight = getStatusBarHeight();
 
+        g.setColor(0xDDDDDD);
+        g.fillRect(0, 0, getWidth(), barHeight);
+
+        g.setColor(0x9B9B9B);
+        g.drawLine(0, barHeight - 1, getWidth(), barHeight - 1);
+
+        g.setColor(0x111111);
+        g.setFont(Fonts.bold);
+        g.drawString(
+            currentTitle,
+            Fonts.boldHeight/4, 
+            (barHeight - Fonts.boldHeight)/2,
+            0);
+
+        g.setFont(Fonts.plain);
+        g.drawString(
+            "12:34",
+            getWidth() - Fonts.boldHeight/4,
+            (barHeight - Fonts.height)/2,
+            Graphics.TOP | Graphics.RIGHT);
     }
 
     private void drawSoftkeys(Graphics g) {
@@ -104,6 +127,7 @@ public class AppCanvas extends Canvas {
 
     protected void sizeChanged(int w, int h) {
         AppBase.recalcAllScreens();
+        updateTitle();
     }
 
     protected void keyPressed(int keyCode) {
@@ -274,5 +298,13 @@ public class AppCanvas extends Canvas {
         // if there's more commands, show them in an options menu
         optionsCommandShown = true;
         leftSoftkeyLabel = "Options";
+    }
+
+    public void updateTitle() {
+        int availableWidth = getWidth() - Fonts.boldHeight/4*3 - Fonts.plain.stringWidth("88:88");
+
+        String title = AppBase.getCurrentScreen().getTitle();
+        currentTitle = Util.stringToWidth(title, Fonts.bold, availableWidth);
+        setTitle(currentTitle);
     }
 }
