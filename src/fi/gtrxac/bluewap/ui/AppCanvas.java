@@ -35,20 +35,19 @@ public class AppCanvas extends Canvas {
 
     protected void paint(Graphics g) {
         Screen curr = AppBase.getCurrentScreen();
-        int statusBarHeight = getStatusBarHeight();
         
         if (Util.useCustomSoftkeys) {
             drawStatusBar(g);
+            g.translate(0, getStatusBarHeight());
         }
 
         if (curr != null) {
-            g.translate(0, statusBarHeight);
             g.setClip(0, 0, getWidth(), getHeight());
             curr.prepareAndDraw(g);
         }
 
         if (Util.useCustomSoftkeys) {
-            int softkeyBarY = statusBarHeight + getHeight();
+            int softkeyBarY = getStatusBarHeight() + getHeight();
             g.translate(-g.getTranslateX(), -g.getTranslateY() + softkeyBarY);
             g.setClip(0, 0, getWidth(), getSoftkeyBarHeight());
             drawSoftkeys(g);
