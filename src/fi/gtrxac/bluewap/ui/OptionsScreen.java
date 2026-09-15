@@ -69,7 +69,7 @@ public class OptionsScreen extends Screen implements CommandListener, ListViewIt
         int viewContentHeight = (viewLastItem == null) ? 0 :
             (viewLastItem.y + viewLastItem.height + listView.itemPadding*2);
 
-        viewHeight = Math.min(getHeight()*4/5, viewContentHeight);
+        viewHeight = Math.min(getHeight()*9/10, viewContentHeight);
         viewX = (getWidth() - viewWidth)/2;
         viewY = getHeight() - viewHeight;
 
