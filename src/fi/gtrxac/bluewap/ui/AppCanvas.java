@@ -27,15 +27,32 @@ public class AppCanvas extends Canvas {
 
     protected void paint(Graphics g) {
         Screen curr = AppBase.getCurrentScreen();
-        if (curr != null) curr.prepareAndDraw(g);
-        if (Util.useCustomSoftkeys) drawSoftkeys(g);
+        int statusBarHeight = getStatusBarHeight();
+        
+        if (Util.useCustomSoftkeys) {
+            drawStatusBar(g);
+        }
+
+        if (curr != null) {
+            g.translate(0, statusBarHeight);
+            g.setClip(0, 0, getWidth(), getHeight());
+            curr.prepareAndDraw(g);
+        }
+
+        if (Util.useCustomSoftkeys) {
+            int softkeyBarY = statusBarHeight + getHeight();
+            g.translate(-g.getTranslateX(), -g.getTranslateY() + softkeyBarY);
+            g.setClip(0, 0, getWidth(), getSoftkeyBarHeight());
+            drawSoftkeys(g);
+        }
+    }
+
+    private void drawStatusBar(Graphics g) {
+
     }
 
     private void drawSoftkeys(Graphics g) {
         int barHeight = getSoftkeyBarHeight();
-
-        g.translate(-g.getTranslateX(), -g.getTranslateY() + getHeight());
-        g.setClip(0, 0, getWidth(), barHeight);
 
         g.setColor(0xEEEEEE);
         g.fillRect(0, 0, getWidth(), barHeight);
@@ -66,13 +83,23 @@ public class AppCanvas extends Canvas {
         g.drawString(label, x + width/2, textY, Graphics.TOP | Graphics.HCENTER);
     }
 
-    private int getSoftkeyBarHeight() {
+    private static int getStatusBarHeight() {
+        return Fonts.boldHeight + Fonts.boldHeight/4*2;
+    }
+
+    private static int getSoftkeyBarHeight() {
         return Fonts.boldHeight*2;
     }
 
+    public static int getBaseY() {
+        return Util.useCustomSoftkeys ? getStatusBarHeight() : 0;
+    }
+
     public int getHeight() {
-        if (!Util.useCustomSoftkeys) return super.getHeight();
-        return super.getHeight() - getSoftkeyBarHeight();
+        if (!Util.useCustomSoftkeys) {
+            return super.getHeight();
+        }
+        return super.getHeight() - getSoftkeyBarHeight() - getStatusBarHeight();
     }
 
     protected void sizeChanged(int w, int h) {
@@ -92,6 +119,7 @@ public class AppCanvas extends Canvas {
     }
 
     protected void pointerPressed(int x, int y) {
+        y -= getBaseY();
         if (handleSoftkeyPress(x, y, false)) return;
 
         Screen curr = AppBase.getCurrentScreen();
@@ -106,12 +134,13 @@ public class AppCanvas extends Canvas {
 
         Screen curr = AppBase.getCurrentScreen();
         if (curr != null) {
-            curr.pointerDragged(x, y);
+            curr.pointerDragged(x, y - getBaseY());
             AppBase.repaint();
         }
     }
 
     protected void pointerReleased(int x, int y) {
+        y -= getBaseY();
         if (softkeyAreaPressed && handleSoftkeyPress(x, y, true)) return;
 
         Screen curr = AppBase.getCurrentScreen();

@@ -67,6 +67,8 @@ public class ListScreen extends Screen implements Runnable {
     private void drawItems(Graphics g) {
         g.translate(getMargin(), -scroll);
 
+        int itemsEndY = AppCanvas.getBaseY() + AppCanvas.instance.getHeight();
+
         for (int i = 0; i < items.size(); i++) {
             Item item = (Item) items.elementAt(i);
         
@@ -80,7 +82,7 @@ public class ListScreen extends Screen implements Runnable {
             }
             g.translate(0, item.height + itemPadding);
 
-            if (g.getTranslateY() >= AppCanvas.instance.getHeight()) break;
+            if (g.getTranslateY() >= itemsEndY) break;
         }
     }
 

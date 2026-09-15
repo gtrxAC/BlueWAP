@@ -184,7 +184,7 @@ public abstract class Screen implements CommandListener {
             }
             catch (Exception e) {}
 
-            g.translate(-g.getTranslateX(), -g.getTranslateY());
+            g.translate(-g.getTranslateX(), -g.getTranslateY() + AppCanvas.getBaseY());
             g.setClip(0, 0, getWidth(), getHeight());
     
             // Draw overlay (grid of 64×64 black square images with 70% opacity)
